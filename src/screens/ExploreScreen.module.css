@@ -428,5 +428,12 @@
 .sheetLead { margin: 8px 40px 0 0; color: var(--ink-soft); font-size: 13px; line-height: 1.5; }
 .articleBody { margin-top: 18px; font-size: 14px; line-height: 1.75; color: var(--ink); }
 .articleBody p { margin: 0 0 12px; }
+.articleTakeaway {
+  padding: 11px 12px;
+  border-left: 3px solid var(--tide);
+  border-radius: 0 12px 12px 0;
+  color: var(--tide-deep);
+  background: rgba(126, 184, 232, 0.12);
+}
 .sheet .cta { margin-top: 10px; justify-content: center; display: inline-flex; }
 .sheet .cta:disabled { opacity: 0.7; cursor: default; }

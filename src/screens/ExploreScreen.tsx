@@ -1,5 +1,6 @@
 import {
   EXPLORE_ISLANDS,
+  EXPLORE_ARTICLES,
   EXPLORE_STARS,
   type ExploreIsland,
 } from '@/data/content'
@@ -206,6 +207,7 @@ export function ExploreScreen() {
       {reading ? (
         <ArticleSheet
           island={reading}
+          article={EXPLORE_ARTICLES.find((item) => item.islandId === reading.id) ?? EXPLORE_ARTICLES[0]}
           completed={completed.includes(reading.id)}
           onClose={() => setReading(null)}
           onComplete={() => {
@@ -220,11 +222,13 @@ export function ExploreScreen() {
 
 function ArticleSheet({
   island,
+  article,
   completed,
   onClose,
   onComplete,
 }: {
   island: ExploreIsland
+  article: (typeof EXPLORE_ARTICLES)[number]
   completed: boolean
   onClose: () => void
   onComplete: () => void
@@ -236,13 +240,12 @@ function ArticleSheet({
         <button type="button" className={styles.sheetClose} onClick={onClose} aria-label="关闭文章">
           <X size={18} />
         </button>
-        <p className={styles.detailKicker}>知识岛屿 · 约 3 分钟</p>
+        <p className={styles.detailKicker}>{article.eyebrow} · {article.readTime}</p>
         <h2 id="article-title" className={styles.sheetTitle}>{island.title}</h2>
-        <p className={styles.sheetLead}>{island.blurb}</p>
+        <p className={styles.sheetLead}>{article.lead}</p>
         <div className={styles.articleBody}>
-          <p>身体的变化并不总是突然发生，它常常像潮汐一样，有自己的节奏。先认识规律，再回到今天的感受。</p>
-          <p>你可以从一个小问题开始记录：它什么时候出现？最近是否反复？什么样的休息、饮食或活动让你感觉好一点？</p>
-          <p>这里的内容不是诊断，而是一张温柔的观察地图。每一次阅读和记录，都会成为下一次理解自己的线索。</p>
+          {article.paragraphs.map((paragraph) => <p key={paragraph}>{paragraph}</p>)}
+          <p className={styles.articleTakeaway}>{article.takeaway}</p>
         </div>
         <button type="button" className={styles.cta} onClick={onComplete} disabled={completed}>
           {completed ? <><Check size={17} weight="bold" /> 已完成阅读</> : '完成阅读，点亮一颗星'}
