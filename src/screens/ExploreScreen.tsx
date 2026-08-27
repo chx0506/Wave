@@ -21,6 +21,8 @@ const PATH = [
   [48, 78],
   [12, 42],
 ]
+const MAP_WIDTH = 1200
+const MAP_HEIGHT = 820
 
 const FILTERS = [
   ['all', '全部'], ['cycle', '周期'], ['pms', 'PMS'], ['sleep', '睡眠'],
@@ -35,6 +37,7 @@ export function ExploreScreen() {
   const [reading, setReading] = useState<ExploreIsland | null>(null)
   const [completed, setCompleted] = useState<string[]>([])
   const [mapOffset, setMapOffset] = useState({ x: -70, y: -36 })
+  const mapViewportRef = useRef<HTMLDivElement>(null)
   const dragRef = useRef({ active: false, moved: false, startX: 0, startY: 0, originX: 0, originY: 0 })
   const suppressClickRef = useRef(false)
   const handleMapPointerDown = (event: PointerEvent<HTMLDivElement>) => {
@@ -48,7 +51,10 @@ export function ExploreScreen() {
     const dy = event.clientY - dragRef.current.startY
     if (Math.hypot(dx, dy) > 6) dragRef.current.moved = true
     // Keep the oversized canvas covering the viewport even at its furthest edge.
-    setMapOffset({ x: Math.max(-520, Math.min(0, dragRef.current.originX + dx)), y: Math.max(-300, Math.min(0, dragRef.current.originY + dy)) })
+    const viewport = mapViewportRef.current
+    const minX = viewport ? Math.min(0, viewport.clientWidth - MAP_WIDTH) : -520
+    const minY = viewport ? Math.min(0, viewport.clientHeight - MAP_HEIGHT) : -300
+    setMapOffset({ x: Math.max(minX, Math.min(0, dragRef.current.originX + dx)), y: Math.max(minY, Math.min(0, dragRef.current.originY + dy)) })
   }
   const handleMapPointerUp = (event: PointerEvent<HTMLDivElement>) => {
     suppressClickRef.current = dragRef.current.moved
@@ -107,7 +113,7 @@ export function ExploreScreen() {
         </div>
 
         <section className={styles.mapCard} aria-label="知识地图">
-          <div className={styles.mapViewport} onPointerDown={handleMapPointerDown} onPointerMove={handleMapPointerMove} onPointerUp={handleMapPointerUp} onPointerCancel={handleMapPointerUp}>
+          <div ref={mapViewportRef} className={styles.mapViewport} onPointerDown={handleMapPointerDown} onPointerMove={handleMapPointerMove} onPointerUp={handleMapPointerUp} onPointerCancel={handleMapPointerUp}>
           <div className={styles.ocean} style={{ transform: `translate3d(${mapOffset.x}px, ${mapOffset.y}px, 0)` }}>
             <svg className={styles.oceanSvg} viewBox="0 0 100 100" aria-hidden="true">
               <defs>

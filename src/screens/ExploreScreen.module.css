@@ -121,11 +121,30 @@
   background: linear-gradient(168deg, #c5e6f7 0%, #9fd0ef 55%, #7eb8e8 100%);
 }
 
+.mapViewport::before,
+.mapViewport::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  z-index: 1;
+  width: 72px;
+  pointer-events: none;
+  opacity: 0.7;
+  background:
+    radial-gradient(90px 22px at 20px 18%, transparent 58%, rgba(255, 255, 255, 0.38) 61%, transparent 66%),
+    radial-gradient(90px 22px at 48px 54%, transparent 58%, rgba(255, 255, 255, 0.28) 61%, transparent 66%),
+    radial-gradient(90px 22px at 15px 90%, transparent 58%, rgba(255, 255, 255, 0.22) 61%, transparent 66%);
+}
+
+.mapViewport::before { left: 0; }
+.mapViewport::after { right: 0; transform: scaleX(-1); }
+
 .mapViewport:active { cursor: grabbing; }
 
 .mapViewport .ocean {
-  width: 760px;
-  min-height: 620px;
+  width: 1200px;
+  min-height: 820px;
   aspect-ratio: auto;
   transition: transform 0.18s var(--ease);
   will-change: transform;
