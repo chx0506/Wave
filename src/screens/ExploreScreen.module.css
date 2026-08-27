@@ -118,14 +118,14 @@
   overflow: hidden;
   touch-action: pan-y;
   cursor: grab;
-  background: #9fd0ef;
+  background: linear-gradient(168deg, #c5e6f7 0%, #9fd0ef 55%, #7eb8e8 100%);
 }
 
 .mapViewport:active { cursor: grabbing; }
 
 .mapViewport .ocean {
-  width: 620px;
-  min-height: 500px;
+  width: 760px;
+  min-height: 620px;
   aspect-ratio: auto;
   transition: transform 0.18s var(--ease);
   will-change: transform;

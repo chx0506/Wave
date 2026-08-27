@@ -47,7 +47,8 @@ export function ExploreScreen() {
     const dx = event.clientX - dragRef.current.startX
     const dy = event.clientY - dragRef.current.startY
     if (Math.hypot(dx, dy) > 6) dragRef.current.moved = true
-    setMapOffset({ x: Math.max(-300, Math.min(0, dragRef.current.originX + dx)), y: Math.max(-180, Math.min(0, dragRef.current.originY + dy)) })
+    // Keep the oversized canvas covering the viewport even at its furthest edge.
+    setMapOffset({ x: Math.max(-520, Math.min(0, dragRef.current.originX + dx)), y: Math.max(-300, Math.min(0, dragRef.current.originY + dy)) })
   }
   const handleMapPointerUp = (event: PointerEvent<HTMLDivElement>) => {
     suppressClickRef.current = dragRef.current.moved
