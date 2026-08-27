@@ -130,8 +130,8 @@
   position: relative;
   min-height: 320px;
   overflow: hidden;
-  touch-action: pan-y;
-  cursor: grab;
+  touch-action: auto;
+  cursor: default;
   background: linear-gradient(168deg, #c5e6f7 0%, #9fd0ef 55%, #7eb8e8 100%);
 }
 
@@ -154,18 +154,13 @@
 .mapViewport::before { left: 0; }
 .mapViewport::after { right: 0; transform: scaleX(-1); }
 
-.mapViewport:active { cursor: grabbing; }
-
 .mapViewport .ocean {
-  position: absolute;
-  left: 0;
-  top: 0;
+  position: relative;
   z-index: 0;
-  width: 1200px;
-  min-height: 820px;
-  aspect-ratio: auto;
-  transition: transform 0.18s var(--ease);
-  will-change: transform;
+  top: 0;
+  width: 100%;
+  min-height: 320px;
+  aspect-ratio: 1 / 1.05;
 }
 
 .recenter {
