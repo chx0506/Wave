@@ -96,13 +96,11 @@
 }
 
 .activeGroup > .active,
-.activeGroup > .feedbackCard,
 .archiveGroup .clueCard {
   box-shadow: 0 8px 22px -18px rgba(70, 120, 160, 0.46);
 }
 
-.activeGroup > .active,
-.activeGroup > .feedbackCard {
+.activeGroup > .active {
   border-color: rgba(255, 255, 255, 0.64);
 }
 
@@ -162,10 +160,12 @@
 }
 
 .feedbackCard {
-  padding: 14px 16px;
-  border-left: 2px solid rgba(126, 184, 232, 0.5);
-  border-radius: 4px 18px 18px 4px;
-  background: rgba(255, 255, 255, 0.44);
+  padding: 15px 16px 14px;
+  background: linear-gradient(
+    160deg,
+    rgba(255, 255, 255, 0.76) 0%,
+    rgba(236, 246, 252, 0.6) 100%
+  );
 }
 
 .feedbackTop,
@@ -177,9 +177,7 @@
 }
 
 .feedbackTitle {
-  margin: 0;
-  font-size: 14px;
-  color: var(--ink-strong);
+  font-size: 15px;
 }
 
 .feedbackCount {
