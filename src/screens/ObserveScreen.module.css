@@ -261,14 +261,15 @@
 }
 
 .clueCard {
-  padding: 0;
+  flex: 0 0 auto;
+  padding: 16px;
   overflow: hidden;
 }
 
 .clueButton {
   display: block;
   width: 100%;
-  padding: 16px;
+  padding: 0;
   text-align: left;
   color: var(--ink);
   background: transparent;
@@ -323,7 +324,7 @@
 }
 
 .clueDetail {
-  margin: -2px 16px 14px;
+  margin: 12px 0 0;
   padding: 12px;
   border-radius: 14px;
   background: rgba(126, 184, 232, 0.08);
@@ -371,7 +372,7 @@
 }
 
 .confirm {
-  margin: 0 16px 14px;
+  margin: 12px 0 0;
   padding: 6px 10px;
   border-radius: 999px;
   color: var(--tide-deep);
