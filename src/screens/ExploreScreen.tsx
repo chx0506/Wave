@@ -4,7 +4,7 @@ import {
   type ExploreIsland,
 } from '@/data/content'
 import { USER_DISPLAY_NAME } from '@/domain/copy'
-import { LockSimple, Star } from '@phosphor-icons/react'
+import { BookOpen, Check, LockSimple, Star, X } from '@phosphor-icons/react'
 import { useMemo, useState } from 'react'
 import shell from './shared/pageShell.module.css'
 import styles from './ExploreScreen.module.css'
@@ -31,6 +31,8 @@ export function ExploreScreen() {
   const [selectedId, setSelectedId] = useState<string>(current.id)
   const [filter, setFilter] = useState<(typeof FILTERS)[number][0]>('all')
   const [lockMessage, setLockMessage] = useState(false)
+  const [reading, setReading] = useState<ExploreIsland | null>(null)
+  const [completed, setCompleted] = useState<string[]>([])
   const visibleIslands = useMemo(
     () => filter === 'all' ? EXPLORE_ISLANDS : EXPLORE_ISLANDS.filter((island) => island.category === filter),
     [filter],
@@ -38,6 +40,7 @@ export function ExploreScreen() {
   const selected =
     visibleIslands.find((i) => i.id === selectedId) ?? visibleIslands[0] ?? current
   const unlocked = EXPLORE_ISLANDS.filter((i) => !i.locked).length
+  const earnedStars = completed.length
 
   return (
     <div className={shell.screen}>
@@ -63,7 +66,7 @@ export function ExploreScreen() {
           </div>
           <div className={styles.starsHud}>
             <Star size={14} weight="fill" />
-            <span>{EXPLORE_STARS}</span>
+            <span>{EXPLORE_STARS + earnedStars}</span>
             <em>{unlocked}/{EXPLORE_ISLANDS.length} 岛</em>
           </div>
         </div>
@@ -153,10 +156,11 @@ export function ExploreScreen() {
               </button>
             ) : (
               <>
-                <button type="button" className={styles.primaryBtn}>
+                <button type="button" className={styles.primaryBtn} onClick={() => setReading(selected)}>
                   继续探索
                 </button>
-                <button type="button" className={styles.ghostBtn}>
+                <button type="button" className={styles.ghostBtn} onClick={() => setReading(selected)}>
+                  <BookOpen size={14} weight="bold" />
                   阅读科普
                 </button>
               </>
@@ -168,6 +172,51 @@ export function ExploreScreen() {
           </p>
         </article>
       </div>
+      {reading ? (
+        <ArticleSheet
+          island={reading}
+          completed={completed.includes(reading.id)}
+          onClose={() => setReading(null)}
+          onComplete={() => {
+            setCompleted((items) => items.includes(reading.id) ? items : [...items, reading.id])
+            setReading(null)
+          }}
+        />
+      ) : null}
+    </div>
+  )
+}
+
+function ArticleSheet({
+  island,
+  completed,
+  onClose,
+  onComplete,
+}: {
+  island: ExploreIsland
+  completed: boolean
+  onClose: () => void
+  onComplete: () => void
+}) {
+  return (
+    <div className={styles.sheetBackdrop} role="presentation" onMouseDown={onClose}>
+      <section className={styles.sheet} role="dialog" aria-modal="true" aria-labelledby="article-title" onMouseDown={(event) => event.stopPropagation()}>
+        <div className={styles.sheetHandle} aria-hidden="true" />
+        <button type="button" className={styles.sheetClose} onClick={onClose} aria-label="关闭文章">
+          <X size={18} />
+        </button>
+        <p className={styles.detailKicker}>知识岛屿 · 约 3 分钟</p>
+        <h2 id="article-title" className={styles.sheetTitle}>{island.title}</h2>
+        <p className={styles.sheetLead}>{island.blurb}</p>
+        <div className={styles.articleBody}>
+          <p>身体的变化并不总是突然发生，它常常像潮汐一样，有自己的节奏。先认识规律，再回到今天的感受。</p>
+          <p>你可以从一个小问题开始记录：它什么时候出现？最近是否反复？什么样的休息、饮食或活动让你感觉好一点？</p>
+          <p>这里的内容不是诊断，而是一张温柔的观察地图。每一次阅读和记录，都会成为下一次理解自己的线索。</p>
+        </div>
+        <button type="button" className={styles.cta} onClick={onComplete} disabled={completed}>
+          {completed ? <><Check size={17} weight="bold" /> 已完成阅读</> : '完成阅读，点亮一颗星'}
+        </button>
+      </section>
     </div>
   )
 }
