@@ -83,17 +83,44 @@ export function BayScreen() {
         type="button"
         className={styles.tornNote}
         onClick={() => setTab(Tabs.home)}
+        aria-label="记录后回来，海湾会更懂你"
       >
         <img
           className={styles.tornStrip}
-          src="/textures/torn-note-strip.png"
+          src={`/textures/torn-note-strip.png?v=4`}
           alt=""
           aria-hidden="true"
           draggable={false}
         />
         <span className={styles.tornContent}>
-          <Leaf size={14} weight="regular" />
-          <span>记录后回来，海湾会更懂你</span>
+          <svg
+            className={styles.tornIcon}
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            aria-hidden="true"
+          >
+            <path
+              d="M7.5 18c0-5.5 3.2-9.8 8.2-11.2 0 5.8-2.6 10.4-8.2 11.2Z"
+              stroke="currentColor"
+              strokeWidth="1.5"
+              strokeLinejoin="round"
+            />
+            <path
+              d="M11.2 17.2c.2-4.8 2.8-8.6 7.3-10 0 5.2-2.3 9.2-7.3 10Z"
+              stroke="currentColor"
+              strokeWidth="1.5"
+              strokeLinejoin="round"
+            />
+            <path
+              d="M7.6 18.1c2.4-1.2 4.6-1.8 7.4-2"
+              stroke="currentColor"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+            />
+          </svg>
+          <span className={styles.tornText}>记录后回来，海湾会更懂你</span>
         </span>
       </button>
     </div>

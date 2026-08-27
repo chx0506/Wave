@@ -127,11 +127,16 @@ export function TideDial({
   snapshot,
   cycleLength,
   cycleConfig,
+  dayFloat: dayFloatProp,
+  onScrubDay,
   onPreviewDay,
 }: {
   snapshot: DaySnapshot
   cycleLength: number
   cycleConfig: CycleConfig
+  /** Continuous cycle day 1…length — drives rings/waves while scrubbing */
+  dayFloat?: number
+  onScrubDay?: (dayFloat: number) => void
   lowTideDay?: number
   highTideDay?: number
   onPreviewDay: (cycleDay: number) => void
@@ -139,21 +144,23 @@ export function TideDial({
   const dialRef = useRef<HTMLDivElement>(null)
   const dragging = useRef(false)
   const [isDragging, setIsDragging] = useState(false)
-  const [visualTide, setVisualTide] = useState(snapshot.tideHeight)
-  /** Continuous day fraction while dragging — keeps both rings locked together */
-  const [visualDayFrac, setVisualDayFrac] = useState(
-    snapshot.cycleDay / cycleLength,
+  const [internalDayFloat, setInternalDayFloat] = useState(
+    () => dayFloatProp ?? snapshot.cycleDay,
   )
 
+  const dayFloat = dayFloatProp ?? internalDayFloat
+  const visualDayFrac = Math.min(1, Math.max(0, dayFloat / cycleLength))
+  const visualTide = tideHeightForCycleDay(dayFloat, cycleConfig)
+
   useEffect(() => {
-    if (!dragging.current) {
-      setVisualTide(snapshot.tideHeight)
-      setVisualDayFrac(snapshot.cycleDay / cycleLength)
+    if (dragging.current) return
+    if (dayFloatProp == null) {
+      setInternalDayFloat(snapshot.cycleDay)
     }
-  }, [snapshot.tideHeight, snapshot.cycleDay, cycleLength])
+  }, [snapshot.cycleDay, dayFloatProp])
 
   // Same progress for both rings — aligned tips
-  const dayFrac = Math.min(1, Math.max(0, visualDayFrac))
+  const dayFrac = visualDayFrac
   const outer = arcDash(dayFrac, TRACK_OUTER)
   const inner = arcDash(dayFrac, TRACK_INNER)
   const tipAngle = dayFrac * 360
@@ -167,8 +174,8 @@ export function TideDial({
     const angle = angleFromPoint(clientX, clientY, rect)
     const dayF = dayFloatFromAngle(angle, cycleLength)
     const next = dayFromAngle(angle, cycleLength)
-    setVisualDayFrac(dayF / cycleLength)
-    setVisualTide(tideHeightForCycleDay(dayF, cycleConfig))
+    if (dayFloatProp == null) setInternalDayFloat(dayF)
+    onScrubDay?.(dayF)
     if (next !== snapshot.cycleDay) onPreviewDay(next)
   }
 
@@ -190,6 +197,12 @@ export function TideDial({
     if (e.currentTarget.hasPointerCapture(e.pointerId)) {
       e.currentTarget.releasePointerCapture(e.pointerId)
     }
+    const committed = Math.round(
+      Math.min(cycleLength, Math.max(1, dayFloat)),
+    )
+    onPreviewDay(committed)
+    onScrubDay?.(committed)
+    if (dayFloatProp == null) setInternalDayFloat(committed)
   }
 
   const ease = isDragging ? 'none' : 'stroke-dasharray 0.32s var(--ease)'

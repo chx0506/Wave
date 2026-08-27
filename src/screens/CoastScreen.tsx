@@ -1,4 +1,5 @@
 import { SAMPLE_CYCLE, SAMPLE_STREAK_DAYS } from '@/data/sample'
+import { CycleDateStrip } from '@/components/coast/CycleDateStrip'
 import { RecordSheet } from '@/components/coast/RecordSheet'
 import { TideCalendar } from '@/components/coast/TideCalendar'
 import { TideDial } from '@/components/coast/TideDial'
@@ -51,9 +52,14 @@ function SoftBotany() {
 export function CoastScreen() {
   const { today, snapshotFor, mode } = useAppState()
   const todaySnap = snapshotFor(today)
-  const [previewDay, setPreviewDay] = useState(todaySnap.cycleDay)
+  const [dayFloat, setDayFloat] = useState(todaySnap.cycleDay)
   const [recordOpen, setRecordOpen] = useState(false)
   const [calendarOpen, setCalendarOpen] = useState(false)
+
+  const previewDay = Math.min(
+    SAMPLE_CYCLE.cycleLength,
+    Math.max(1, Math.round(dayFloat)),
+  )
 
   const snapshot = useMemo(
     () => snapshotForCycleDay(previewDay, SAMPLE_CYCLE),
@@ -93,9 +99,20 @@ export function CoastScreen() {
           snapshot={snapshot}
           cycleLength={SAMPLE_CYCLE.cycleLength}
           cycleConfig={SAMPLE_CYCLE}
+          dayFloat={dayFloat}
+          onScrubDay={setDayFloat}
           lowTideDay={SAMPLE_CYCLE.phaseWindows.menstrual}
           highTideDay={SAMPLE_CYCLE.cycleLength}
-          onPreviewDay={setPreviewDay}
+          onPreviewDay={(day) => setDayFloat(day)}
+        />
+
+        <CycleDateStrip
+          cycleStart={SAMPLE_CYCLE.currentCycleStart}
+          cycleLength={SAMPLE_CYCLE.cycleLength}
+          dayFloat={dayFloat}
+          todayCycleDay={todaySnap.cycleDay}
+          onScrubDay={setDayFloat}
+          onCommitDay={(day) => setDayFloat(day)}
         />
 
         <div className={styles.metrics}>
