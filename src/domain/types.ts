@@ -1,8 +1,9 @@
 export const Tabs = {
-  coast: 'coast',
-  record: 'record',
-  calendar: 'calendar',
-  atlas: 'atlas',
+  home: 'home',
+  observe: 'observe',
+  bay: 'bay',
+  explore: 'explore',
+  me: 'me',
 } as const
 
 export type TabId = (typeof Tabs)[keyof typeof Tabs]
@@ -61,3 +62,17 @@ export type DaySnapshot = {
 export type CalendarCell =
   | { kind: 'empty'; key: string }
   | { kind: 'day'; key: string; date: Date; snapshot: DaySnapshot }
+
+/** Home quick-log dimensions from PRD 潮汐日志 */
+export const LogKeys = {
+  period: 'period',
+  pain: 'pain',
+  mood: 'mood',
+  sleep: 'sleep',
+  energy: 'energy',
+  stress: 'stress',
+  diet: 'diet',
+  exercise: 'exercise',
+} as const
+
+export type LogKey = (typeof LogKeys)[keyof typeof LogKeys]

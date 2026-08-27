@@ -5,7 +5,7 @@ import { AppContext } from '@/state/useAppState'
 import { useCallback, useMemo, useState, type ReactNode } from 'react'
 
 export function AppProvider({ children }: { children: ReactNode }) {
-  const [tab, setTab] = useState<TabId>(Tabs.coast)
+  const [tab, setTab] = useState<TabId>(Tabs.home)
   const [mode, setMode] = useState<DayMode>(DayModes.day)
   const [selectedDate, setSelectedDate] = useState<Date>(TODAY)
   const [viewedYear, setViewedYear] = useState(TODAY.getFullYear())

@@ -1,5 +1,5 @@
 import { diffDays, startOfDay } from './dates'
-import { Phases, TideStates, type CycleConfig, type DaySnapshot, type Phase, type TideState } from './types'
+import { Phases, TideStates, type CycleConfig, type DaySnapshot, type TideState } from './types'
 
 export function cycleDayNumber(date: Date, config: CycleConfig): number {
   const offset = diffDays(date, config.currentCycleStart)
@@ -7,7 +7,7 @@ export function cycleDayNumber(date: Date, config: CycleConfig): number {
   return wrapped + 1
 }
 
-export function phaseForCycleDay(cycleDay: number, config: CycleConfig): Phase {
+export function phaseForCycleDay(cycleDay: number, config: CycleConfig) {
   const { menstrual, follicular, ovulatory } = config.phaseWindows
   if (cycleDay <= menstrual) return Phases.menstrual
   if (cycleDay <= menstrual + follicular) return Phases.follicular
@@ -16,21 +16,23 @@ export function phaseForCycleDay(cycleDay: number, config: CycleConfig): Phase {
 }
 
 /**
- * Beach coverage, 0-1. 1 = water covers the most sand.
+ * Beach coverage 0–1 for a cycle day.
+ * 1 = water covers the most sand.
  *
- * Day before period (cycleLength): peak.
- * Period days 1-N: tide recedes.
- * After period: tide climbs again toward the next peak.
+ * Loop:
+ * - After period → day before next period: tide rises toward peak
+ * - Day before period (cycleLength): highest tide
+ * - Period days 1…N: tide gradually recedes to low
  */
 export function tideHeightForCycleDay(cycleDay: number, config: CycleConfig): number {
   const period = config.phaseWindows.menstrual
   const length = config.cycleLength
-  const floor = 0.12
+  const floor = 0.1
   const peak = 1
 
   if (cycleDay <= period) {
     const span = Math.max(period - 1, 1)
-    return lerp(peak * 0.92, floor, (cycleDay - 1) / span)
+    return lerp(peak, floor, (cycleDay - 1) / span)
   }
 
   return lerp(floor, peak, (cycleDay - period) / (length - period))
@@ -51,6 +53,29 @@ export function snapshotForDate(date: Date, config: CycleConfig): DaySnapshot {
     tide: tideForCycleDay(cycleDay, config),
     tideHeight: tideHeightForCycleDay(cycleDay, config),
   }
+}
+
+export function snapshotForCycleDay(cycleDay: number, config: CycleConfig): DaySnapshot {
+  const day = ((cycleDay - 1) % config.cycleLength) + 1
+  return {
+    date: startOfDay(config.currentCycleStart),
+    cycleDay: day,
+    phase: phaseForCycleDay(day, config),
+    tide: tideForCycleDay(day, config),
+    tideHeight: tideHeightForCycleDay(day, config),
+  }
+}
+
+/** Days until next period start (退潮 / 月经 Day 1). */
+export function daysUntilNextPeriod(cycleDay: number, config: CycleConfig): number {
+  return config.cycleLength - cycleDay
+}
+
+/** Days until ovulatory window starts. 0 if already in / past window this cycle. */
+export function daysUntilOvulation(cycleDay: number, config: CycleConfig): number {
+  const start =
+    config.phaseWindows.menstrual + config.phaseWindows.follicular + 1
+  return Math.max(0, start - cycleDay)
 }
 
 function lerp(from: number, to: number, t: number): number {

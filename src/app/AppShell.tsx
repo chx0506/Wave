@@ -1,9 +1,11 @@
 import { PhoneFrame } from '@/components/chrome/PhoneFrame'
 import { StatusBar } from '@/components/chrome/StatusBar'
 import { TabBar } from '@/components/chrome/TabBar'
-import { CalendarScreen } from '@/screens/CalendarScreen'
+import { BayScreen } from '@/screens/BayScreen'
 import { CoastScreen } from '@/screens/CoastScreen'
-import { PlaceholderScreen } from '@/screens/PlaceholderScreen'
+import { ExploreScreen } from '@/screens/ExploreScreen'
+import { MeScreen } from '@/screens/MeScreen'
+import { ObserveScreen } from '@/screens/ObserveScreen'
 import { Tabs } from '@/domain/types'
 import { useAppState } from '@/state/useAppState'
 import styles from './AppShell.module.css'
@@ -13,19 +15,17 @@ export function AppShell() {
 
   return (
     <PhoneFrame mode={mode}>
-      <StatusBar />
-      <main className={styles.main}>
-        {tab === Tabs.coast ? <CoastScreen /> : null}
-        {tab === Tabs.calendar ? <CalendarScreen /> : null}
-        {tab === Tabs.record || tab === Tabs.atlas ? (
-          <PlaceholderScreen tab={tab} />
-        ) : null}
-      </main>
-      <TabBar
-        active={tab}
-        onChange={setTab}
-        tone={tab === Tabs.coast ? 'frosted' : 'solid'}
-      />
+      <div className={styles.shell} data-phone-shell>
+        <StatusBar />
+        <main className={styles.main}>
+          {tab === Tabs.home ? <CoastScreen /> : null}
+          {tab === Tabs.observe ? <ObserveScreen /> : null}
+          {tab === Tabs.bay ? <BayScreen /> : null}
+          {tab === Tabs.explore ? <ExploreScreen /> : null}
+          {tab === Tabs.me ? <MeScreen /> : null}
+        </main>
+        <TabBar active={tab} onChange={setTab} />
+      </div>
     </PhoneFrame>
   )
 }

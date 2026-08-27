@@ -1,12 +1,12 @@
 import type { CycleConfig } from '@/domain/types'
 
-/** Mock cycle aligned with the two design comps (today = 2026-08-26, day 12). */
+/** Mock cycle aligned with home dial (today = day 8, 涨潮期). */
 export const TODAY = new Date(2026, 7, 26)
 
 export const SAMPLE_CYCLE: CycleConfig = {
   cycleLength: 28,
-  currentCycleStart: new Date(2026, 7, 15),
-  lastLowTide: new Date(2026, 7, 12),
+  currentCycleStart: new Date(2026, 7, 19),
+  lastLowTide: new Date(2026, 7, 19),
   phaseWindows: {
     menstrual: 5,
     follicular: 8,
@@ -14,3 +14,6 @@ export const SAMPLE_CYCLE: CycleConfig = {
     luteal: 12,
   },
 }
+
+/** Demo streak for home metric card. */
+export const SAMPLE_STREAK_DAYS = 12

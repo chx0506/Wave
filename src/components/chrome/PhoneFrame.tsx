@@ -12,12 +12,10 @@ export function PhoneFrame({
   return (
     <div className={styles.studio}>
       <div className={styles.device} data-mode={mode}>
-        <span className={styles.btnSilent} />
-        <span className={styles.btnVolUp} />
-        <span className={styles.btnVolDown} />
-        <span className={styles.btnPower} />
-        <div className={styles.screen}>{children}</div>
-        <span className={styles.home} />
+        <div className={styles.bezel}>
+          <div className={styles.island} aria-hidden="true" />
+          <div className={styles.screen}>{children}</div>
+        </div>
       </div>
     </div>
   )

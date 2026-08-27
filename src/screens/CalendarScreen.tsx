@@ -42,7 +42,7 @@ export function CalendarScreen() {
         </section>
         <DaySummaryBar
           snapshot={snapshotFor(selectedDate)}
-          onBackfill={() => setTab(Tabs.record)}
+          onBackfill={() => setTab(Tabs.home)}
         />
       </div>
     </div>

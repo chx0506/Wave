@@ -1,0 +1,125 @@
+.active {
+  background: linear-gradient(
+    145deg,
+    rgba(186, 224, 246, 0.55) 0%,
+    rgba(255, 255, 255, 0.82) 55%,
+    rgba(231, 243, 251, 0.75) 100%
+  );
+}
+
+.activeTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.days {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--tide-deep);
+  letter-spacing: 0.04em;
+}
+
+.track {
+  margin-top: 14px;
+  height: 8px;
+  border-radius: 999px;
+  background: rgba(126, 184, 232, 0.18);
+  overflow: hidden;
+}
+
+.fill {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--coast-water-light), var(--tide-deep));
+}
+
+.secondary {
+  margin-top: 14px;
+  width: 100%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 11px 14px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--tide-deep);
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid rgba(255, 255, 255, 0.8);
+}
+
+.steps {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+  padding: 12px;
+  border-radius: 20px;
+  background: linear-gradient(
+    160deg,
+    rgba(255, 255, 255, 0.78) 0%,
+    rgba(236, 246, 252, 0.6) 100%
+  );
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  box-shadow: var(--shadow-float);
+}
+
+.step {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  text-align: center;
+}
+
+.stepKey {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-size: 13px;
+  font-weight: 700;
+  color: #fff;
+  background: linear-gradient(145deg, var(--coast-water-light), var(--tide-deep));
+}
+
+.stepLabel {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--ink);
+  line-height: 1.25;
+}
+
+.stepLine {
+  display: none;
+}
+
+.clueRow {
+  display: grid;
+  grid-template-columns: 22px 1fr auto;
+  gap: 10px;
+  align-items: start;
+}
+
+.shells {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--ink-soft);
+  white-space: nowrap;
+}
+
+.linkCal {
+  margin: 0 auto;
+  padding: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--tide-deep);
+}

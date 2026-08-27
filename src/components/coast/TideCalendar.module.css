@@ -1,0 +1,296 @@
+.overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 32;
+  display: flex;
+  flex-direction: column;
+  background:
+    radial-gradient(100% 55% at 50% -5%, rgba(186, 224, 246, 0.7) 0%, transparent 50%),
+    linear-gradient(180deg, #eef7fd 0%, #f7fbff 42%, #e6f2fa 100%);
+  animation: fadeIn 0.22s ease;
+}
+
+.header {
+  flex: 0 0 auto;
+  padding: calc(var(--statusbar-h) + 2px) 16px 8px;
+  display: grid;
+  grid-template-columns: 36px 1fr 36px;
+  align-items: center;
+  gap: 8px;
+}
+
+.iconBtn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  color: var(--tide-deep);
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid rgba(126, 184, 232, 0.28);
+}
+
+.titleBlock {
+  text-align: center;
+}
+
+.title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--ink-strong);
+  letter-spacing: 0.1em;
+}
+
+.subtitle {
+  margin: 2px 0 0;
+  font-size: 11px;
+  color: var(--ink-soft);
+  letter-spacing: 0.12em;
+}
+
+.scroll {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  padding: 4px 16px calc(20px + env(safe-area-inset-bottom, 0px));
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.pager {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  color: var(--ink-strong);
+  font-size: 15px;
+}
+
+.nav {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  color: var(--tide-deep);
+  background: rgba(255, 255, 255, 0.75);
+  border: 1px solid rgba(126, 184, 232, 0.25);
+}
+
+.calCard {
+  padding: 12px 10px 14px;
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.78);
+  border: 1px solid rgba(255, 255, 255, 0.95);
+  box-shadow: var(--shadow-card);
+}
+
+.weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  margin-bottom: 6px;
+  text-align: center;
+  font-size: 11px;
+  color: var(--ink-faint);
+  letter-spacing: 0.06em;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px 2px;
+}
+
+.day {
+  position: relative;
+  min-height: 48px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 4px 0 2px;
+  border-radius: 14px;
+  color: var(--ink);
+  background: transparent;
+}
+
+.day[data-today='true'] {
+  box-shadow: inset 0 0 0 1.5px var(--tide);
+}
+
+.day[data-selected='true'] {
+  background: rgba(186, 224, 246, 0.35);
+}
+
+.dayNum {
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.drop,
+.moon {
+  display: grid;
+  place-items: center;
+  color: var(--tide-deep);
+}
+
+.phaseRow {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
+
+.phaseCard {
+  padding: 10px 6px;
+  border-radius: 16px;
+  text-align: center;
+  background: rgba(255, 255, 255, 0.8);
+  border: 1px solid rgba(126, 184, 232, 0.18);
+  box-shadow: 0 10px 22px -16px rgba(90, 140, 180, 0.45);
+}
+
+.phaseCard strong {
+  display: block;
+  margin-top: 4px;
+  font-size: 12px;
+  color: var(--ink-strong);
+}
+
+.phaseCard p {
+  margin: 4px 0 0;
+  font-size: 10px;
+  line-height: 1.35;
+  color: var(--ink-soft);
+}
+
+.phaseIcon {
+  display: inline-grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  color: var(--tide-deep);
+  background: rgba(186, 224, 246, 0.45);
+}
+
+.phaseCard[data-phase='follicular'] .phaseIcon {
+  color: #5fafdf;
+  background: rgba(159, 208, 240, 0.45);
+}
+
+.phaseCard[data-phase='ovulatory'] .phaseIcon {
+  color: #4a9ac8;
+  background: rgba(126, 184, 232, 0.4);
+}
+
+.phaseCard[data-phase='luteal'] .phaseIcon {
+  color: #7aa8c8;
+  background: rgba(210, 232, 245, 0.7);
+}
+
+.rhythm {
+  padding: 14px 12px;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.78);
+  border: 1px solid rgba(255, 255, 255, 0.95);
+  box-shadow: var(--shadow-card);
+}
+
+.rhythmHead {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.rhythmHead h3 {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--ink-strong);
+  letter-spacing: 0.04em;
+}
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 12px;
+  font-size: 10px;
+  color: var(--ink-soft);
+}
+
+.legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.legToday,
+.legPeriod,
+.legPredicted {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.legToday {
+  box-shadow: inset 0 0 0 1.5px var(--tide);
+  background: #fff;
+}
+
+.legPeriod {
+  background: linear-gradient(180deg, #9fd0f0, #5fafdf);
+}
+
+.legPredicted {
+  box-shadow: inset 0 0 0 1.5px var(--tide-deep);
+  background: transparent;
+}
+
+.chart {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.markCta {
+  width: 100%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 14px;
+  border-radius: 999px;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: #fff;
+  background: linear-gradient(135deg, #9fd0f0 0%, var(--tide) 45%, var(--tide-deep) 100%);
+  box-shadow: 0 14px 28px -12px rgba(90, 150, 200, 0.65);
+}
+
+.markCta:active {
+  transform: scale(0.985);
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .overlay {
+    animation: none;
+  }
+}

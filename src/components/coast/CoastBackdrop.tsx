@@ -1,4 +1,4 @@
-import { IllustratedTide } from '@/components/coast/IllustratedTide'
+import { SideBayCanvas } from '@/components/coast/SideBayCanvas'
 import type { DayMode } from '@/domain/types'
 import styles from './CoastBackdrop.module.css'
 
@@ -11,7 +11,7 @@ export function CoastBackdrop({
 }) {
   return (
     <div className={styles.scene} aria-hidden="true">
-      <IllustratedTide mode={mode} coverage={coverage} />
+      <SideBayCanvas mode={mode} coverage={coverage} />
     </div>
   )
 }

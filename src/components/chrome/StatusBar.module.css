@@ -3,7 +3,7 @@
   inset: 0 0 auto;
   z-index: 8;
   height: var(--statusbar-h);
-  padding: 14px 28px 0;
+  padding: 18px 28px 0;
   display: flex;
   align-items: center;
   justify-content: space-between;
