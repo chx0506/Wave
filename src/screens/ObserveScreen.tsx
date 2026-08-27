@@ -32,6 +32,7 @@ export function ObserveScreen() {
   } = useAppState()
   const active = experiments.find((item) => item.status === 'active')
   const [sheet, setSheet] = useState<'create' | 'record' | null>(null)
+  const [pathOpen, setPathOpen] = useState(false)
   const [expandedClue, setExpandedClue] = useState<string | null>(null)
   return (
     <div className={shell.screen}>
@@ -50,13 +51,16 @@ export function ObserveScreen() {
               <p className={styles.groupKicker}>In progress</p>
               <h2 id="active-group-title" className={styles.groupTitle}>正在进行的实验</h2>
             </div>
-            <span className={styles.groupHint}>记录 · 观察 · 对照</span>
+            <button type="button" className={styles.pathBadge} onClick={() => setPathOpen(true)} aria-haspopup="dialog" aria-label="查看身体小实验路径">
+              <Path size={13} weight="bold" />
+              <span>实验路径</span>
+              <span className={styles.pathBadgeStep}>{active ? '3/4' : '1/4'}</span>
+            </button>
           </div>
           {active ? (
             <ActiveExperiment experiment={active} onRecord={() => setSheet('record')} />
           ) : <EmptyExperiment />}
           {active ? <RecentFeedback experiment={active} /> : null}
-          <ExperimentPath active={Boolean(active)} />
         </section>
 
         <section className={styles.archiveGroup} aria-labelledby="archive-group-title">
@@ -166,54 +170,21 @@ export function ObserveScreen() {
           }}
         />
       ) : null}
+      {pathOpen ? <ExperimentPathSheet active={Boolean(active)} onClose={() => setPathOpen(false)} /> : null}
     </div>
   )
 }
 
-function ExperimentPath({ active }: { active: boolean }) {
-  const currentStep = active ? 2 : 0
-
+function ExperimentPathSheet({ active, onClose }: { active: boolean; onClose: () => void }) {
   return (
-    <section className={styles.pathCard} aria-label="身体小实验路径">
-      <div className={styles.pathHeading}>
-        <div>
-          <p className={styles.pathKicker}>Tide pool path</p>
-          <h2 className={styles.pathTitle}>身体的答案，慢慢浮上来</h2>
-        </div>
-        <span className={styles.pathStatus}>
-          {active ? '正在观察' : '从问题开始'}
-        </span>
-      </div>
-      <p className={styles.pathIntro}>
-        不急着下结论，只改变一件小事，再和过去的自己轻轻比较。
-      </p>
+    <Sheet title="身体小实验路径" onClose={onClose}>
+      <p className={shell.cardMeta}>身体的答案，慢慢浮上来</p>
+      <p className={styles.pathIntro}>不急着下结论，只改变一件小事，再和过去的自己轻轻比较。</p>
       <div className={styles.pathSteps}>
-        <svg
-          className={styles.pathLine}
-          viewBox="0 0 300 58"
-          preserveAspectRatio="none"
-          aria-hidden="true"
-        >
-          <path d="M18 35 C58 2 96 53 140 28 S225 8 282 31" />
-        </svg>
-        {STEPS.map((step, index) => (
-          <div
-            key={step.key}
-            className={styles.pathStep}
-            data-state={
-              index < currentStep
-                ? 'done'
-                : index === currentStep
-                  ? 'current'
-                  : 'upcoming'
-            }
-          >
-            <span className={styles.pathDot}>{step.key}</span>
-            <span className={styles.pathLabel}>{step.label}</span>
-          </div>
-        ))}
+        <svg className={styles.pathLine} viewBox="0 0 300 58" preserveAspectRatio="none" aria-hidden="true"><path d="M18 35 C58 2 96 53 140 28 S225 8 282 31" /></svg>
+        {STEPS.map((step, index) => <div key={step.key} className={styles.pathStep} data-state={index < (active ? 2 : 0) ? 'done' : index === (active ? 2 : 0) ? 'current' : 'upcoming'}><span className={styles.pathDot}>{step.key}</span><span className={styles.pathLabel}>{step.label}</span></div>)}
       </div>
-    </section>
+    </Sheet>
   )
 }
 
