@@ -89,7 +89,8 @@
 
 .mapViewport {
   position: relative;
-  min-height: 320px;
+  min-height: 280px;
+  aspect-ratio: 1 / 0.82;
   overflow: hidden;
   touch-action: auto;
   cursor: default;
@@ -120,8 +121,8 @@
   z-index: 0;
   top: 0;
   width: 100%;
-  min-height: 320px;
-  aspect-ratio: 1 / 1.05;
+  min-height: 280px;
+  aspect-ratio: 1 / 0.82;
 }
 
 .recenter {
