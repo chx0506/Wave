@@ -50,6 +50,7 @@ export function ObserveScreen() {
         ) : (
           <EmptyExperiment />
         )}
+        {active ? <RecentFeedback experiment={active} /> : null}
         <p className={shell.sectionLabel}>身体线索</p>
         {clues.map((clue) => (
           <article key={clue.id} className={shell.card}>
@@ -164,6 +165,34 @@ function ExperimentPath({ active }: { active: boolean }) {
             <span className={styles.pathLabel}>{step.label}</span>
           </div>
         ))}
+      </div>
+    </section>
+  )
+}
+
+function RecentFeedback({ experiment }: { experiment: Experiment }) {
+  const records = experiment.observations
+  const completed = records.filter((item) => item.completedTry).length
+  const latest = records.at(-1)
+  return (
+    <section className={styles.feedbackCard} aria-label="最近观察反馈">
+      <div className={styles.feedbackTop}>
+        <div>
+          <p className={styles.pathKicker}>Recent signal</p>
+          <h2 className={styles.feedbackTitle}>最近观察反馈</h2>
+        </div>
+        <span className={styles.feedbackCount}>{records.length} 条记录</span>
+      </div>
+      {latest ? (
+        <p className={styles.feedbackCopy}>
+          最近一次记录：{Object.entries(latest.values).map(([key, value]) => `${key} ${value}`).join(' · ')}
+        </p>
+      ) : (
+        <p className={styles.feedbackCopy}>完成第一条记录后，这里会出现你的身体反馈。</p>
+      )}
+      <div className={styles.feedbackMeta}>
+        <span>尝试完成 {completed}/{records.length || 0} 天</span>
+        <span>再观察 {Math.max(experiment.totalDays - experiment.currentDay, 0)} 天</span>
       </div>
     </section>
   )
