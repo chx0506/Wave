@@ -6,7 +6,7 @@ import {
 } from '@/data/content'
 import { USER_DISPLAY_NAME } from '@/domain/copy'
 import { BookOpen, Check, LockSimple, Star, X } from '@phosphor-icons/react'
-import { useMemo, useState } from 'react'
+import { useState } from 'react'
 import shell from './shared/pageShell.module.css'
 import styles from './ExploreScreen.module.css'
 
@@ -22,24 +22,13 @@ const PATH = [
   [12, 42],
 ]
 
-const FILTERS = [
-  ['all', '全部'], ['cycle', '周期'], ['pms', 'PMS'], ['sleep', '睡眠'],
-  ['mood', '情绪'], ['pain', '疼痛'], ['move', '运动'], ['food', '饮食'], ['health', '健康'],
-] as const
-
 export function ExploreScreen() {
   const current = EXPLORE_ISLANDS.find((i) => i.current) ?? EXPLORE_ISLANDS[0]
   const [selectedId, setSelectedId] = useState<string>(current.id)
-  const [filter, setFilter] = useState<(typeof FILTERS)[number][0]>('all')
   const [lockMessage, setLockMessage] = useState(false)
-  const [reading, setReading] = useState<ExploreIsland | null>(null)
+  const [sheet, setSheet] = useState<{ island: ExploreIsland; kind: 'explore' | 'article' } | null>(null)
   const [completed, setCompleted] = useState<string[]>([])
-  const visibleIslands = useMemo(
-    () => filter === 'all' ? EXPLORE_ISLANDS : EXPLORE_ISLANDS.filter((island) => island.category === filter),
-    [filter],
-  )
-  const selected =
-    visibleIslands.find((i) => i.id === selectedId) ?? visibleIslands[0] ?? current
+  const selected = EXPLORE_ISLANDS.find((i) => i.id === selectedId) ?? current
   const selectedStars = Math.min(
     selected.stars + (completed.includes(selected.id) ? 1 : 0),
     selected.starsMax,
@@ -74,15 +63,6 @@ export function ExploreScreen() {
             <span>{EXPLORE_STARS + earnedStars}</span>
             <em>{unlocked}/{EXPLORE_ISLANDS.length} 岛</em>
           </div>
-        </div>
-
-        <div className={styles.filters} aria-label="知识主题筛选">
-          {FILTERS.map(([id, label]) => (
-            <button key={id} type="button" className={styles.filter} data-active={filter === id}
-              onClick={() => { setFilter(id); setLockMessage(false) }}>
-              {label}
-            </button>
-          ))}
         </div>
 
         <section className={styles.mapCard} aria-label="知识地图">
@@ -123,7 +103,7 @@ export function ExploreScreen() {
               />
             </svg>
 
-            {visibleIslands.map((island) => (
+            {EXPLORE_ISLANDS.map((island) => (
               <IslandNode
                 key={island.id}
                 island={island}
@@ -165,10 +145,10 @@ export function ExploreScreen() {
               </button>
             ) : (
               <>
-                <button type="button" className={styles.primaryBtn} onClick={() => setReading(selected)}>
+                <button type="button" className={styles.primaryBtn} onClick={() => setSheet({ island: selected, kind: 'explore' })}>
                   继续探索
                 </button>
-                <button type="button" className={styles.ghostBtn} onClick={() => setReading(selected)}>
+                <button type="button" className={styles.ghostBtn} onClick={() => setSheet({ island: selected, kind: 'article' })}>
                   <BookOpen size={14} weight="bold" />
                   阅读科普
                 </button>
@@ -181,15 +161,16 @@ export function ExploreScreen() {
           </p>
         </article>
       </div>
-      {reading ? (
+      {sheet ? (
         <ArticleSheet
-          island={reading}
-          article={EXPLORE_ARTICLES.find((item) => item.islandId === reading.id) ?? EXPLORE_ARTICLES[0]}
-          completed={completed.includes(reading.id)}
-          onClose={() => setReading(null)}
+          island={sheet.island}
+          kind={sheet.kind}
+          article={EXPLORE_ARTICLES.find((item) => item.islandId === sheet.island.id) ?? EXPLORE_ARTICLES[0]}
+          completed={completed.includes(sheet.island.id)}
+          onClose={() => setSheet(null)}
           onComplete={() => {
-            setCompleted((items) => items.includes(reading.id) ? items : [...items, reading.id])
-            setReading(null)
+            setCompleted((items) => items.includes(sheet.island.id) ? items : [...items, sheet.island.id])
+            setSheet(null)
           }}
         />
       ) : null}
@@ -199,12 +180,14 @@ export function ExploreScreen() {
 
 function ArticleSheet({
   island,
+  kind,
   article,
   completed,
   onClose,
   onComplete,
 }: {
   island: ExploreIsland
+  kind: 'explore' | 'article'
   article: (typeof EXPLORE_ARTICLES)[number]
   completed: boolean
   onClose: () => void
@@ -217,15 +200,22 @@ function ArticleSheet({
         <button type="button" className={styles.sheetClose} onClick={onClose} aria-label="关闭文章">
           <X size={18} />
         </button>
-        <p className={styles.detailKicker}>{article.eyebrow} · {article.readTime}</p>
+        <p className={styles.detailKicker}>{kind === 'explore' ? '探索路径' : article.eyebrow} · {article.readTime}</p>
         <h2 id="article-title" className={styles.sheetTitle}>{island.title}</h2>
-        <p className={styles.sheetLead}>{article.lead}</p>
+        <p className={styles.sheetLead}>{kind === 'explore' ? '沿着这座岛留下的线索，完成一次轻量探索。' : article.lead}</p>
         <div className={styles.articleBody}>
-          {article.paragraphs.map((paragraph) => <p key={paragraph}>{paragraph}</p>)}
-          <p className={styles.articleTakeaway}>{article.takeaway}</p>
+          {kind === 'explore' ? (
+            <>
+              <p>先发现：看看这座岛正在讲什么，找到一个和你有关的问题。</p>
+              <p>再观察：回到今天的身体感受，记下出现的时间、强度和变化。</p>
+              <p>留线索：完成探索后点亮一颗星，下次回来和过去的自己比较。</p>
+            </>
+          ) : (
+            <>{article.paragraphs.map((paragraph) => <p key={paragraph}>{paragraph}</p>)}<p className={styles.articleTakeaway}>{article.takeaway}</p></>
+          )}
         </div>
         <button type="button" className={styles.cta} onClick={onComplete} disabled={completed}>
-          {completed ? <><Check size={17} weight="bold" /> 已完成阅读</> : '完成阅读，点亮一颗星'}
+          {completed ? <><Check size={17} weight="bold" /> 已完成探索</> : kind === 'explore' ? '完成探索，点亮一颗星' : '完成阅读，点亮一颗星'}
         </button>
       </section>
     </div>
