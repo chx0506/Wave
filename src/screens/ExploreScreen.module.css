@@ -2,6 +2,33 @@
   gap: 12px;
 }
 
+.filters {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  padding: 1px 2px 3px;
+  scrollbar-width: none;
+}
+
+.filters::-webkit-scrollbar { display: none; }
+
+.filter {
+  flex: 0 0 auto;
+  padding: 7px 12px;
+  border-radius: 999px;
+  color: var(--ink-soft);
+  background: rgba(255, 255, 255, 0.62);
+  border: 1px solid rgba(255, 255, 255, 0.75);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.filter[data-active='true'] {
+  color: #fff;
+  background: linear-gradient(135deg, #9fd0f0, var(--tide-deep));
+  box-shadow: 0 6px 14px -10px rgba(90, 150, 200, 0.8);
+}
+
 .hud {
   display: flex;
   align-items: center;
@@ -294,4 +321,14 @@
   font-size: 11px;
   color: var(--ink-faint);
   letter-spacing: 0.02em;
+}
+
+.lockMessage {
+  margin: 0;
+  padding: 9px 11px;
+  border-radius: 12px;
+  color: var(--tide-deep);
+  background: rgba(126, 184, 232, 0.12);
+  font-size: 11px;
+  line-height: 1.45;
 }

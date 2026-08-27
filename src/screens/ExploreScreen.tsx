@@ -5,7 +5,7 @@ import {
 } from '@/data/content'
 import { USER_DISPLAY_NAME } from '@/domain/copy'
 import { LockSimple, Star } from '@phosphor-icons/react'
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import shell from './shared/pageShell.module.css'
 import styles from './ExploreScreen.module.css'
 
@@ -21,11 +21,22 @@ const PATH = [
   [12, 42],
 ]
 
+const FILTERS = [
+  ['all', '全部'], ['cycle', '周期'], ['pms', 'PMS'], ['sleep', '睡眠'],
+  ['mood', '情绪'], ['pain', '疼痛'], ['move', '运动'], ['food', '饮食'], ['health', '健康'],
+] as const
+
 export function ExploreScreen() {
   const current = EXPLORE_ISLANDS.find((i) => i.current) ?? EXPLORE_ISLANDS[0]
   const [selectedId, setSelectedId] = useState<string>(current.id)
+  const [filter, setFilter] = useState<(typeof FILTERS)[number][0]>('all')
+  const [lockMessage, setLockMessage] = useState(false)
+  const visibleIslands = useMemo(
+    () => filter === 'all' ? EXPLORE_ISLANDS : EXPLORE_ISLANDS.filter((island) => island.category === filter),
+    [filter],
+  )
   const selected =
-    EXPLORE_ISLANDS.find((i) => i.id === selectedId) ?? current
+    visibleIslands.find((i) => i.id === selectedId) ?? visibleIslands[0] ?? current
   const unlocked = EXPLORE_ISLANDS.filter((i) => !i.locked).length
 
   return (
@@ -55,6 +66,15 @@ export function ExploreScreen() {
             <span>{EXPLORE_STARS}</span>
             <em>{unlocked}/{EXPLORE_ISLANDS.length} 岛</em>
           </div>
+        </div>
+
+        <div className={styles.filters} aria-label="知识主题筛选">
+          {FILTERS.map(([id, label]) => (
+            <button key={id} type="button" className={styles.filter} data-active={filter === id}
+              onClick={() => { setFilter(id); setLockMessage(false) }}>
+              {label}
+            </button>
+          ))}
         </div>
 
         <section className={styles.mapCard} aria-label="知识地图">
@@ -94,12 +114,12 @@ export function ExploreScreen() {
               />
             </svg>
 
-            {EXPLORE_ISLANDS.map((island) => (
+            {visibleIslands.map((island) => (
               <IslandNode
                 key={island.id}
                 island={island}
                 active={island.id === selected.id}
-                onSelect={() => setSelectedId(island.id)}
+                onSelect={() => { setSelectedId(island.id); setLockMessage(false) }}
               />
             ))}
           </div>
@@ -127,7 +147,7 @@ export function ExploreScreen() {
           <p className={styles.detailBlurb}>{selected.blurb}</p>
           <div className={styles.detailActions}>
             {selected.locked ? (
-              <button type="button" className={styles.unlockBtn}>
+              <button type="button" className={styles.unlockBtn} onClick={() => setLockMessage(true)}>
                 <LockSimple size={14} weight="bold" />
                 用星星或贝壳解锁
               </button>
@@ -142,6 +162,7 @@ export function ExploreScreen() {
               </>
             )}
           </div>
+          {lockMessage ? <p className={styles.lockMessage}>完成前置岛屿并收集更多星星后，就可以来这里继续探索。</p> : null}
           <p className={styles.hint}>
             通过阅读、记录与完成小观察获得星星，点亮下一座岛。
           </p>

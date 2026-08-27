@@ -134,6 +134,7 @@ export const EXPLORE_STARS = 14
 export const EXPLORE_ISLANDS = [
   {
     id: 'cycle',
+    category: 'cycle',
     title: '周期四季',
     short: '周期',
     blurb: '退潮、涨潮、满潮、平潮分别意味着什么',
@@ -147,6 +148,7 @@ export const EXPLORE_ISLANDS = [
   },
   {
     id: 'pms',
+    category: 'pms',
     title: 'PMS 小岛',
     short: 'PMS',
     blurb: '经前情绪、睡眠与身体变化的常见线索',
@@ -160,6 +162,7 @@ export const EXPLORE_ISLANDS = [
   },
   {
     id: 'sleep',
+    category: 'sleep',
     title: '睡眠潮汐',
     short: '睡眠',
     blurb: '为什么有些夜晚更容易醒',
@@ -173,6 +176,7 @@ export const EXPLORE_ISLANDS = [
   },
   {
     id: 'mood',
+    category: 'mood',
     title: '情绪海湾',
     short: '情绪',
     blurb: '情绪像天气一样变化，也可以被温柔观察',
@@ -186,6 +190,7 @@ export const EXPLORE_ISLANDS = [
   },
   {
     id: 'pain',
+    category: 'pain',
     title: '疼痛灯塔',
     short: '痛经',
     blurb: '痛经与压力、睡眠的关系',
@@ -199,6 +204,7 @@ export const EXPLORE_ISLANDS = [
   },
   {
     id: 'move',
+    category: 'move',
     title: '运动海岸',
     short: '运动',
     blurb: '不同阶段适合怎样的活动强度',
@@ -212,6 +218,7 @@ export const EXPLORE_ISLANDS = [
   },
   {
     id: 'food',
+    category: 'food',
     title: '饮食潮池',
     short: '饮食',
     blurb: '轻量调整饮食，观察身体反馈',
@@ -225,6 +232,7 @@ export const EXPLORE_ISLANDS = [
   },
   {
     id: 'health',
+    category: 'health',
     title: '健康灯塔',
     short: '健康',
     blurb: '女性健康知识的起点，慢慢展开',
