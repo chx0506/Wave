@@ -76,3 +76,39 @@ export const LogKeys = {
 } as const
 
 export type LogKey = (typeof LogKeys)[keyof typeof LogKeys]
+
+export const ExperimentCategories = {
+  sleep: 'sleep', mood: 'mood', pain: 'pain', energy: 'energy',
+  stress: 'stress', diet: 'diet', exercise: 'exercise',
+} as const
+export type ExperimentCategory = (typeof ExperimentCategories)[keyof typeof ExperimentCategories]
+export type ExperimentStatus = 'active' | 'completed'
+export type ClueStatus = 'pending' | 'confirmed'
+export type ObservationEntry = {
+  day: number
+  date: Date
+  values: Record<string, string>
+  completedTry: boolean
+  note?: string
+}
+export type Experiment = {
+  id: string
+  category: ExperimentCategory
+  question: string
+  try: string
+  watch: string[]
+  totalDays: number
+  currentDay: number
+  status: ExperimentStatus
+  startedAt: Date
+  observations: ObservationEntry[]
+}
+export type BodyClue = {
+  id: string
+  title: string
+  note: string
+  category: ExperimentCategory
+  status: ClueStatus
+  shells: number
+  sourceExperimentId?: string
+}
