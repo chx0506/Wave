@@ -1,0 +1,62 @@
+.card {
+  position: relative;
+  z-index: 2;
+  margin: 0 20px;
+  padding: 22px 22px 20px;
+  border-radius: var(--radius-card);
+  background: var(--glass);
+  backdrop-filter: blur(22px);
+  -webkit-backdrop-filter: blur(22px);
+  border: 1px solid rgba(255, 255, 255, 0.65);
+  box-shadow: var(--shadow-card);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.title {
+  margin: 10px 0 0;
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: var(--tide-deep);
+}
+
+.hint {
+  position: relative;
+  margin: 8px 0 0;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--ink-soft);
+}
+
+.wave {
+  display: block;
+  width: 92px;
+  height: 10px;
+  margin: 2px auto 0;
+  color: var(--tide);
+}
+
+.cta {
+  width: 100%;
+  margin-top: 18px;
+  height: 48px;
+  border-radius: var(--radius-pill);
+  background: var(--tide);
+  color: var(--foam);
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  box-shadow: 0 10px 20px -12px var(--tide-deep);
+  transition: transform 200ms var(--ease), background 200ms var(--ease);
+}
+
+.cta:hover {
+  background: var(--tide-deep);
+}
+
+.cta:active {
+  transform: translateY(1px);
+}

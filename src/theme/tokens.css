@@ -1,0 +1,75 @@
+/* Single source of visual truth. Screens and SVGs read these variables.
+   Day / night swap happens on [data-mode], not by rewriting components. */
+
+:root {
+  --font-ui: 'Noto Sans SC', 'PingFang SC', 'Hiragino Sans GB', sans-serif;
+
+  --ink: #3d5a73;
+  --ink-strong: #2c4458;
+  --ink-soft: #7a9bb3;
+  --ink-faint: #a8c0d0;
+
+  --tide: #7eb8e8;
+  --tide-deep: #6aa9dc;
+  --tide-soft: #b7d8f2;
+  --tide-wash: #e7f3fb;
+
+  --sand: #f7fbff;
+  --foam: #ffffff;
+  --glass: rgba(255, 255, 255, 0.78);
+  --glass-heavy: rgba(255, 255, 255, 0.92);
+
+  --line: rgba(126, 184, 232, 0.28);
+  --shadow-card: 0 18px 40px -24px rgba(90, 140, 180, 0.45);
+  --shadow-phone: 0 30px 80px -20px rgba(90, 140, 180, 0.55);
+
+  --radius-card: 32px;
+  --radius-pill: 999px;
+  --radius-cell: 14px;
+
+  --tabbar-h: 84px;
+  --statusbar-h: 54px;
+
+  --coast-sky-top: #b9dff3;
+  --coast-sky-mid: #d7eef9;
+  --coast-island: #c5e0f0;
+  --coast-cloud: rgba(255, 255, 255, 0.7);
+  --coast-sand: #f4f9fd;
+  --coast-water-light: #c5e4f6;
+  --coast-water: #9fd0ee;
+  --coast-water-deep: #86c2e8;
+  --coast-foam: #ffffff;
+  --coast-ripple: rgba(255, 255, 255, 0.35);
+
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+[data-mode='night'] {
+  --ink: #d5e6f2;
+  --ink-strong: #eef6fb;
+  --ink-soft: #9db8cc;
+  --ink-faint: #7a96aa;
+
+  --tide: #6aa0c8;
+  --tide-deep: #5b91b9;
+  --tide-soft: #3d6280;
+  --tide-wash: rgba(80, 120, 160, 0.28);
+
+  --sand: #1c2c40;
+  --foam: #e8f3fa;
+  --glass: rgba(22, 36, 54, 0.72);
+  --glass-heavy: rgba(22, 36, 54, 0.88);
+  --line: rgba(180, 210, 230, 0.18);
+  --shadow-card: 0 18px 40px -24px rgba(0, 10, 30, 0.55);
+
+  --coast-sky-top: #152038;
+  --coast-sky-mid: #1d2f4c;
+  --coast-island: #2a4466;
+  --coast-cloud: rgba(210, 228, 245, 0.18);
+  --coast-sand: #e8eef4;
+  --coast-water-light: #3a6288;
+  --coast-water: #2d5276;
+  --coast-water-deep: #244866;
+  --coast-foam: #d7e8f4;
+  --coast-ripple: rgba(200, 224, 240, 0.18);
+}

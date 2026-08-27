@@ -1,0 +1,39 @@
+.screen {
+  flex: 1;
+  min-height: 0;
+  padding: calc(var(--statusbar-h) + 24px) 28px 24px;
+  background:
+    linear-gradient(180deg, var(--coast-water-light) 0%, var(--tide-wash) 38%, var(--sand) 100%);
+  display: flex;
+  align-items: flex-end;
+}
+
+.panel {
+  width: 100%;
+  padding: 28px 24px 32px;
+  border-radius: var(--radius-card);
+  background: var(--glass);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  border: 1px solid rgba(255, 255, 255, 0.65);
+}
+
+.title {
+  margin: 0;
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--ink-strong);
+}
+
+.body {
+  margin: 10px 0 0;
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--ink);
+}
+
+.note {
+  margin: 18px 0 0;
+  font-size: 13px;
+  color: var(--ink-soft);
+}

@@ -1,0 +1,24 @@
+.bar {
+  position: absolute;
+  inset: 0 0 auto;
+  z-index: 8;
+  height: var(--statusbar-h);
+  padding: 14px 28px 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  color: var(--ink-strong);
+  pointer-events: none;
+}
+
+.time {
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.icons {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}

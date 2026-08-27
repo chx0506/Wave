@@ -1,0 +1,12 @@
+.scene {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.art {
+  width: 100%;
+  height: 100%;
+  display: block;
+}

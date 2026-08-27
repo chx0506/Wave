@@ -1,0 +1,39 @@
+.bar {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  margin: 12px 18px 0;
+  padding: 11px 6px;
+  border-radius: var(--radius-pill);
+  background: var(--foam);
+  border: 1px solid var(--line);
+  font-size: 12px;
+}
+
+.date {
+  flex: 0 0 auto;
+  padding: 0 10px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--ink-strong);
+  white-space: nowrap;
+}
+
+.chip,
+.action {
+  flex: 1 1 0;
+  min-width: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 0 6px;
+  color: var(--tide-deep);
+  font-weight: 500;
+  white-space: nowrap;
+  border-left: 1px solid var(--line);
+}
+
+.action {
+  font-weight: 600;
+}

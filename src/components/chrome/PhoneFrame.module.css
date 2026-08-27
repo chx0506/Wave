@@ -1,0 +1,116 @@
+.studio {
+  min-height: 100svh;
+  display: grid;
+  place-items: center;
+  background:
+    radial-gradient(1200px 620px at 50% -8%, #eaf6fc 0%, transparent 52%),
+    #9eb9c9;
+  padding: 28px 16px;
+}
+
+.device {
+  position: relative;
+  width: 412px;
+  height: 880px;
+  padding: 12px 11px 18px;
+  border-radius: 54px;
+  background: linear-gradient(160deg, #3a3d42 0%, #1c1e22 48%, #111214 100%);
+  box-shadow:
+    0 40px 80px -28px rgba(40, 70, 100, 0.55),
+    inset 0 1px 0 rgba(255, 255, 255, 0.22);
+  color: var(--ink);
+}
+
+.screen {
+  position: relative;
+  width: 390px;
+  height: 844px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  border-radius: 44px;
+  background: var(--sand);
+}
+
+.home {
+  position: absolute;
+  left: 50%;
+  bottom: 7px;
+  width: 128px;
+  height: 5px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.28);
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
+.btnSilent,
+.btnVolUp,
+.btnVolDown,
+.btnPower {
+  position: absolute;
+  background: #0c0d0f;
+  pointer-events: none;
+}
+
+.btnSilent {
+  left: -3px;
+  top: 118px;
+  width: 4px;
+  height: 22px;
+  border-radius: 2px 0 0 2px;
+}
+
+.btnVolUp {
+  left: -3px;
+  top: 168px;
+  width: 4px;
+  height: 42px;
+  border-radius: 2px 0 0 2px;
+}
+
+.btnVolDown {
+  left: -3px;
+  top: 218px;
+  width: 4px;
+  height: 42px;
+  border-radius: 2px 0 0 2px;
+}
+
+.btnPower {
+  right: -3px;
+  top: 198px;
+  width: 4px;
+  height: 64px;
+  border-radius: 0 2px 2px 0;
+}
+
+@media (max-width: 480px) {
+  .studio {
+    padding: 0;
+    background: var(--sand);
+  }
+
+  .device {
+    width: 100vw;
+    height: 100svh;
+    padding: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+  }
+
+  .screen {
+    width: 100%;
+    height: 100%;
+    border-radius: 0;
+  }
+
+  .home,
+  .btnSilent,
+  .btnVolUp,
+  .btnVolDown,
+  .btnPower {
+    display: none;
+  }
+}
