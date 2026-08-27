@@ -81,6 +81,8 @@
   position: relative;
   z-index: 1;
   flex: 0 0 auto;
+  width: 100%;
+  background: linear-gradient(168deg, #c5e6f7 0%, #9fd0ef 55%, #7eb8e8 100%);
   border-radius: 28px;
   overflow: hidden;
   border: 1px solid rgba(255, 255, 255, 0.7);
@@ -89,6 +91,7 @@
 
 .mapViewport {
   position: relative;
+  width: 100%;
   min-height: 280px;
   aspect-ratio: 1 / 0.82;
   overflow: hidden;
@@ -121,8 +124,9 @@
   z-index: 0;
   top: 0;
   width: 100%;
-  min-height: 280px;
-  aspect-ratio: 1 / 0.82;
+  height: 100%;
+  min-height: 0;
+  aspect-ratio: auto;
 }
 
 .recenter {
