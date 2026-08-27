@@ -1,12 +1,16 @@
 import { Leaf, X } from '@phosphor-icons/react'
 import { useState } from 'react'
+import flowDry from '@/assets/flow/flow-dry.png'
+import flowFull from '@/assets/flow/flow-full.png'
+import flowLight from '@/assets/flow/flow-light.png'
+import flowMedium from '@/assets/flow/flow-medium.png'
 import styles from './RecordSheet.module.css'
 
 const FLOW_OPTIONS = [
-  { id: 'none', label: '干涸', level: 0 },
-  { id: 'light', label: '偏少', level: 1 },
-  { id: 'medium', label: '偏多', level: 2 },
-  { id: 'heavy', label: '充盈', level: 3 },
+  { id: 'none', label: '干涸', src: flowDry },
+  { id: 'light', label: '偏少', src: flowLight },
+  { id: 'medium', label: '偏多', src: flowMedium },
+  { id: 'heavy', label: '充盈', src: flowFull },
 ] as const
 
 const SYMPTOMS = [
@@ -60,7 +64,7 @@ export function RecordSheet({
         <div className={styles.handle} aria-hidden="true" />
         <header className={styles.header}>
           <div className={styles.brand}>
-            <strong>月潮</strong>
+            <strong>MoonWave</strong>
             <span>daily record</span>
           </div>
           <h2 className={styles.title}>
@@ -85,8 +89,13 @@ export function RecordSheet({
                   data-on={flow === opt.id}
                   onClick={() => setFlow(opt.id)}
                 >
-                  <span className={styles.flowArt} data-level={opt.level} aria-hidden="true">
-                    <FlowGlyph level={opt.level} />
+                  <span className={styles.flowArt} aria-hidden="true">
+                    <img
+                      className={styles.flowImg}
+                      src={opt.src}
+                      alt=""
+                      draggable={false}
+                    />
                   </span>
                   <span className={styles.flowLabel}>{opt.label}</span>
                   <span className={styles.radio} data-on={flow === opt.id} />
@@ -167,27 +176,6 @@ export function RecordSheet({
         </div>
       </div>
     </div>
-  )
-}
-
-function FlowGlyph({ level }: { level: number }) {
-  const h = 10 + level * 8
-  return (
-    <svg viewBox="0 0 48 40" width="48" height="40">
-      <ellipse cx="24" cy="34" rx="14" ry="3" fill="rgba(90,140,180,0.12)" />
-      <path
-        d={`M8 ${32 - h * 0.15} C14 ${20 - level * 2}, 18 ${28 - level}, 24 ${18 - level * 2}
-            C30 ${28 - level}, 34 ${20 - level * 2}, 40 ${32 - h * 0.15}
-            C36 ${34}, 12 ${34}, 8 ${32 - h * 0.15} Z`}
-        fill={`url(#flow${level})`}
-      />
-      <defs>
-        <linearGradient id={`flow${level}`} x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#c5e6f7" />
-          <stop offset="100%" stopColor={level > 1 ? '#5fafdf' : '#9fd0ef'} />
-        </linearGradient>
-      </defs>
-    </svg>
   )
 }
 

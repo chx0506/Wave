@@ -1,53 +1,73 @@
-/* Single source of visual truth. Screens and SVGs read these variables.
+/* Single source of visual truth — high-key light-blue paper world.
    Day / night swap happens on [data-mode], not by rewriting components. */
 
 :root {
   --font-ui: 'Noto Sans SC', 'PingFang SC', 'Hiragino Sans GB', sans-serif;
   --font-display: 'Noto Serif SC', 'Songti SC', 'Noto Sans SC', serif;
 
-  --ink: #3d5a73;
-  --ink-strong: #2c4458;
-  --ink-soft: #7a9bb3;
-  --ink-faint: #a8c0d0;
+  --ink: #3a5368;
+  --ink-strong: #2c4558;
+  --ink-soft: #7a96ab;
+  --ink-faint: #a8bfcf;
 
-  --tide: #7eb8e8;
-  --tide-deep: #6aa9dc;
-  --tide-soft: #b7d8f2;
-  --tide-wash: #e7f3fb;
+  --tide: #9fc8e8;
+  --tide-deep: #6fa8d4;
+  --tide-soft: #c9e2f4;
+  --tide-wash: #eaf4fb;
 
-  --sand: #f7fbff;
+  --sand: #f6fafd;
   --foam: #ffffff;
-  --glass: rgba(255, 255, 255, 0.62);
-  --glass-heavy: rgba(255, 255, 255, 0.86);
-  --glass-float: rgba(255, 255, 255, 0.55);
+  --paper: #f8fbfe;
+  --paper-blue: #edf5fb;
+  --seal: #c45c52;
 
-  --line: rgba(126, 184, 232, 0.28);
-  --shadow-card: 0 16px 40px -22px rgba(90, 140, 180, 0.42);
-  --shadow-phone: 0 30px 80px -20px rgba(90, 140, 180, 0.55);
+  /* Legacy glass vars → opaque paper fills (no frosted glass) */
+  --glass: rgba(248, 251, 254, 0.94);
+  --glass-heavy: #f8fbfe;
+  --glass-float: #f4f9fc;
+
+  --line: rgba(145, 186, 220, 0.32);
+  --shadow-card: 0 14px 28px -18px rgba(90, 140, 180, 0.35);
+  --shadow-phone: 0 30px 80px -20px rgba(90, 140, 180, 0.48);
   --shadow-float:
-    0 1px 0 rgba(255, 255, 255, 0.8) inset,
-    0 12px 32px rgba(70, 120, 160, 0.16),
-    0 4px 12px rgba(70, 120, 160, 0.1);
+    0 1px 0 rgba(255, 255, 255, 0.95) inset,
+    0 -1px 0 rgba(145, 186, 220, 0.12) inset,
+    0 10px 22px -12px rgba(90, 140, 180, 0.28),
+    0 2px 6px rgba(90, 140, 180, 0.08);
+  --shadow-paper:
+    0 1px 0 rgba(255, 255, 255, 0.9) inset,
+    0 8px 18px -10px rgba(90, 140, 180, 0.28),
+    0 2px 4px rgba(90, 140, 180, 0.06);
+  --shadow-emboss:
+    0 1px 0 rgba(255, 255, 255, 0.95) inset,
+    0 -1px 0 rgba(145, 186, 220, 0.18) inset,
+    0 6px 14px -8px rgba(90, 140, 180, 0.22);
 
-  --radius-card: 32px;
+  --radius-card: 22px;
   --radius-pill: 999px;
   --radius-cell: 14px;
 
-  --tabbar-h: 72px;
-  --tabbar-float-space: 88px;
+  --tabbar-h: 64px;
+  --tabbar-float-space: 72px;
   --statusbar-h: 62px;
 
-  --coast-sky-top: #a8d7f0;
-  --coast-sky-mid: #cfeaf8;
-  --coast-island: #b7d8ea;
-  --coast-cloud: rgba(255, 255, 255, 0.78);
-  --coast-sand: #f8fcff;
-  --coast-water-light: #b6dff4;
-  --coast-water: #84c4ea;
-  --coast-water-deep: #5fafdf;
-  --coast-foam: #ffffff;
-  --coast-ripple: rgba(255, 255, 255, 0.4);
+  --paper-wave: #c5dff2;
+  --paper-wave-mid: #a8cbe6;
+  --paper-wave-deep: #8eb8dc;
+  --paper-wave-foam: #f4f9fc;
 
+  --coast-sky-top: #cfe6f5;
+  --coast-sky-mid: #e8f3fa;
+  --coast-island: #b7d4ea;
+  --coast-cloud: rgba(255, 255, 255, 0.88);
+  --coast-sand: #f7fbfd;
+  --coast-water-light: #c5dff2;
+  --coast-water: #a8cbe6;
+  --coast-water-deep: #8eb8dc;
+  --coast-foam: #ffffff;
+  --coast-ripple: rgba(255, 255, 255, 0.55);
+
+  --texture-paper: url('/textures/paper-grain.png');
   --ease: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
@@ -64,10 +84,29 @@
 
   --sand: #1c2c40;
   --foam: #e8f3fa;
-  --glass: rgba(22, 36, 54, 0.72);
-  --glass-heavy: rgba(22, 36, 54, 0.88);
+  --paper: #223448;
+  --paper-blue: #1a2a3c;
+  --seal: #d47870;
+
+  --glass: rgba(22, 36, 54, 0.92);
+  --glass-heavy: #1c2c40;
+  --glass-float: #223448;
   --line: rgba(180, 210, 230, 0.18);
   --shadow-card: 0 18px 40px -24px rgba(0, 10, 30, 0.55);
+  --shadow-float:
+    0 1px 0 rgba(255, 255, 255, 0.06) inset,
+    0 12px 28px rgba(0, 10, 30, 0.4);
+  --shadow-paper:
+    0 1px 0 rgba(255, 255, 255, 0.06) inset,
+    0 10px 22px rgba(0, 10, 30, 0.35);
+  --shadow-emboss:
+    0 1px 0 rgba(255, 255, 255, 0.06) inset,
+    0 6px 14px rgba(0, 10, 30, 0.3);
+
+  --paper-wave: #3a6288;
+  --paper-wave-mid: #2d5276;
+  --paper-wave-deep: #244866;
+  --paper-wave-foam: #d7e8f4;
 
   --coast-sky-top: #152038;
   --coast-sky-mid: #1d2f4c;

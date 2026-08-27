@@ -4,8 +4,8 @@
   place-items: center;
   padding: 32px 20px;
   background:
-    radial-gradient(900px 480px at 50% 0%, #e8f4fb 0%, transparent 55%),
-    linear-gradient(180deg, #b7cfdc 0%, #8eacbc 100%);
+    radial-gradient(900px 480px at 50% 0%, #eaf4fb 0%, transparent 55%),
+    linear-gradient(180deg, #c5d9e8 0%, #9eb8ca 100%);
 }
 
 .device {
@@ -73,6 +73,23 @@
   flex-direction: column;
   background: var(--sand);
   color: var(--ink);
+}
+
+.paperGrain {
+  position: absolute;
+  inset: 0;
+  z-index: 30;
+  pointer-events: none;
+  opacity: 0.22;
+  mix-blend-mode: multiply;
+  background-image: var(--texture-paper);
+  background-size: 280px 280px;
+  background-repeat: repeat;
+}
+
+[data-mode='night'] .paperGrain {
+  opacity: 0.12;
+  mix-blend-mode: soft-light;
 }
 
 @media (max-width: 460px) {

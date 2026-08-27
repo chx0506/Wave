@@ -37,10 +37,10 @@
 .title {
   margin: 0;
   font-family: var(--font-display);
-  font-size: 22px;
+  font-size: 20px;
   font-weight: 700;
   color: var(--ink-strong);
-  letter-spacing: 0.1em;
+  letter-spacing: 0.04em;
 }
 
 .subtitle {
@@ -138,6 +138,18 @@
   color: var(--tide-deep);
 }
 
+.drop[data-kind='period'] {
+  color: #d97868;
+}
+
+.drop[data-kind='predicted'] {
+  color: #e8917a;
+}
+
+.moon {
+  color: #5f9fcb;
+}
+
 .phaseRow {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -145,17 +157,17 @@
 }
 
 .phaseCard {
-  padding: 10px 6px;
+  padding: 10px 6px 12px;
   border-radius: 16px;
   text-align: center;
-  background: rgba(255, 255, 255, 0.8);
+  background: rgba(255, 255, 255, 0.88);
   border: 1px solid rgba(126, 184, 232, 0.18);
   box-shadow: 0 10px 22px -16px rgba(90, 140, 180, 0.45);
 }
 
 .phaseCard strong {
   display: block;
-  margin-top: 4px;
+  margin-top: 2px;
   font-size: 12px;
   color: var(--ink-strong);
 }
@@ -163,39 +175,43 @@
 .phaseCard p {
   margin: 4px 0 0;
   font-size: 10px;
-  line-height: 1.35;
+  line-height: 1.4;
   color: var(--ink-soft);
+  white-space: pre-line;
 }
 
 .phaseIcon {
-  display: inline-grid;
+  display: grid;
   place-items: center;
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  color: var(--tide-deep);
-  background: rgba(186, 224, 246, 0.45);
+  width: 100%;
+  height: 44px;
+  margin: 0 auto 2px;
+  border-radius: 0;
+  background: transparent;
+  color: inherit;
 }
 
-.phaseCard[data-phase='follicular'] .phaseIcon {
-  color: #5fafdf;
-  background: rgba(159, 208, 240, 0.45);
+.phaseImg {
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+  pointer-events: none;
+  user-select: none;
 }
 
-.phaseCard[data-phase='ovulatory'] .phaseIcon {
-  color: #4a9ac8;
-  background: rgba(126, 184, 232, 0.4);
-}
-
+.phaseCard[data-phase='follicular'] .phaseIcon,
+.phaseCard[data-phase='ovulatory'] .phaseIcon,
 .phaseCard[data-phase='luteal'] .phaseIcon {
-  color: #7aa8c8;
-  background: rgba(210, 232, 245, 0.7);
+  background: transparent;
 }
 
 .rhythm {
-  padding: 14px 12px;
+  position: relative;
+  padding: 14px 12px 12px;
   border-radius: 20px;
-  background: rgba(255, 255, 255, 0.78);
+  overflow: visible;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.92) 0%, rgba(240, 248, 253, 0.88) 100%);
   border: 1px solid rgba(255, 255, 255, 0.95);
   box-shadow: var(--shadow-card);
 }
@@ -204,12 +220,13 @@
   display: flex;
   flex-direction: column;
   gap: 8px;
-  margin-bottom: 8px;
+  margin-bottom: 4px;
 }
 
 .rhythmHead h3 {
   margin: 0;
-  font-size: 14px;
+  font-family: var(--font-display);
+  font-size: 15px;
   font-weight: 700;
   color: var(--ink-strong);
   letter-spacing: 0.04em;
@@ -218,7 +235,7 @@
 .legend {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px 12px;
+  gap: 6px 10px;
   font-size: 10px;
   color: var(--ink-soft);
 }
@@ -229,33 +246,33 @@
   gap: 4px;
 }
 
-.legToday,
-.legPeriod,
-.legPredicted {
+.legToday {
   width: 10px;
   height: 10px;
   border-radius: 50%;
   display: inline-block;
-}
-
-.legToday {
-  box-shadow: inset 0 0 0 1.5px var(--tide);
+  box-shadow: inset 0 0 0 1.5px #6fa8d4;
   background: #fff;
-}
-
-.legPeriod {
-  background: linear-gradient(180deg, #9fd0f0, #5fafdf);
-}
-
-.legPredicted {
-  box-shadow: inset 0 0 0 1.5px var(--tide-deep);
-  background: transparent;
 }
 
 .chart {
   width: 100%;
   height: auto;
+  aspect-ratio: 320 / 128;
   display: block;
+  position: relative;
+  z-index: 1;
+}
+
+.seaweed {
+  position: absolute;
+  right: 6px;
+  bottom: 4px;
+  width: 72px;
+  height: 40px;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.9;
 }
 
 .markCta {
@@ -270,7 +287,7 @@
   font-weight: 700;
   letter-spacing: 0.04em;
   color: #fff;
-  background: linear-gradient(135deg, #9fd0f0 0%, var(--tide) 45%, var(--tide-deep) 100%);
+  background: linear-gradient(135deg, #8ec4e6 0%, #6fa8d4 48%, #5a93be 100%);
   box-shadow: 0 14px 28px -12px rgba(90, 150, 200, 0.65);
 }
 

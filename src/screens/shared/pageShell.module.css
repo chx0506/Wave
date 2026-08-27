@@ -6,9 +6,9 @@
   flex-direction: column;
   overflow: hidden;
   background:
-    radial-gradient(110% 60% at 8% -6%, rgba(186, 224, 246, 0.7) 0%, transparent 50%),
-    radial-gradient(80% 45% at 96% 6%, rgba(210, 236, 250, 0.55) 0%, transparent 45%),
-    linear-gradient(168deg, #eef7fd 0%, #f8fcff 46%, #e8f3fb 100%);
+    radial-gradient(110% 60% at 8% -6%, rgba(197, 223, 242, 0.5) 0%, transparent 50%),
+    radial-gradient(80% 45% at 96% 6%, rgba(220, 236, 248, 0.45) 0%, transparent 45%),
+    linear-gradient(168deg, #eef5fb 0%, var(--paper) 46%, #e8f2f9 100%);
 }
 
 .glow {
@@ -16,7 +16,7 @@
   inset: 0;
   pointer-events: none;
   background:
-    radial-gradient(60% 30% at 50% 100%, rgba(167, 214, 240, 0.22) 0%, transparent 70%);
+    radial-gradient(60% 30% at 50% 100%, rgba(168, 203, 230, 0.16) 0%, transparent 70%);
 }
 
 .header {
@@ -26,16 +26,11 @@
 }
 
 .kicker {
-  margin: 0;
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.14em;
-  color: var(--tide);
-  text-transform: uppercase;
+  display: none;
 }
 
 .title {
-  margin: 6px 0 0;
+  margin: 0;
   font-family: var(--font-display);
   font-size: 26px;
   font-weight: 700;
@@ -65,16 +60,10 @@
 
 .card {
   padding: 16px;
-  border-radius: 22px;
-  background: linear-gradient(
-    160deg,
-    rgba(255, 255, 255, 0.84) 0%,
-    rgba(236, 246, 252, 0.68) 100%
-  );
-  border: 1px solid rgba(255, 255, 255, 0.75);
-  box-shadow: var(--shadow-float);
-  backdrop-filter: blur(16px) saturate(160%);
-  -webkit-backdrop-filter: blur(16px) saturate(160%);
+  border-radius: var(--radius-card);
+  background: var(--foam);
+  border: 1px solid rgba(145, 186, 220, 0.2);
+  box-shadow: var(--shadow-paper);
 }
 
 .cardTitle {
@@ -102,7 +91,8 @@
   font-weight: 700;
   letter-spacing: 0.04em;
   color: var(--tide-deep);
-  background: rgba(126, 184, 232, 0.18);
+  background: rgba(159, 200, 232, 0.28);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.6) inset;
 }
 
 .cta {
@@ -113,14 +103,14 @@
   width: 100%;
   padding: 14px 18px;
   border-radius: 999px;
-  background: linear-gradient(135deg, #9fd0f0 0%, var(--tide) 42%, var(--tide-deep) 100%);
+  background: linear-gradient(135deg, #b5d8f0 0%, var(--tide) 48%, var(--tide-deep) 100%);
   color: #fff;
   font-size: 14px;
   font-weight: 600;
   letter-spacing: 0.04em;
   box-shadow:
-    0 1px 0 rgba(255, 255, 255, 0.35) inset,
-    0 14px 28px -14px rgba(90, 150, 200, 0.65);
+    0 1px 0 rgba(255, 255, 255, 0.4) inset,
+    0 12px 24px -12px rgba(90, 150, 200, 0.5);
 }
 
 .cta:active {

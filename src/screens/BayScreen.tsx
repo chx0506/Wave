@@ -1,85 +1,101 @@
-import { BAY_PRACTICES, BAY_THEMES } from '@/data/content'
 import { Tabs } from '@/domain/types'
 import { useAppState } from '@/state/useAppState'
-import {
-  ArrowRight,
-  MoonStars,
-  Sparkle,
-  Wind,
-} from '@phosphor-icons/react'
-import shell from './shared/pageShell.module.css'
+import { Leaf, Play, Wind, Waves } from '@phosphor-icons/react'
+import { useState } from 'react'
 import styles from './BayScreen.module.css'
+
+type Intensity = 'soft' | 'mid' | 'deep'
 
 export function BayScreen() {
   const { setTab } = useAppState()
+  const [intensity, setIntensity] = useState<Intensity>('mid')
 
   return (
-    <div className={shell.screen}>
-      <div className={shell.glow} aria-hidden="true" />
-      <div className={styles.heroWash} aria-hidden="true" />
-      <header className={shell.header}>
-        <p className={shell.kicker}>Still Bay</p>
-        <h1 className={shell.title}>静谧海湾</h1>
-        <p className={shell.subtitle}>
-          有时候不需要马上解决什么，只需要先回来一下。
-        </p>
+    <div className={styles.screen}>
+      <header className={styles.header}>
+        <div>
+          <h1 className={styles.title}>静谧海湾</h1>
+          <p className={styles.subtitle}>
+            根据你最近的压力记录，先给自己三分钟。
+          </p>
+        </div>
+        <button type="button" className={styles.iconBtn} aria-label="主题">
+          <Leaf size={18} weight="regular" />
+        </button>
       </header>
 
-      <div className={shell.body}>
-        <section className={`${shell.card} ${styles.heroCard}`}>
-          <div className={styles.heroIcon}>
-            <Wind size={22} weight="fill" />
-          </div>
-          <div>
-            <h2 className={shell.cardTitle}>今天推荐 · 舒缓呼吸</h2>
-            <p className={shell.cardMeta}>
-              根据你最近的压力记录，先给自己三分钟。
-            </p>
-          </div>
-          <button type="button" className={styles.play}>
-            开始
-            <ArrowRight size={14} weight="bold" />
+      <div className={styles.stage}>
+        <img
+          className={styles.scene}
+          src="/textures/asset-bay-scene.png"
+          alt=""
+          aria-hidden="true"
+        />
+
+        <div className={styles.timerDisc}>
+          <p className={styles.timer}>3:00</p>
+          <p className={styles.timerHint}>呼吸 · 跟随浪</p>
+        </div>
+
+        <div className={styles.controls}>
+          <button
+            type="button"
+            className={styles.chip}
+            data-active={intensity === 'soft'}
+            onClick={() => setIntensity('soft')}
+          >
+            <Waves size={13} weight="regular" />
+            轻柔
           </button>
-        </section>
 
-        <p className={shell.sectionLabel}>练习</p>
-        <div className={styles.grid}>
-          {BAY_PRACTICES.map((item) => (
-            <article key={item.id} className={`${shell.card} ${styles.practice}`} data-tone={item.tone}>
-              <div className={styles.practiceTop}>
-                <span className={styles.mins}>{item.mins} min</span>
-                <Sparkle size={14} weight="fill" />
-              </div>
-              <h3 className={styles.practiceTitle}>{item.title}</h3>
-              <p className={styles.practiceReason}>{item.reason}</p>
-            </article>
-          ))}
-        </div>
+          <button type="button" className={styles.play} aria-label="开始呼吸">
+            <span className={styles.playRing} aria-hidden="true" />
+            <span className={styles.playCore}>
+              <Play size={20} weight="fill" />
+            </span>
+          </button>
 
-        <p className={shell.sectionLabel}>海湾主题</p>
-        <div className={styles.themes}>
-          {BAY_THEMES.map((theme) => (
-            <div
-              key={theme.name}
-              className={styles.theme}
-              data-locked={theme.locked}
+          <div className={styles.chipGroup} role="group" aria-label="强度">
+            <button
+              type="button"
+              className={styles.chipOption}
+              data-active={intensity === 'mid'}
+              onClick={() => setIntensity('mid')}
             >
-              <MoonStars size={16} weight={theme.locked ? 'regular' : 'fill'} />
-              <span>{theme.name}</span>
-              {theme.locked ? <em>贝壳解锁</em> : <em>已拥有</em>}
-            </div>
-          ))}
+              <Waves size={13} weight="regular" />
+              中等
+            </button>
+            <span className={styles.chipSep} aria-hidden="true" />
+            <button
+              type="button"
+              className={styles.chipOption}
+              data-active={intensity === 'deep'}
+              onClick={() => setIntensity('deep')}
+            >
+              <Wind size={13} weight="regular" />
+              深度
+            </button>
+          </div>
         </div>
-
-        <button
-          type="button"
-          className={shell.cta}
-          onClick={() => setTab(Tabs.home)}
-        >
-          <span>记录后回来，海湾会更懂你</span>
-          <ArrowRight size={16} weight="bold" />
-        </button>
       </div>
+
+      <button
+        type="button"
+        className={styles.tornNote}
+        onClick={() => setTab(Tabs.home)}
+      >
+        <img
+          className={styles.tornStrip}
+          src="/textures/torn-note-strip.png"
+          alt=""
+          aria-hidden="true"
+          draggable={false}
+        />
+        <span className={styles.tornContent}>
+          <Leaf size={14} weight="regular" />
+          <span>记录后回来，海湾会更懂你</span>
+        </span>
+      </button>
     </div>
   )
 }

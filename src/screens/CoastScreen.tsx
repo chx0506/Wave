@@ -1,13 +1,9 @@
 import { SAMPLE_CYCLE, SAMPLE_STREAK_DAYS } from '@/data/sample'
-import { CrabFloat } from '@/components/coast/CrabFloat'
 import { RecordSheet } from '@/components/coast/RecordSheet'
 import { TideCalendar } from '@/components/coast/TideCalendar'
 import { TideDial } from '@/components/coast/TideDial'
 import {
   APP_NAME,
-  HOME_QUESTION,
-  MOOD_WEATHER,
-  PHASE_TODAY_TIP,
   RECORD_PROMPT,
   USER_DISPLAY_NAME,
   greetingForHour,
@@ -18,12 +14,10 @@ import {
   snapshotForCycleDay,
 } from '@/domain/cycle'
 import { formatMonthDay } from '@/domain/dates'
-import { Tabs } from '@/domain/types'
 import { useAppState } from '@/state/useAppState'
 import {
   CalendarBlank,
   CaretRight,
-  CloudSun,
   FlowerLotus,
   Leaf,
   Waves,
@@ -39,27 +33,23 @@ function shellPortal(node: ReactNode) {
 
 function SoftBotany() {
   return (
-    <svg className={styles.botany} viewBox="0 0 390 780" aria-hidden="true">
-      <g fill="none" stroke="var(--tide)" strokeWidth="1.2" opacity="0.28">
-        <path d="M8 320 C40 300, 48 340, 72 318 C90 302, 78 360, 110 340" />
-        <path d="M18 350 C46 338, 52 372, 80 352" />
-        <circle cx="74" cy="316" r="3" fill="var(--tide-soft)" stroke="none" />
-        <circle cx="96" cy="336" r="2.2" fill="var(--tide-soft)" stroke="none" />
+    <svg className={styles.botany} viewBox="0 0 390 844" aria-hidden="true">
+      <g fill="var(--tide-soft)" opacity="0.34">
+        <path d="M-10 520 C28 470, 52 560, 78 500 C98 460, 110 540, 140 510 C120 600, 60 640, -10 680 Z" />
+        <path d="M0 680 C40 640, 70 720, 108 680 C80 740, 40 760, 0 790 Z" />
+        <path d="M400 540 C360 490, 330 560, 300 520 C280 490, 250 560, 230 530 C260 620, 330 650, 400 700 Z" />
+        <path d="M400 700 C350 660, 320 740, 280 700 C320 760, 360 780, 400 810 Z" />
       </g>
-      <g fill="var(--tide-soft)" opacity="0.22">
-        <path d="M0 640 C40 600, 70 660, 110 620 C90 680, 40 700, 0 720 Z" />
-        <path d="M10 700 C50 670, 80 720, 120 690 C70 740, 30 760, 0 770 Z" />
-      </g>
-      <g fill="var(--tide)" opacity="0.16">
-        <path d="M390 650 C350 610, 320 670, 280 630 C300 690, 350 710, 390 730 Z" />
-        <path d="M390 720 C340 690, 310 740, 270 710 C310 760, 360 770, 390 780 Z" />
+      <g fill="none" stroke="var(--tide)" strokeWidth="1.1" opacity="0.22">
+        <path d="M12 300 C40 280, 48 330, 72 308 C90 290, 84 350, 112 328" />
+        <path d="M360 290 C340 270, 330 320, 308 300 C290 284, 292 340, 268 318" />
       </g>
     </svg>
   )
 }
 
 export function CoastScreen() {
-  const { today, snapshotFor, setTab, mode } = useAppState()
+  const { today, snapshotFor, mode } = useAppState()
   const todaySnap = snapshotFor(today)
   const [previewDay, setPreviewDay] = useState(todaySnap.cycleDay)
   const [recordOpen, setRecordOpen] = useState(false)
@@ -73,8 +63,6 @@ export function CoastScreen() {
   const untilPeriod = daysUntilNextPeriod(todaySnap.cycleDay, SAMPLE_CYCLE)
   const untilOvulation = daysUntilOvulation(todaySnap.cycleDay, SAMPLE_CYCLE)
   const greeting = `${greetingForHour(15)}，${USER_DISPLAY_NAME}`
-  const weather = MOOD_WEATHER.calm
-  const tip = PHASE_TODAY_TIP[snapshot.phase]
 
   return (
     <div className={styles.screen} data-mode={mode}>
@@ -89,60 +77,52 @@ export function CoastScreen() {
             </span>
           </div>
           <p className={styles.greeting}>{greeting}</p>
-          <p className={styles.question}>{HOME_QUESTION}</p>
         </div>
-        <div className={styles.headerActions}>
-          <button
-            type="button"
-            className={styles.calBtn}
-            aria-label="潮汐日历"
-            onClick={() => setCalendarOpen(true)}
-          >
-            <CalendarBlank size={18} weight="regular" />
-          </button>
-        </div>
+        <button
+          type="button"
+          className={styles.iconBtn}
+          aria-label="潮汐日历"
+          onClick={() => setCalendarOpen(true)}
+        >
+          <Leaf size={18} weight="regular" />
+        </button>
       </header>
 
       <div className={styles.body}>
-        <div className={styles.weatherChip}>
-          <CloudSun size={15} weight="fill" />
-          <span>今日天气 · {weather.label}</span>
-          <em>{weather.hint}</em>
-        </div>
-
         <TideDial
           snapshot={snapshot}
           cycleLength={SAMPLE_CYCLE.cycleLength}
+          cycleConfig={SAMPLE_CYCLE}
+          lowTideDay={SAMPLE_CYCLE.phaseWindows.menstrual}
+          highTideDay={SAMPLE_CYCLE.cycleLength}
           onPreviewDay={setPreviewDay}
         />
 
         <div className={styles.metrics}>
           <article className={styles.metric}>
-            <span className={styles.metricIcon} data-tone="tide">
-              <Waves size={15} weight="fill" />
+            <span className={styles.metricIcon}>
+              <Waves size={16} weight="regular" />
             </span>
-            <p className={styles.metricText}>距下次退潮 {untilPeriod}天</p>
+            <p className={styles.metricLabel}>距下次退潮</p>
+            <p className={styles.metricValue}>{untilPeriod} 天</p>
           </article>
           <article className={styles.metric}>
-            <span className={styles.metricIcon} data-tone="bloom">
-              <FlowerLotus size={15} weight="fill" />
+            <span className={styles.metricIcon}>
+              <FlowerLotus size={16} weight="regular" />
             </span>
-            <p className={styles.metricText}>
-              {untilOvulation === 0 ? '排卵窗口进行中' : `排卵窗口 ${untilOvulation}天后`}
+            <p className={styles.metricLabel}>排卵窗口</p>
+            <p className={styles.metricValue}>
+              {untilOvulation === 0 ? '进行中' : `${untilOvulation} 天后`}
             </p>
           </article>
           <article className={styles.metric}>
-            <span className={styles.metricIcon} data-tone="cal">
-              <CalendarBlank size={15} weight="fill" />
+            <span className={styles.metricIcon}>
+              <CalendarBlank size={16} weight="regular" />
             </span>
-            <p className={styles.metricText}>连续记录 {SAMPLE_STREAK_DAYS}天</p>
+            <p className={styles.metricLabel}>连续记录</p>
+            <p className={styles.metricValue}>{SAMPLE_STREAK_DAYS} 天</p>
           </article>
         </div>
-
-        <article className={styles.tip}>
-          <p className={styles.tipLabel}>今天可以怎样舒服一点</p>
-          <p className={styles.tipBody}>{tip}</p>
-        </article>
 
         <button
           type="button"
@@ -154,12 +134,6 @@ export function CoastScreen() {
           <CaretRight size={15} weight="bold" />
         </button>
       </div>
-
-      <CrabFloat
-        phase={todaySnap.phase}
-        onOpenBay={() => setTab(Tabs.bay)}
-        onOpenObserve={() => setTab(Tabs.observe)}
-      />
 
       {recordOpen &&
         shellPortal(

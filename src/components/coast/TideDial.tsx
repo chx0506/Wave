@@ -1,18 +1,31 @@
 import { PHASE_TIDE_LABEL } from '@/domain/copy'
-import type { DaySnapshot } from '@/domain/types'
-import { useRef, type PointerEvent } from 'react'
+import { tideHeightForCycleDay } from '@/domain/cycle'
+import type { CycleConfig, DaySnapshot } from '@/domain/types'
+import { useEffect, useRef, useState, type PointerEvent, type ReactNode } from 'react'
+import { PaperWaveRelief } from './PaperWaveRelief'
 import styles from './TideDial.module.css'
 
 const CX = 160
 const CY = 160
-const MOON_R = 148
-const RING_OUTER = 128
-const RING_INNER = 112
-const BOWL_R = 98
+const MOON_R = 150
+const TRACK_OUTER = 128
+const TRACK_INNER = 108
+const BOWL_R = 93
+
+/** Mock dial cream + sky blue — from yuechao paper home comp (#f9dab4 / #a4c7e3). */
+const PAPER = '#f9dab4'
+const PAPER_SOFT = '#fce6c8'
+const PAPER_DEEP = '#e8c49a'
+const BLUE_SHADE = '#a4c7e3'
+const BLUE_DEEP = '#7eb4dc'
 
 function polar(r: number, angleDeg: number) {
   const rad = ((angleDeg - 90) * Math.PI) / 180
   return { x: CX + r * Math.cos(rad), y: CY + r * Math.sin(rad) }
+}
+
+function dayAngle(day: number, cycleLength: number) {
+  return (day / cycleLength) * 360
 }
 
 function angleFromPoint(clientX: number, clientY: number, rect: DOMRect) {
@@ -23,141 +36,163 @@ function angleFromPoint(clientX: number, clientY: number, rect: DOMRect) {
   return deg
 }
 
-/** Classic moon-phase discs around the dial. */
+function dayFloatFromAngle(angleDeg: number, cycleLength: number) {
+  let raw = (angleDeg / 360) * cycleLength
+  if (raw <= 0) raw += cycleLength
+  if (raw > cycleLength) raw -= cycleLength
+  return raw
+}
+
+function dayFromAngle(angleDeg: number, cycleLength: number) {
+  const raw = Math.round((angleDeg / 360) * cycleLength)
+  if (raw <= 0) return cycleLength
+  if (raw > cycleLength) return 1
+  return raw
+}
+
+/**
+ * Raised paper moon — cream = lit face, blue = night face (mock palette).
+ * Phases are exaggerated so the ring clearly reads as a lunar cycle.
+ */
 function MoonPhase({ index, x, y }: { index: number; x: number; y: number }) {
-  const t = index / 7
-  return (
-    <g transform={`translate(${x} ${y})`}>
-      <circle r="7" fill="#fff" stroke="var(--tide)" strokeWidth="0.9" />
-      {t < 0.08 ? (
-        <circle r="6.2" fill="var(--tide-soft)" opacity="0.55" />
-      ) : t > 0.92 ? (
-        <circle r="6.2" fill="var(--tide)" opacity="0.75" />
-      ) : (
+  const r = 9.2
+  const fr = r - 1.15
+  const lit = PAPER
+  const shade = BLUE_SHADE
+  const uid = `moonClip-${index}`
+
+  type Spec =
+    | { kind: 'solid'; fill: string }
+    | { kind: 'quarter'; litRight: boolean }
+    | { kind: 'overlap'; base: string; cover: string; ox: number }
+
+  // 0 new → 2 first quarter → 4 full → 6 last quarter
+  const specs: Spec[] = [
+    { kind: 'solid', fill: shade },
+    { kind: 'overlap', base: lit, cover: shade, ox: -fr * 0.72 },
+    { kind: 'quarter', litRight: true },
+    { kind: 'overlap', base: lit, cover: shade, ox: -fr * 1.22 },
+    { kind: 'solid', fill: lit },
+    { kind: 'overlap', base: lit, cover: shade, ox: fr * 1.22 },
+    { kind: 'quarter', litRight: false },
+    { kind: 'overlap', base: lit, cover: shade, ox: fr * 0.72 },
+  ]
+  const spec = specs[index]
+
+  let face: ReactNode
+  if (spec.kind === 'solid') {
+    face = <circle r={fr} fill={spec.fill} />
+  } else if (spec.kind === 'quarter') {
+    face = (
+      <>
+        <circle r={fr} fill={spec.litRight ? shade : lit} />
         <path
           d={
-            t < 0.5
-              ? `M 0 -6.2 A 6.2 6.2 0 0 1 0 6.2 A ${6.2 * (1 - t * 2)} 6.2 0 0 0 0 -6.2`
-              : `M 0 -6.2 A 6.2 6.2 0 0 1 0 6.2 A ${6.2 * ((t - 0.5) * 2)} 6.2 0 0 1 0 -6.2`
+            spec.litRight
+              ? `M 0 ${-fr} A ${fr} ${fr} 0 0 1 0 ${fr} Z`
+              : `M 0 ${-fr} A ${fr} ${fr} 0 0 0 0 ${fr} Z`
           }
-          fill="var(--tide)"
-          opacity="0.7"
+          fill={spec.litRight ? lit : shade}
         />
-      )}
+      </>
+    )
+  } else {
+    face = (
+      <>
+        <circle r={fr} fill={spec.base} />
+        <circle cx={spec.ox} r={fr} fill={spec.cover} />
+      </>
+    )
+  }
+
+  return (
+    <g transform={`translate(${x} ${y})`} filter="url(#moonLift)">
+      <circle r={r + 1.1} fill="#fff6e8" opacity="0.95" />
+      <circle r={r} fill="#fffefb" stroke={PAPER_SOFT} strokeWidth="1.15" />
+      <clipPath id={uid}>
+        <circle r={fr} />
+      </clipPath>
+      <g clipPath={`url(#${uid})`}>{face}</g>
     </g>
   )
 }
 
-/** Soft illustrated wave crest in the lower bowl — light-blue ink style. */
-function WaveArt({ tideHeight }: { tideHeight: number }) {
-  const lift = (1 - tideHeight) * 28
-  return (
-    <g
-      className={styles.waveArt}
-      style={{ ['--tide-lift' as string]: `${lift}px` }}
-    >
-      {/* deep water body */}
-      <path
-        d="M62 188
-           C78 176, 96 204, 118 186
-           C138 170, 152 198, 176 182
-           C198 168, 214 192, 258 178
-           L258 268 L62 268 Z"
-        fill="url(#waveBody)"
-      />
-      {/* mid crest */}
-      <path
-        d="M70 192
-           C88 168, 104 210, 124 184
-           C142 162, 156 208, 178 178
-           C196 156, 214 198, 250 174
-           L250 210
-           C220 198, 200 220, 176 204
-           C154 226, 136 198, 118 214
-           C98 230, 84 206, 70 218 Z"
-        fill="url(#waveMid)"
-        opacity="0.92"
-      />
-      {/* foam curls */}
-      <path
-        d="M96 186 C104 174, 112 190, 120 180 C128 170, 134 188, 144 178"
-        fill="none"
-        stroke="#fff"
-        strokeWidth="2.2"
-        strokeLinecap="round"
-        opacity="0.85"
-      />
-      <path
-        d="M158 176 C166 164, 174 184, 184 170 C192 160, 200 178, 212 168"
-        fill="none"
-        stroke="#fff"
-        strokeWidth="2"
-        strokeLinecap="round"
-        opacity="0.8"
-      />
-      <circle cx="112" cy="182" r="3.2" fill="#fff" opacity="0.9" />
-      <circle cx="130" cy="176" r="2.4" fill="#fff" opacity="0.75" />
-      <circle cx="190" cy="170" r="3" fill="#fff" opacity="0.85" />
-      <circle cx="208" cy="166" r="2.2" fill="#fff" opacity="0.7" />
-      {/* soft spray dots */}
-      <g fill="var(--tide-soft)" opacity="0.45">
-        <circle cx="100" cy="198" r="1.6" />
-        <circle cx="148" cy="190" r="1.3" />
-        <circle cx="170" cy="186" r="1.5" />
-        <circle cx="226" cy="180" r="1.4" />
-      </g>
-    </g>
-  )
+function arcDash(fraction: number, radius: number) {
+  const circ = 2 * Math.PI * radius
+  const len = Math.max(0, Math.min(1, fraction)) * circ
+  return { circ, len }
 }
 
 export function TideDial({
   snapshot,
   cycleLength,
+  cycleConfig,
   onPreviewDay,
 }: {
   snapshot: DaySnapshot
   cycleLength: number
+  cycleConfig: CycleConfig
+  lowTideDay?: number
+  highTideDay?: number
   onPreviewDay: (cycleDay: number) => void
 }) {
   const dialRef = useRef<HTMLDivElement>(null)
-  const dragRef = useRef<{ angle: number; day: number } | null>(null)
+  const dragging = useRef(false)
+  const [isDragging, setIsDragging] = useState(false)
+  const [visualTide, setVisualTide] = useState(snapshot.tideHeight)
+  /** Continuous day fraction while dragging — keeps both rings locked together */
+  const [visualDayFrac, setVisualDayFrac] = useState(
+    snapshot.cycleDay / cycleLength,
+  )
 
-  const progress = (snapshot.cycleDay / cycleLength) * 360
-  const ringSweep = 48 + snapshot.tideHeight * 220
+  useEffect(() => {
+    if (!dragging.current) {
+      setVisualTide(snapshot.tideHeight)
+      setVisualDayFrac(snapshot.cycleDay / cycleLength)
+    }
+  }, [snapshot.tideHeight, snapshot.cycleDay, cycleLength])
 
-  const onPointerDown = (e: PointerEvent<HTMLDivElement>) => {
+  // Same progress for both rings — aligned tips
+  const dayFrac = Math.min(1, Math.max(0, visualDayFrac))
+  const outer = arcDash(dayFrac, TRACK_OUTER)
+  const inner = arcDash(dayFrac, TRACK_INNER)
+  const tipAngle = dayFrac * 360
+  const tipOuter = polar(TRACK_OUTER, tipAngle)
+  const tipInner = polar(TRACK_INNER, tipAngle)
+
+  const applyPointer = (clientX: number, clientY: number) => {
     const el = dialRef.current
     if (!el) return
-    el.setPointerCapture(e.pointerId)
     const rect = el.getBoundingClientRect()
-    dragRef.current = {
-      angle: angleFromPoint(e.clientX, e.clientY, rect),
-      day: snapshot.cycleDay,
-    }
-  }
-
-  const onPointerMove = (e: PointerEvent<HTMLDivElement>) => {
-    const start = dragRef.current
-    const el = dialRef.current
-    if (!start || !el) return
-    const rect = el.getBoundingClientRect()
-    const ang = angleFromPoint(e.clientX, e.clientY, rect)
-    let delta = ang - start.angle
-    if (delta > 180) delta -= 360
-    if (delta < -180) delta += 360
-    if (Math.abs(delta) < 8) return
-    const dayDelta = Math.round(delta / (360 / cycleLength))
-    const next =
-      ((((start.day - 1 + dayDelta) % cycleLength) + cycleLength) % cycleLength) + 1
+    const angle = angleFromPoint(clientX, clientY, rect)
+    const dayF = dayFloatFromAngle(angle, cycleLength)
+    const next = dayFromAngle(angle, cycleLength)
+    setVisualDayFrac(dayF / cycleLength)
+    setVisualTide(tideHeightForCycleDay(dayF, cycleConfig))
     if (next !== snapshot.cycleDay) onPreviewDay(next)
   }
 
+  const onPointerDown = (e: PointerEvent<HTMLDivElement>) => {
+    dialRef.current?.setPointerCapture(e.pointerId)
+    dragging.current = true
+    setIsDragging(true)
+    applyPointer(e.clientX, e.clientY)
+  }
+
+  const onPointerMove = (e: PointerEvent<HTMLDivElement>) => {
+    if (!dragging.current) return
+    applyPointer(e.clientX, e.clientY)
+  }
+
   const onPointerUp = (e: PointerEvent<HTMLDivElement>) => {
-    dragRef.current = null
+    dragging.current = false
+    setIsDragging(false)
     if (e.currentTarget.hasPointerCapture(e.pointerId)) {
       e.currentTarget.releasePointerCapture(e.pointerId)
     }
   }
+
+  const ease = isDragging ? 'none' : 'stroke-dasharray 0.32s var(--ease)'
 
   return (
     <div
@@ -174,100 +209,238 @@ export function TideDial({
       aria-valuenow={snapshot.cycleDay}
       aria-valuetext={`${PHASE_TIDE_LABEL[snapshot.phase]}，第 ${snapshot.cycleDay} 天`}
     >
+      <div className={styles.plate} aria-hidden="true" />
+
+      <div className={styles.bowl} aria-hidden="true">
+        <PaperWaveRelief tide={visualTide} dragging={isDragging} />
+      </div>
+
       <svg className={styles.svg} viewBox="0 0 320 320" aria-hidden="true">
         <defs>
-          <linearGradient id="ringWash" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0%" stopColor="var(--coast-water-light)" stopOpacity="0.95" />
-            <stop offset="55%" stopColor="var(--tide)" stopOpacity="0.75" />
-            <stop offset="100%" stopColor="var(--tide-deep)" stopOpacity="0.55" />
+          <linearGradient id="grooveBlue" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor="#d7e8f4" />
+            <stop offset="100%" stopColor="#bdd2e7" />
           </linearGradient>
-          <linearGradient id="waveBody" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="var(--coast-water-light)" />
-            <stop offset="45%" stopColor="var(--coast-water)" />
-            <stop offset="100%" stopColor="var(--coast-water-deep)" />
+          <linearGradient id="groovePaper" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor="#fff6e8" />
+            <stop offset="100%" stopColor="#f9dab4" />
           </linearGradient>
-          <linearGradient id="waveMid" x1="0" y1="0" x2="0.3" y2="1">
-            <stop offset="0%" stopColor="#d7eefb" />
-            <stop offset="40%" stopColor="var(--coast-water)" />
-            <stop offset="100%" stopColor="var(--tide-deep)" />
+          <linearGradient id="progressOuter" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stopColor="#bdd2e7" />
+            <stop offset="100%" stopColor="#8db7db" />
           </linearGradient>
-          <clipPath id="bowlClip">
-            <circle cx={CX} cy={CY} r={BOWL_R} />
-          </clipPath>
-          <filter id="softBlur" x="-20%" y="-20%" width="140%" height="140%">
-            <feGaussianBlur stdDeviation="1.2" />
+          <linearGradient id="progressInner" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stopColor="#fce6c8" />
+            <stop offset="48%" stopColor={PAPER} />
+            <stop offset="100%" stopColor={PAPER_DEEP} />
+          </linearGradient>
+          <filter id="moonLift" x="-60%" y="-60%" width="220%" height="220%">
+            <feDropShadow
+              dx="0"
+              dy="1.2"
+              stdDeviation="1"
+              floodColor="#d4b896"
+              floodOpacity="0.36"
+            />
+          </filter>
+          <filter id="ringShadow" x="-8%" y="-8%" width="116%" height="116%">
+            <feDropShadow
+              dx="0"
+              dy="1.4"
+              stdDeviation="1.2"
+              floodColor="#8db7db"
+              floodOpacity="0.22"
+            />
+          </filter>
+          <filter id="tipLift" x="-70%" y="-70%" width="240%" height="240%">
+            <feDropShadow
+              dx="0"
+              dy="1.2"
+              stdDeviation="1"
+              floodColor="#5a8fb8"
+              floodOpacity="0.36"
+            />
+          </filter>
+          <filter id="tipPaper" x="-70%" y="-70%" width="240%" height="240%">
+            <feDropShadow
+              dx="0"
+              dy="1.1"
+              stdDeviation="0.9"
+              floodColor="#d4b896"
+              floodOpacity="0.45"
+            />
           </filter>
         </defs>
 
-        {/* outer dotted moon track */}
+        <circle
+          cx={CX}
+          cy={CY}
+          r={(TRACK_OUTER + MOON_R) / 2}
+          fill="none"
+          stroke="#f4f9fc"
+          strokeWidth={MOON_R - TRACK_OUTER + 6}
+          opacity="0.55"
+          filter="url(#ringShadow)"
+        />
+
+        {/* Dashed moon guide — soft paper beige */}
         <circle
           cx={CX}
           cy={CY}
           r={MOON_R}
           fill="none"
-          stroke="var(--tide)"
-          strokeWidth="1.2"
-          strokeDasharray="1.8 5.5"
-          opacity="0.45"
+          stroke={PAPER_SOFT}
+          strokeWidth="1.15"
+          strokeDasharray="1.4 5.2"
+          opacity="0.85"
         />
 
+        {/* Day dots between moons */}
+        {Array.from({ length: cycleLength }, (_, i) => {
+          const day = i + 1
+          const angle = dayAngle(day, cycleLength)
+          const nearMoon = Array.from({ length: 8 }, (_, m) => m * 45).some(
+            (moonAng) => {
+              const d = Math.abs(angle - moonAng)
+              return Math.min(d, 360 - d) < 12
+            },
+          )
+          if (nearMoon) return null
+          const p = polar(MOON_R, angle)
+          return (
+            <circle
+              key={day}
+              cx={p.x}
+              cy={p.y}
+              r="1.8"
+              fill={PAPER}
+              opacity="0.9"
+            />
+          )
+        })}
+
+        {/* Paper moon discs — rice-beige / blue phases */}
         {Array.from({ length: 8 }, (_, i) => {
-          const p = polar(MOON_R, (360 / 8) * i)
+          const p = polar(MOON_R, (i / 8) * 360)
           return <MoonPhase key={i} index={i} x={p.x} y={p.y} />
         })}
 
-        {/* soft double watercolor rings */}
+        {/* Dual recessed grooves */}
         <circle
           cx={CX}
           cy={CY}
-          r={RING_OUTER}
+          r={TRACK_OUTER}
           fill="none"
-          stroke="url(#ringWash)"
-          strokeWidth="14"
-          opacity="0.55"
-          filter="url(#softBlur)"
-        />
-        <circle
-          cx={CX}
-          cy={CY}
-          r={RING_INNER}
-          fill="none"
-          stroke="url(#ringWash)"
-          strokeWidth="11"
-          opacity="0.72"
-          strokeDasharray={`${(ringSweep / 360) * 2 * Math.PI * RING_INNER} ${2 * Math.PI * RING_INNER}`}
+          stroke="url(#grooveBlue)"
+          strokeWidth="12"
           strokeLinecap="round"
-          transform={`rotate(-90 ${CX} ${CY})`}
-          style={{ transition: 'stroke-dasharray 0.45s var(--ease)' }}
+        />
+        <circle
+          cx={CX}
+          cy={CY}
+          r={TRACK_INNER}
+          fill="none"
+          stroke="url(#groovePaper)"
+          strokeWidth="10.5"
+          strokeLinecap="round"
+        />
+        <circle
+          cx={CX}
+          cy={CY}
+          r={TRACK_OUTER + 5.6}
+          fill="none"
+          stroke="rgba(255,255,255,0.98)"
+          strokeWidth="1.1"
+        />
+        <circle
+          cx={CX}
+          cy={CY}
+          r={TRACK_OUTER - 5.6}
+          fill="none"
+          stroke="rgba(145,186,220,0.32)"
+          strokeWidth="1"
+        />
+        <circle
+          cx={CX}
+          cy={CY}
+          r={TRACK_INNER + 4.9}
+          fill="none"
+          stroke="rgba(255,253,248,0.95)"
+          strokeWidth="1"
+        />
+        <circle
+          cx={CX}
+          cy={CY}
+          r={TRACK_INNER - 4.9}
+          fill="none"
+          stroke="rgba(249,218,180,0.5)"
+          strokeWidth="0.9"
         />
 
-        {/* progress tip */}
-        {(() => {
-          const tip = polar(RING_INNER, progress)
-          return (
-            <circle
-              cx={tip.x}
-              cy={tip.y}
-              r="5"
-              fill="var(--tide-deep)"
-              stroke="#fff"
-              strokeWidth="1.5"
-            />
-          )
-        })()}
+        {/* Outer progress — cycle day (blue) */}
+        <circle
+          cx={CX}
+          cy={CY}
+          r={TRACK_OUTER}
+          fill="none"
+          stroke="url(#progressOuter)"
+          strokeWidth="9"
+          strokeLinecap="round"
+          strokeDasharray={`${outer.len} ${outer.circ}`}
+          transform={`rotate(-90 ${CX} ${CY})`}
+          style={{ transition: ease }}
+        />
 
-        {/* inner bowl */}
-        <circle cx={CX} cy={CY} r={BOWL_R} fill="#f7fbff" />
-        <g clipPath="url(#bowlClip)">
-          <WaveArt tideHeight={snapshot.tideHeight} />
-        </g>
+        {/* Inner progress — same dayFrac (paper beige), tips aligned */}
+        <circle
+          cx={CX}
+          cy={CY}
+          r={TRACK_INNER}
+          fill="none"
+          stroke="url(#progressInner)"
+          strokeWidth="7.5"
+          strokeLinecap="round"
+          strokeDasharray={`${inner.len} ${inner.circ}`}
+          transform={`rotate(-90 ${CX} ${CY})`}
+          style={{ transition: ease }}
+        />
+
+        {/* Aligned tip discs */}
+        <circle
+          cx={tipInner.x}
+          cy={tipInner.y}
+          r="4.2"
+          fill={PAPER}
+          stroke="#fffef8"
+          strokeWidth="1.7"
+          filter="url(#tipPaper)"
+        />
+        <circle
+          cx={tipOuter.x}
+          cy={tipOuter.y}
+          r="5.2"
+          fill={BLUE_DEEP}
+          stroke="#ffffff"
+          strokeWidth="2"
+          filter="url(#tipLift)"
+        />
+
+        {/* Bowl paper rim */}
         <circle
           cx={CX}
           cy={CY}
           r={BOWL_R}
           fill="none"
-          stroke="rgba(255,255,255,0.8)"
-          strokeWidth="2"
+          stroke="rgba(255,255,255,0.98)"
+          strokeWidth="2.6"
+        />
+        <circle
+          cx={CX}
+          cy={CY}
+          r={BOWL_R}
+          fill="none"
+          stroke="rgba(168,203,230,0.28)"
+          strokeWidth="1"
         />
       </svg>
 

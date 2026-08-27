@@ -14,7 +14,10 @@ export function PhoneFrame({
       <div className={styles.device} data-mode={mode}>
         <div className={styles.bezel}>
           <div className={styles.island} aria-hidden="true" />
-          <div className={styles.screen}>{children}</div>
+          <div className={styles.screen}>
+            <div className={styles.paperGrain} aria-hidden="true" />
+            {children}
+          </div>
         </div>
       </div>
     </div>

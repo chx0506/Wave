@@ -1,0 +1,87 @@
+.stage {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  border-radius: 50%;
+  isolation: isolate;
+  background:
+    radial-gradient(120% 90% at 50% 8%, #ffffff 0%, #f6fafd 55%, #eaf3f9 100%);
+}
+
+.reel {
+  position: absolute;
+  inset: -4%;
+  z-index: 1;
+  transition: transform 0.55s cubic-bezier(0.33, 0.02, 0.18, 1);
+  will-change: transform;
+  animation: reelBob 9s ease-in-out infinite;
+}
+
+.stage[data-dragging='1'] .reel {
+  transition-duration: 0.05s;
+  transition-timing-function: linear;
+  animation-play-state: paused;
+}
+
+.frame {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center center;
+  pointer-events: none;
+  /* Soft adjacent-frame blend — denser sequence keeps ghosts mild */
+  transition: opacity 0.55s cubic-bezier(0.33, 0.02, 0.18, 1);
+  mask-image: radial-gradient(circle at 50% 50%, #000 67%, transparent 76%);
+  -webkit-mask-image: radial-gradient(circle at 50% 50%, #000 67%, transparent 76%);
+}
+
+.stage[data-dragging='1'] .frame {
+  transition-duration: 0.05s;
+  transition-timing-function: linear;
+}
+
+.grain {
+  position: absolute;
+  inset: 0;
+  z-index: 20;
+  pointer-events: none;
+  border-radius: 50%;
+  opacity: 0.12;
+  mix-blend-mode: multiply;
+  background-image: url('/textures/paper-grain.png');
+  background-size: 140px 140px;
+}
+
+.rim {
+  position: absolute;
+  inset: 0;
+  z-index: 21;
+  pointer-events: none;
+  border-radius: 50%;
+  box-shadow:
+    inset 0 3px 10px rgba(145, 186, 220, 0.24),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.85);
+}
+
+@keyframes reelBob {
+  0%,
+  100% {
+    translate: 0 0;
+  }
+  50% {
+    translate: 0 -1.1px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reel {
+    animation: none;
+    transition: transform 0.2s ease;
+  }
+
+  .frame {
+    transition: opacity 0.2s ease;
+  }
+}
