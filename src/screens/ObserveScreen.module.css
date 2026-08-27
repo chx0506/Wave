@@ -266,11 +266,19 @@
 }
 
 .clueButton {
+  display: block;
   width: 100%;
   padding: 16px;
   text-align: left;
-  color: inherit;
+  color: var(--ink);
   background: transparent;
+  border: 0;
+  font: inherit;
+}
+
+.clueButton .cardTitle,
+.clueButton .cardMeta {
+  color: inherit;
 }
 
 .clueButton:focus-visible {
