@@ -3,7 +3,12 @@
 }
 
 .filters {
+  position: relative;
+  z-index: 3;
   display: flex;
+  flex: 0 0 36px;
+  min-height: 36px;
+  align-items: center;
   gap: 6px;
   overflow-x: auto;
   padding: 1px 2px 3px;
@@ -113,6 +118,8 @@
 
 .mapCard {
   position: relative;
+  z-index: 1;
+  flex: 0 0 auto;
   border-radius: 28px;
   overflow: hidden;
   border: 1px solid rgba(255, 255, 255, 0.7);
