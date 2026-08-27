@@ -193,11 +193,11 @@ function RecentFeedback({ experiment }: { experiment: Experiment }) {
   const completed = records.filter((item) => item.completedTry).length
   const latest = records.at(-1)
   return (
-    <section className={styles.feedbackCard} aria-label="最近观察反馈">
+    <section className={`${shell.card} ${styles.feedbackCard}`} aria-label="最近观察反馈">
       <div className={styles.feedbackTop}>
         <div>
           <p className={styles.pathKicker}>Recent signal</p>
-          <h2 className={styles.feedbackTitle}>最近观察反馈</h2>
+          <h2 className={`${shell.cardTitle} ${styles.feedbackTitle}`}>最近观察反馈</h2>
         </div>
         <span className={styles.feedbackCount}>{records.length} 条记录</span>
       </div>
