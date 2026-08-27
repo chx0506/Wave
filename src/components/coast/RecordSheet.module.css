@@ -30,8 +30,11 @@
 
 .header {
   position: relative;
-  padding: 10px 18px 8px;
-  text-align: center;
+  display: grid;
+  grid-template-columns: 64px 1fr 36px;
+  align-items: start;
+  gap: 6px;
+  padding: 10px 14px 8px;
   flex: 0 0 auto;
 }
 
@@ -40,44 +43,45 @@
   flex-direction: column;
   align-items: flex-start;
   gap: 1px;
+  padding-top: 2px;
 }
 
 .brand strong {
   font-family: var(--font-display);
-  font-size: 16px;
+  font-size: 15px;
   color: var(--tide-deep);
   letter-spacing: 0.08em;
 }
 
 .brand span {
-  font-size: 10px;
+  font-size: 9px;
   color: var(--ink-faint);
-  letter-spacing: 0.08em;
+  letter-spacing: 0.06em;
 }
 
 .title {
-  margin: -22px 0 0;
+  margin: 6px 0 0;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 6px;
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 700;
   color: var(--ink-strong);
   letter-spacing: 0.04em;
+  text-align: center;
 }
 
 .close {
-  position: absolute;
-  top: 12px;
-  right: 14px;
   width: 32px;
   height: 32px;
+  margin-top: 2px;
   border-radius: 50%;
   display: grid;
   place-items: center;
   color: var(--ink-soft);
   background: rgba(255, 255, 255, 0.7);
+  justify-self: end;
 }
 
 .scroll {

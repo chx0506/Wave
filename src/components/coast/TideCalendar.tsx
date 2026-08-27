@@ -174,7 +174,7 @@ function DropFace({ dashed }: { dashed?: boolean }) {
     <svg viewBox="0 0 24 28" width="16" height="18">
       <path
         d="M12 2 C12 2 4 12 4 18 A8 8 0 0 0 20 18 C20 12 12 2 12 2 Z"
-        fill={dashed ? 'none' : 'url(#dropFill)'}
+        fill={dashed ? 'none' : '#6eb4e4'}
         stroke={dashed ? 'var(--tide-deep)' : 'none'}
         strokeWidth={dashed ? 1.4 : 0}
         strokeDasharray={dashed ? '2.5 2' : undefined}
@@ -183,13 +183,13 @@ function DropFace({ dashed }: { dashed?: boolean }) {
         <>
           <circle cx="9.5" cy="17" r="1.1" fill="#fff" opacity="0.9" />
           <circle cx="14.5" cy="17" r="1.1" fill="#fff" opacity="0.9" />
-          <path d="M10 20.5 Q12 22 14 20.5" fill="none" stroke="#fff" strokeWidth="1.1" strokeLinecap="round" />
-          <defs>
-            <linearGradient id="dropFill" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#9fd0f0" />
-              <stop offset="100%" stopColor="#5fafdf" />
-            </linearGradient>
-          </defs>
+          <path
+            d="M10 20.5 Q12 22 14 20.5"
+            fill="none"
+            stroke="#fff"
+            strokeWidth="1.1"
+            strokeLinecap="round"
+          />
         </>
       )}
     </svg>

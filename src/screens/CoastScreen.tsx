@@ -28,11 +28,11 @@ import {
   Leaf,
   Waves,
 } from '@phosphor-icons/react'
-import { useMemo, useState } from 'react'
+import { useMemo, useState, type ReactNode } from 'react'
 import { createPortal } from 'react-dom'
 import styles from './CoastScreen.module.css'
 
-function shellPortal(node: React.ReactNode) {
+function shellPortal(node: ReactNode) {
   const host = document.querySelector('[data-phone-shell]')
   return host ? createPortal(node, host) : node
 }
