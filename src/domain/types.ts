@@ -89,7 +89,7 @@ export const ExperimentCategories = {
 export type ExperimentCategory =
   (typeof ExperimentCategories)[keyof typeof ExperimentCategories]
 export type ExperimentStatus = 'active' | 'completed'
-export type ClueStatus = 'pending' | 'confirmed'
+export type ClueStatus = 'observing' | 'pending' | 'confirmed'
 export type ObservationEntry = {
   day: number
   date: Date
@@ -116,5 +116,7 @@ export type BodyClue = {
   category: ExperimentCategory
   status: ClueStatus
   shells: number
+  sourceExperimentTitle: string
+  observationDays: number
   sourceExperimentId?: string
 }

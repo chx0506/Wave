@@ -10,9 +10,30 @@ export const OBSERVE_ACTIVE = {
 }
 
 export const OBSERVE_CLUES = [
-  { title: '经前第 3 天睡眠变浅', note: '近 3 个周期都出现过', shells: 2 },
-  { title: '涨潮期精力更高', note: '适合安排重要事情', shells: 1 },
-  { title: '压力高的日子疼痛更明显', note: '待继续观察', shells: 1 },
+  {
+    title: '经前第 3 天睡眠变浅',
+    note: '近 3 个周期都出现过',
+    shells: 2,
+    sourceExperimentTitle: '经前睡眠实验',
+    observationDays: 14,
+    status: 'confirmed',
+  },
+  {
+    title: '涨潮期精力更高',
+    note: '适合安排重要事情',
+    shells: 1,
+    sourceExperimentTitle: '周期精力观察',
+    observationDays: 21,
+    status: 'confirmed',
+  },
+  {
+    title: '压力高的日子疼痛更明显',
+    note: '还需要更多记录来确认',
+    shells: 1,
+    sourceExperimentTitle: '压力与疼痛观察',
+    observationDays: 8,
+    status: 'observing',
+  },
 ]
 
 export const EXPERIMENT_PRESETS = [

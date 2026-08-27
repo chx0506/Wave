@@ -38,7 +38,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       ...c,
       id: `clue-${i}`,
       category: i === 0 ? 'sleep' : i === 1 ? 'energy' : 'pain',
-      status: 'confirmed' as const,
+      status: c.status as BodyClue['status'],
     })),
   )
 
@@ -100,6 +100,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
             category: target.category,
             status: 'pending',
             shells: 1,
+            sourceExperimentTitle: target.question,
+            observationDays: target.totalDays,
             sourceExperimentId: target.id,
           },
           ...existing,
