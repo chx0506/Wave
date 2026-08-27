@@ -5,7 +5,7 @@ import {
 } from '@/data/content'
 import { USER_DISPLAY_NAME } from '@/domain/copy'
 import { BookOpen, Check, LockSimple, Star, X } from '@phosphor-icons/react'
-import { useMemo, useState } from 'react'
+import { useMemo, useRef, useState, type PointerEvent } from 'react'
 import shell from './shared/pageShell.module.css'
 import styles from './ExploreScreen.module.css'
 
@@ -33,6 +33,26 @@ export function ExploreScreen() {
   const [lockMessage, setLockMessage] = useState(false)
   const [reading, setReading] = useState<ExploreIsland | null>(null)
   const [completed, setCompleted] = useState<string[]>([])
+  const [mapOffset, setMapOffset] = useState({ x: -70, y: -36 })
+  const dragRef = useRef({ active: false, moved: false, startX: 0, startY: 0, originX: 0, originY: 0 })
+  const suppressClickRef = useRef(false)
+  const handleMapPointerDown = (event: PointerEvent<HTMLDivElement>) => {
+    if (event.pointerType === 'mouse' && event.button !== 0) return
+    dragRef.current = { active: true, moved: false, startX: event.clientX, startY: event.clientY, originX: mapOffset.x, originY: mapOffset.y }
+    event.currentTarget.setPointerCapture(event.pointerId)
+  }
+  const handleMapPointerMove = (event: PointerEvent<HTMLDivElement>) => {
+    if (!dragRef.current.active) return
+    const dx = event.clientX - dragRef.current.startX
+    const dy = event.clientY - dragRef.current.startY
+    if (Math.hypot(dx, dy) > 6) dragRef.current.moved = true
+    setMapOffset({ x: Math.max(-300, Math.min(0, dragRef.current.originX + dx)), y: Math.max(-180, Math.min(0, dragRef.current.originY + dy)) })
+  }
+  const handleMapPointerUp = (event: PointerEvent<HTMLDivElement>) => {
+    suppressClickRef.current = dragRef.current.moved
+    dragRef.current.active = false
+    if (event.currentTarget.hasPointerCapture(event.pointerId)) event.currentTarget.releasePointerCapture(event.pointerId)
+  }
   const visibleIslands = useMemo(
     () => filter === 'all' ? EXPLORE_ISLANDS : EXPLORE_ISLANDS.filter((island) => island.category === filter),
     [filter],
@@ -85,7 +105,8 @@ export function ExploreScreen() {
         </div>
 
         <section className={styles.mapCard} aria-label="知识地图">
-          <div className={styles.ocean}>
+          <div className={styles.mapViewport} onPointerDown={handleMapPointerDown} onPointerMove={handleMapPointerMove} onPointerUp={handleMapPointerUp} onPointerCancel={handleMapPointerUp}>
+          <div className={styles.ocean} style={{ transform: `translate3d(${mapOffset.x}px, ${mapOffset.y}px, 0)` }}>
             <svg className={styles.oceanSvg} viewBox="0 0 100 100" aria-hidden="true">
               <defs>
                 <linearGradient id="sea" x1="0" y1="0" x2="0" y2="1">
@@ -126,9 +147,15 @@ export function ExploreScreen() {
                 key={island.id}
                 island={island}
                 active={island.id === selected.id}
-                onSelect={() => { setSelectedId(island.id); setLockMessage(false) }}
+                onSelect={() => {
+                  if (suppressClickRef.current) { suppressClickRef.current = false; return }
+                  setSelectedId(island.id); setLockMessage(false)
+                }}
               />
             ))}
+          </div>
+          <button type="button" className={styles.recenter} onClick={() => setMapOffset({ x: -70, y: -36 })}>回到当前岛屿</button>
+          <p className={styles.mapHint}>拖动海面，浏览更多岛屿</p>
           </div>
         </section>
 

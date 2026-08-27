@@ -112,6 +112,50 @@
   box-shadow: var(--shadow-float);
 }
 
+.mapViewport {
+  position: relative;
+  min-height: 320px;
+  overflow: hidden;
+  touch-action: pan-y;
+  cursor: grab;
+  background: #9fd0ef;
+}
+
+.mapViewport:active { cursor: grabbing; }
+
+.mapViewport .ocean {
+  width: 620px;
+  min-height: 500px;
+  aspect-ratio: auto;
+  transition: transform 0.18s var(--ease);
+  will-change: transform;
+}
+
+.recenter {
+  position: absolute;
+  right: 12px;
+  top: 12px;
+  padding: 7px 10px;
+  border-radius: 999px;
+  color: var(--tide-deep);
+  background: rgba(255, 255, 255, 0.84);
+  box-shadow: 0 5px 12px rgba(70, 120, 160, 0.16);
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.mapHint {
+  position: absolute;
+  left: 12px;
+  bottom: 10px;
+  margin: 0;
+  padding: 5px 8px;
+  border-radius: 999px;
+  color: rgba(44, 68, 88, 0.7);
+  background: rgba(255, 255, 255, 0.58);
+  font-size: 10px;
+}
+
 .ocean {
   position: relative;
   width: 100%;
