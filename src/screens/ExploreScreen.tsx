@@ -39,6 +39,10 @@ export function ExploreScreen() {
   )
   const selected =
     visibleIslands.find((i) => i.id === selectedId) ?? visibleIslands[0] ?? current
+  const selectedStars = Math.min(
+    selected.stars + (completed.includes(selected.id) ? 1 : 0),
+    selected.starsMax,
+  )
   const unlocked = EXPLORE_ISLANDS.filter((i) => !i.locked).length
   const earnedStars = completed.length
 
@@ -136,13 +140,13 @@ export function ExploreScreen() {
               </p>
               <h2 className={styles.detailTitle}>{selected.title}</h2>
             </div>
-            <div className={styles.starRow} aria-label={`星星 ${selected.stars}/${selected.starsMax}`}>
+            <div className={styles.starRow} aria-label={`星星 ${selectedStars}/${selected.starsMax}`}>
               {Array.from({ length: selected.starsMax }, (_, i) => (
                 <Star
                   key={i}
                   size={16}
-                  weight={i < selected.stars ? 'fill' : 'regular'}
-                  className={i < selected.stars ? styles.starOn : styles.starOff}
+                  weight={i < selectedStars ? 'fill' : 'regular'}
+                  className={i < selectedStars ? styles.starOn : styles.starOff}
                 />
               ))}
             </div>

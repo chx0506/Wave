@@ -314,6 +314,10 @@
   color: var(--tide-deep);
   background: rgba(255, 255, 255, 0.7);
   border: 1px solid rgba(126, 184, 232, 0.28);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
 }
 
 .hint {
