@@ -3,6 +3,7 @@ import { Tabs, type Experiment, type ExperimentCategory } from '@/domain/types'
 import { useAppState } from '@/state/useAppState'
 import {
   ArrowRight,
+  CaretDown,
   Flask,
   MagnifyingGlass,
   Path,
@@ -31,6 +32,7 @@ export function ObserveScreen() {
   } = useAppState()
   const active = experiments.find((item) => item.status === 'active')
   const [sheet, setSheet] = useState<'create' | 'record' | null>(null)
+  const [expandedClue, setExpandedClue] = useState<string | null>(null)
   return (
     <div className={shell.screen}>
       <div className={shell.glow} aria-hidden="true" />
@@ -53,32 +55,63 @@ export function ObserveScreen() {
         {active ? <RecentFeedback experiment={active} /> : null}
         <p className={shell.sectionLabel}>身体线索</p>
         {clues.map((clue) => (
-          <article key={clue.id} className={shell.card}>
-            <div className={styles.clueRow}>
-              <MagnifyingGlass
-                size={18}
-                weight="fill"
-                color="var(--tide-deep)"
-              />
-              <div>
-                <h3 className={shell.cardTitle}>{clue.title}</h3>
-                <p className={shell.cardMeta}>
-                  {clue.note} ·{' '}
-                  {clue.status === 'pending' ? '待确认' : '已确认'}
-                </p>
+          <article
+            key={clue.id}
+            className={`${shell.card} ${styles.clueCard}`}
+            data-expanded={expandedClue === clue.id}
+          >
+            <button
+              type="button"
+              className={styles.clueButton}
+              aria-expanded={expandedClue === clue.id}
+              onClick={() =>
+                setExpandedClue((current) =>
+                  current === clue.id ? null : clue.id,
+                )
+              }
+            >
+              <div className={styles.clueRow}>
+                <MagnifyingGlass size={18} weight="fill" color="var(--tide-deep)" />
+                <div>
+                  <h3 className={shell.cardTitle}>{clue.title}</h3>
+                  <p className={shell.cardMeta}>
+                    {clue.sourceExperimentTitle} · {clue.observationDays} 天观察
+                  </p>
+                </div>
+                <div className={styles.clueAside}>
+                  <span className={styles.clueState} data-state={clue.status}>
+                    {clue.status === 'observing'
+                      ? '观察中'
+                      : clue.status === 'pending'
+                        ? '待确认'
+                        : '已确认'}
+                  </span>
+                  <CaretDown
+                    size={14}
+                    className={styles.chevron}
+                    weight="bold"
+                  />
+                </div>
               </div>
-              <span className={styles.shells}>
-                <Seal size={12} weight="fill" />
-                {clue.shells}
-              </span>
-            </div>
+            </button>
+            {expandedClue === clue.id ? (
+              <div className={styles.clueDetail}>
+                <p>{clue.note}。这只是你的个人观察，不代表医学诊断。</p>
+                <div className={styles.clueDetailMeta}>
+                  <span>来自「{clue.sourceExperimentTitle}」</span>
+                  <span>
+                    <Seal size={12} weight="fill" /> {clue.shells} 贝壳
+                  </span>
+                </div>
+              </div>
+            ) : null}
             {clue.status === 'pending' ? (
               <button
                 type="button"
                 className={styles.confirm}
                 onClick={() => confirmClue(clue.id)}
               >
-                确认这条线索
+                收进我的身体档案
               </button>
             ) : null}
           </article>

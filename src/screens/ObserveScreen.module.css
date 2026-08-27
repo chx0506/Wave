@@ -260,6 +260,90 @@
   align-items: start;
 }
 
+.clueCard {
+  padding: 0;
+  overflow: hidden;
+}
+
+.clueButton {
+  width: 100%;
+  padding: 16px;
+  text-align: left;
+  color: inherit;
+  background: transparent;
+}
+
+.clueButton:focus-visible {
+  outline: 2px solid var(--tide-deep);
+  outline-offset: -4px;
+}
+
+.clueAside {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 7px;
+}
+
+.clueState {
+  padding: 4px 7px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 700;
+  white-space: nowrap;
+  color: var(--tide-deep);
+  background: rgba(126, 184, 232, 0.14);
+}
+
+.clueState[data-state='observing'] {
+  color: #7d9b72;
+  background: rgba(177, 208, 164, 0.18);
+}
+
+.clueState[data-state='pending'] {
+  color: #a27d58;
+  background: rgba(224, 191, 151, 0.2);
+}
+
+.chevron {
+  color: var(--ink-faint);
+  transition: transform 0.2s var(--ease);
+}
+
+.clueCard[data-expanded='true'] .chevron {
+  transform: rotate(180deg);
+}
+
+.clueDetail {
+  margin: -2px 16px 14px;
+  padding: 12px;
+  border-radius: 14px;
+  background: rgba(126, 184, 232, 0.08);
+}
+
+.clueDetail p {
+  margin: 0;
+  font-size: 11px;
+  line-height: 1.55;
+  color: var(--ink-soft);
+}
+
+.clueDetailMeta {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 9px;
+  font-size: 10px;
+  color: var(--ink-faint);
+}
+
+.clueDetailMeta span:last-child {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  white-space: nowrap;
+}
+
 .shells {
   display: inline-flex;
   align-items: center;
@@ -279,6 +363,7 @@
 }
 
 .confirm {
+  margin: 0 16px 14px;
   padding: 6px 10px;
   border-radius: 999px;
   color: var(--tide-deep);
