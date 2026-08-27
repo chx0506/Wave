@@ -16,15 +16,58 @@ export const OBSERVE_CLUES = [
 ]
 
 export const EXPERIMENT_PRESETS = [
-  { category: 'sleep', question: '为什么我每次经前都睡不好？', try: '减少晚间咖啡因', watch: ['睡眠', '压力', '精力'] },
-  { category: 'pain', question: '压力高的日子，疼痛会更明显吗？', try: '每天留出 5 分钟放松', watch: ['疼痛', '压力', '睡眠'] },
-  { category: 'energy', question: '涨潮期的精力是否更高？', try: '把重要事情安排在上午', watch: ['精力', '情绪', '完成感'] },
-  { category: 'exercise', question: '经前减少高强度运动会更舒服吗？', try: '改为轻量散步或拉伸', watch: ['疼痛', '精力', '情绪'] },
+  {
+    category: 'sleep',
+    question: '为什么我每次经前都睡不好？',
+    try: '减少晚间咖啡因',
+    watch: ['睡眠', '压力', '精力'],
+  },
+  {
+    category: 'pain',
+    question: '压力高的日子，疼痛会更明显吗？',
+    try: '每天留出 5 分钟放松',
+    watch: ['疼痛', '压力', '睡眠'],
+  },
+  {
+    category: 'energy',
+    question: '涨潮期的精力是否更高？',
+    try: '把重要事情安排在上午',
+    watch: ['精力', '情绪', '完成感'],
+  },
+  {
+    category: 'exercise',
+    question: '经前减少高强度运动会更舒服吗？',
+    try: '改为轻量散步或拉伸',
+    watch: ['疼痛', '精力', '情绪'],
+  },
+  {
+    category: 'mood',
+    question: '经前留出独处时间，情绪会更稳定吗？',
+    try: '每天安排 10 分钟安静时间',
+    watch: ['情绪', '压力', '睡眠'],
+  },
+  {
+    category: 'stress',
+    question: '短暂呼吸练习能缓解下午的压力吗？',
+    try: '下午进行 3 分钟舒缓呼吸',
+    watch: ['压力', '精力', '情绪'],
+  },
+  {
+    category: 'diet',
+    question: '规律吃早餐会让上午更有精力吗？',
+    try: '连续吃一份简单早餐',
+    watch: ['精力', '情绪', '饥饿感'],
+  },
 ] as const
 
 export const EXPERIMENT_CATEGORIES = [
-  { id: 'sleep', label: '睡眠' }, { id: 'mood', label: '情绪' }, { id: 'pain', label: '疼痛' },
-  { id: 'energy', label: '精力' }, { id: 'stress', label: '压力' }, { id: 'diet', label: '饮食' }, { id: 'exercise', label: '运动' },
+  { id: 'sleep', label: '睡眠' },
+  { id: 'mood', label: '情绪' },
+  { id: 'pain', label: '疼痛' },
+  { id: 'energy', label: '精力' },
+  { id: 'stress', label: '压力' },
+  { id: 'diet', label: '饮食' },
+  { id: 'exercise', label: '运动' },
 ] as const
 
 export const BAY_PRACTICES = [

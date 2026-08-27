@@ -1,4 +1,11 @@
-import type { BodyClue, DayMode, DaySnapshot, Experiment, ExperimentCategory, TabId } from '@/domain/types'
+import type {
+  BodyClue,
+  DayMode,
+  DaySnapshot,
+  Experiment,
+  ExperimentCategory,
+  TabId,
+} from '@/domain/types'
 import { createContext, useContext } from 'react'
 
 export type AppState = {
@@ -16,8 +23,19 @@ export type AppState = {
   snapshotFor: (date: Date) => DaySnapshot
   experiments: Experiment[]
   clues: BodyClue[]
-  createExperiment: (input: { category: ExperimentCategory; question: string; try: string; watch: readonly string[]; totalDays: number }) => void
-  recordObservation: (id: string, values: Record<string, string>, completedTry: boolean, note?: string) => void
+  createExperiment: (input: {
+    category: ExperimentCategory
+    question: string
+    try: string
+    watch: readonly string[]
+    totalDays: number
+  }) => void
+  recordObservation: (
+    id: string,
+    values: Record<string, string>,
+    completedTry: boolean,
+    note?: string,
+  ) => void
   confirmClue: (id: string) => void
 }
 
