@@ -44,17 +44,31 @@ export function ObserveScreen() {
         </p>
       </header>
       <div className={shell.body}>
-        {active ? (
-          <ActiveExperiment
-            experiment={active}
-            onRecord={() => setSheet('record')}
-          />
-        ) : (
-          <EmptyExperiment />
-        )}
-        {active ? <RecentFeedback experiment={active} /> : null}
-        <p className={shell.sectionLabel}>身体线索</p>
-        {clues.map((clue) => (
+        <section className={styles.activeGroup} aria-labelledby="active-group-title">
+          <div className={styles.groupHeading}>
+            <div>
+              <p className={styles.groupKicker}>In progress</p>
+              <h2 id="active-group-title" className={styles.groupTitle}>正在进行的实验</h2>
+            </div>
+            <span className={styles.groupHint}>记录 · 观察 · 对照</span>
+          </div>
+          {active ? (
+            <ActiveExperiment experiment={active} onRecord={() => setSheet('record')} />
+          ) : <EmptyExperiment />}
+          {active ? <RecentFeedback experiment={active} /> : null}
+          <ExperimentPath active={Boolean(active)} />
+        </section>
+
+        <section className={styles.archiveGroup} aria-labelledby="archive-group-title">
+          <div className={styles.groupHeading}>
+            <div>
+              <p className={styles.groupKicker}>Personal archive</p>
+              <h2 id="archive-group-title" className={styles.groupTitle}>身体线索档案</h2>
+            </div>
+            <span className={styles.groupCount}>{clues.length} 条</span>
+          </div>
+          <p className={styles.groupDescription}>往期实验留下的个人观察，不是诊断结论，而是逐渐形成的身体经验。</p>
+          <div className={styles.clueList}>{clues.map((clue) => (
           <article
             key={clue.id}
             className={`${shell.card} ${styles.clueCard}`}
@@ -115,8 +129,8 @@ export function ObserveScreen() {
               </button>
             ) : null}
           </article>
-        ))}
-        <ExperimentPath active={Boolean(active)} />
+          ))}</div>
+        </section>
         <button
           type="button"
           className={shell.cta}
