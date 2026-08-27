@@ -50,18 +50,6 @@ export function ObserveScreen() {
         ) : (
           <EmptyExperiment />
         )}
-        <p className={shell.sectionLabel}>小实验流程</p>
-        <div className={styles.steps}>
-          {STEPS.map((step, i) => (
-            <div key={step.key} className={styles.step}>
-              <span className={styles.stepKey}>{step.key}</span>
-              <span className={styles.stepLabel}>{step.label}</span>
-              {i < STEPS.length - 1 ? (
-                <span className={styles.stepLine} />
-              ) : null}
-            </div>
-          ))}
-        </div>
         <p className={shell.sectionLabel}>身体线索</p>
         {clues.map((clue) => (
           <article key={clue.id} className={shell.card}>
@@ -94,6 +82,7 @@ export function ObserveScreen() {
             ) : null}
           </article>
         ))}
+        <ExperimentPath active={Boolean(active)} />
         <button
           type="button"
           className={shell.cta}
@@ -130,6 +119,53 @@ export function ObserveScreen() {
         />
       ) : null}
     </div>
+  )
+}
+
+function ExperimentPath({ active }: { active: boolean }) {
+  const currentStep = active ? 2 : 0
+
+  return (
+    <section className={styles.pathCard} aria-label="身体小实验路径">
+      <div className={styles.pathHeading}>
+        <div>
+          <p className={styles.pathKicker}>Tide pool path</p>
+          <h2 className={styles.pathTitle}>身体的答案，慢慢浮上来</h2>
+        </div>
+        <span className={styles.pathStatus}>
+          {active ? '正在观察' : '从问题开始'}
+        </span>
+      </div>
+      <p className={styles.pathIntro}>
+        不急着下结论，只改变一件小事，再和过去的自己轻轻比较。
+      </p>
+      <div className={styles.pathSteps}>
+        <svg
+          className={styles.pathLine}
+          viewBox="0 0 300 58"
+          preserveAspectRatio="none"
+          aria-hidden="true"
+        >
+          <path d="M18 35 C58 2 96 53 140 28 S225 8 282 31" />
+        </svg>
+        {STEPS.map((step, index) => (
+          <div
+            key={step.key}
+            className={styles.pathStep}
+            data-state={
+              index < currentStep
+                ? 'done'
+                : index === currentStep
+                  ? 'current'
+                  : 'upcoming'
+            }
+          >
+            <span className={styles.pathDot}>{step.key}</span>
+            <span className={styles.pathLabel}>{step.label}</span>
+          </div>
+        ))}
+      </div>
+    </section>
   )
 }
 
