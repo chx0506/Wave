@@ -7,6 +7,90 @@
   );
 }
 
+.activeGroup,
+.archiveGroup {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px 12px 12px;
+  border-radius: 28px;
+}
+
+.activeGroup {
+  background: linear-gradient(160deg, rgba(210, 237, 251, 0.62), rgba(245, 251, 255, 0.56));
+  border: 1px solid rgba(126, 184, 232, 0.2);
+}
+
+.archiveGroup {
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.52), rgba(231, 243, 251, 0.38));
+  border: 1px solid rgba(255, 255, 255, 0.72);
+}
+
+.groupHeading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 2px 4px 0;
+}
+
+.groupKicker {
+  margin: 0 0 3px;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.13em;
+  color: var(--tide-deep);
+  text-transform: uppercase;
+}
+
+.groupTitle {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--ink-strong);
+}
+
+.groupHint,
+.groupCount {
+  flex: 0 0 auto;
+  margin-top: 5px;
+  padding: 5px 8px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--tide-deep);
+  background: rgba(255, 255, 255, 0.62);
+}
+
+.groupDescription {
+  margin: -2px 4px 2px;
+  font-size: 11px;
+  line-height: 1.5;
+  color: var(--ink-soft);
+}
+
+.activeGroup > .active,
+.activeGroup > .feedbackCard,
+.activeGroup > .pathCard,
+.archiveGroup .clueCard {
+  box-shadow: 0 8px 22px -18px rgba(70, 120, 160, 0.46);
+}
+
+.activeGroup > .active,
+.activeGroup > .feedbackCard,
+.activeGroup > .pathCard {
+  border-color: rgba(255, 255, 255, 0.64);
+}
+
+.clueList {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
 .activeTop {
   display: flex;
   align-items: center;
