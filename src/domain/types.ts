@@ -108,7 +108,6 @@ export type Experiment = {
   try: string
   watch: string[]
   totalDays: number
-  currentDay: number
   status: ExperimentStatus
   startedAt: Date
   observations: ObservationEntry[]

@@ -2,6 +2,11 @@ import { SAMPLE_CYCLE, TODAY } from '@/data/sample'
 import { OBSERVE_ACTIVE, OBSERVE_CLUES } from '@/data/content'
 import { snapshotForDate } from '@/domain/cycle'
 import {
+  buildExperimentClue,
+  getExperimentProgress,
+  normalizeExperiment,
+} from '@/domain/experiment'
+import {
   DayModes,
   Tabs,
   type BodyClue,
@@ -20,18 +25,26 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [viewedYear, setViewedYear] = useState(TODAY.getFullYear())
   const [viewedMonthNum, setViewedMonthNum] = useState(TODAY.getMonth() + 1)
   const [experiments, setExperiments] = useState<Experiment[]>([
-    {
+    normalizeExperiment({
       id: 'exp-sleep',
       category: 'sleep',
       question: OBSERVE_ACTIVE.question,
       try: OBSERVE_ACTIVE.try,
       watch: OBSERVE_ACTIVE.watch,
       totalDays: OBSERVE_ACTIVE.total,
-      currentDay: OBSERVE_ACTIVE.day,
       status: 'active',
       startedAt: new Date(2026, 7, 22),
-      observations: [],
-    },
+      observations: OBSERVE_ACTIVE.observations.map((observation) => ({
+        day: observation.day,
+        date: new Date(2026, 7, 21 + observation.day),
+        values: {
+          睡眠: observation.sleep,
+          压力: observation.stress,
+          精力: observation.energy,
+        },
+        completedTry: observation.completedTry,
+      })),
+    }),
   ])
   const [clues, setClues] = useState<BodyClue[]>(
     OBSERVE_CLUES.map((clue, index) => ({
@@ -70,7 +83,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
           ...input,
           watch: [...input.watch],
           id: `exp-${Date.now()}`,
-          currentDay: 0,
           status: 'active',
           startedAt: new Date(),
           observations: [],
@@ -91,14 +103,13 @@ export function AppProvider({ children }: { children: ReactNode }) {
       const target = experiments.find((item) => item.id === id)
       if (!target || target.status === 'completed') return
 
-      const day = target.currentDay + 1
+      const day = getExperimentProgress(target).currentDay + 1
       const completed = day >= target.totalDays
       setExperiments((previous) =>
         previous.map((item) =>
           item.id === id
             ? {
                 ...item,
-                currentDay: day,
                 status: completed ? 'completed' : 'active',
                 observations: [
                   ...item.observations,
@@ -109,22 +120,31 @@ export function AppProvider({ children }: { children: ReactNode }) {
         ),
       )
 
-      if (completed) {
-        setClues((previous) => [
+    },
+    [experiments],
+  )
+
+  const archiveExperimentClue = useCallback(
+    (experimentId: string) => {
+      const experiment = experiments.find((item) => item.id === experimentId)
+      if (!experiment || experiment.status !== 'completed') return
+
+      setClues((previous) => {
+        if (previous.some((clue) => clue.sourceExperimentId === experimentId)) {
+          return previous
+        }
+        return [
           {
             id: `clue-${Date.now()}`,
-            title: `${target.question.replace('为什么', '').replace('？', '')} · 出现了新的线索`,
-            note: '完成一次身体实验后生成，继续在下个周期观察',
-            category: target.category,
-            status: 'pending',
+            ...buildExperimentClue(experiment),
+            status: 'confirmed',
             shells: 1,
-            sourceExperimentTitle: target.question,
-            observationDays: target.totalDays,
-            sourceExperimentId: target.id,
+            sourceExperimentTitle: experiment.question,
+            sourceExperimentId: experiment.id,
           },
           ...previous,
-        ])
-      }
+        ]
+      })
     },
     [experiments],
   )
@@ -155,6 +175,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       clues,
       createExperiment,
       recordObservation,
+      archiveExperimentClue,
       confirmClue,
     }),
     [
@@ -170,6 +191,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       clues,
       createExperiment,
       recordObservation,
+      archiveExperimentClue,
       confirmClue,
     ],
   )

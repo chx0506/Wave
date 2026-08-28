@@ -4,9 +4,15 @@ export const OBSERVE_ACTIVE = {
   question: '为什么我每次经前都睡不好？',
   try: '减少晚间咖啡因',
   watch: ['睡眠', '压力', '精力'],
-  day: 5,
   total: 14,
   status: '进行中',
+  observations: [
+    { day: 1, sleep: '较低', stress: '较高', energy: '较低', completedTry: true },
+    { day: 2, sleep: '一般', stress: '一般', energy: '一般', completedTry: true },
+    { day: 3, sleep: '一般', stress: '较低', energy: '一般', completedTry: true },
+    { day: 4, sleep: '较高', stress: '一般', energy: '较高', completedTry: false },
+    { day: 5, sleep: '较高', stress: '较低', energy: '较高', completedTry: true },
+  ],
 }
 
 export const OBSERVE_CLUES = [
@@ -44,10 +50,22 @@ export const EXPERIMENT_PRESETS = [
     watch: ['睡眠', '压力', '精力'],
   },
   {
+    category: 'sleep',
+    question: '睡前少看手机，会更容易入睡吗？',
+    try: '睡前 30 分钟放下手机',
+    watch: ['入睡速度', '睡眠', '精力'],
+  },
+  {
     category: 'pain',
     question: '压力高的日子，疼痛会更明显吗？',
     try: '每天留出 5 分钟放松',
     watch: ['疼痛', '压力', '睡眠'],
+  },
+  {
+    category: 'pain',
+    question: '经期热敷会让腹部更舒服吗？',
+    try: '不适时热敷腹部 15 分钟',
+    watch: ['疼痛', '舒适度', '精力'],
   },
   {
     category: 'energy',
@@ -56,15 +74,33 @@ export const EXPERIMENT_PRESETS = [
     watch: ['精力', '情绪', '完成感'],
   },
   {
+    category: 'energy',
+    question: '午后短暂休息能减少疲惫吗？',
+    try: '午后闭眼休息 10 分钟',
+    watch: ['精力', '专注', '完成感'],
+  },
+  {
     category: 'exercise',
     question: '经前减少高强度运动会更舒服吗？',
     try: '改为轻量散步或拉伸',
     watch: ['疼痛', '精力', '情绪'],
   },
   {
+    category: 'exercise',
+    question: '轻量散步会让经期身体更舒展吗？',
+    try: '每天轻松散步 15 分钟',
+    watch: ['舒适度', '精力', '情绪'],
+  },
+  {
     category: 'mood',
     question: '经前留出独处时间，情绪会更稳定吗？',
     try: '每天安排 10 分钟安静时间',
+    watch: ['情绪', '压力', '睡眠'],
+  },
+  {
+    category: 'mood',
+    question: '写下此刻的感受，会让我更放松吗？',
+    try: '每天写三句话记录感受',
     watch: ['情绪', '压力', '睡眠'],
   },
   {
@@ -74,10 +110,22 @@ export const EXPERIMENT_PRESETS = [
     watch: ['压力', '精力', '情绪'],
   },
   {
+    category: 'stress',
+    question: '把任务拆小，会减少今天的压力吗？',
+    try: '每天只列出三个优先任务',
+    watch: ['压力', '完成感', '精力'],
+  },
+  {
     category: 'diet',
     question: '规律吃早餐会让上午更有精力吗？',
     try: '连续吃一份简单早餐',
     watch: ['精力', '情绪', '饥饿感'],
+  },
+  {
+    category: 'diet',
+    question: '下午及时加餐，会减少晚间饥饿吗？',
+    try: '下午准备一份简单加餐',
+    watch: ['饥饿感', '精力', '情绪'],
   },
 ] as const
 

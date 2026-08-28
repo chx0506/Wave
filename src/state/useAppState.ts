@@ -36,6 +36,7 @@ export type AppState = {
     completedTry: boolean,
     note?: string,
   ) => void
+  archiveExperimentClue: (experimentId: string) => void
   confirmClue: (id: string) => void
 }
 

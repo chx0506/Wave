@@ -1,13 +1,23 @@
 import { EXPERIMENT_CATEGORIES, EXPERIMENT_PRESETS } from '@/data/content'
 import { Tabs, type Experiment, type ExperimentCategory } from '@/domain/types'
+import {
+  buildExperimentConclusion,
+  getExperimentProgress,
+} from '@/domain/experiment'
 import { useAppState } from '@/state/useAppState'
 import {
   ArrowRight,
+  CalendarBlank,
   CaretDown,
+  CheckCircle,
   Flask,
+  Eye,
+  Hourglass,
+  Info,
   MagnifyingGlass,
   Path,
   Seal,
+  Sparkle,
   X,
 } from '@phosphor-icons/react'
 import { useMemo, useState, type ReactNode } from 'react'
@@ -28,12 +38,28 @@ export function ObserveScreen() {
     clues,
     createExperiment,
     recordObservation,
+    archiveExperimentClue,
     confirmClue,
   } = useAppState()
-  const active = experiments.find((item) => item.status === 'active')
-  const [sheet, setSheet] = useState<'create' | 'record' | null>(null)
+  const activeExperiments = experiments.filter((item) => item.status === 'active')
+  const [sheet, setSheet] = useState<'create' | null>(null)
+  const [recordingExperimentId, setRecordingExperimentId] = useState<
+    string | null
+  >(null)
   const [pathOpen, setPathOpen] = useState(false)
   const [expandedClue, setExpandedClue] = useState<string | null>(null)
+  const [expandedFeedbackId, setExpandedFeedbackId] = useState<string | null>(
+    null,
+  )
+  const [completedExperimentId, setCompletedExperimentId] = useState<
+    string | null
+  >(null)
+  const recordingExperiment = experiments.find(
+    (item) => item.id === recordingExperimentId,
+  )
+  const completedExperiment = experiments.find(
+    (item) => item.id === completedExperimentId,
+  )
 
   return (
     <div className={shell.screen}>
@@ -42,11 +68,15 @@ export function ObserveScreen() {
         <p className={shell.kicker}>Observe</p>
         <h1 className={shell.title}>潮池观察</h1>
         <p className={shell.subtitle}>
-          如果一个问题反复出现，就陪自己认真看看。发现什么可能更适合我。
+          从一个真实困扰开始，做一次小改变，听听身体的反馈。
         </p>
       </header>
 
-      <div className={shell.body}>
+      <div className={styles.paperWaveBand} aria-hidden="true">
+        <span className={styles.waveFoamLine} />
+      </div>
+
+      <div className={`${shell.body} ${styles.observeBody}`}>
         <section
           className={styles.activeGroup}
           aria-labelledby="active-group-title"
@@ -67,18 +97,39 @@ export function ObserveScreen() {
             >
               <Path size={13} weight="bold" />
               <span>实验路径</span>
-              <span className={styles.pathBadgeStep}>{active ? '3/4' : '1/4'}</span>
+              <span className={styles.pathBadgeStep}>
+                {activeExperiments.length > 0 ? '3/4' : '1/4'}
+              </span>
             </button>
           </div>
-          {active ? (
-            <ActiveExperiment
-              experiment={active}
-              onRecord={() => setSheet('record')}
-            />
+          {activeExperiments.length > 0 ? (
+            <div className={styles.activeList}>
+              {activeExperiments.map((experiment) => (
+                <div key={experiment.id} className={styles.activeItem}>
+                  <ActiveExperiment
+                    experiment={experiment}
+                    onRecord={() => setRecordingExperimentId(experiment.id)}
+                    feedbackExpanded={expandedFeedbackId === experiment.id}
+                    onToggleFeedback={() =>
+                      setExpandedFeedbackId((current) =>
+                        current === experiment.id ? null : experiment.id,
+                      )
+                    }
+                  />
+                </div>
+              ))}
+            </div>
           ) : (
             <EmptyExperiment />
           )}
-          {active ? <RecentFeedback experiment={active} /> : null}
+          <button
+            type="button"
+            className={shell.cta}
+            onClick={() => setSheet('create')}
+          >
+            <span>开始新的身体小实验</span>
+            <Path size={18} weight="bold" />
+          </button>
         </section>
 
         <section
@@ -94,8 +145,8 @@ export function ObserveScreen() {
             </div>
             <span className={styles.groupCount}>{clues.length} 条</span>
           </div>
-          <p className={styles.groupDescription}>
-            往期实验留下的个人观察，不是诊断结论，而是逐渐形成的身体经验。
+      <p className={styles.groupDescription}>
+            完成实验后留下的个人线索。
           </p>
           <div className={styles.clueList}>
             {clues.map((clue) => (
@@ -118,20 +169,33 @@ export function ObserveScreen() {
                     <span className={styles.clueIcon}>
                       <MagnifyingGlass size={16} weight="bold" />
                     </span>
-                    <div>
+                    <div className={styles.clueSummary}>
                       <h3 className={shell.cardTitle}>{clue.title}</h3>
-                      <p className={shell.cardMeta}>
-                        {clue.sourceExperimentTitle} · {clue.observationDays}{' '}
-                        天观察
-                      </p>
+                      <span className={styles.clueQuickMeta}>
+                        <CalendarBlank size={12} weight="bold" />
+                        {clue.observationDays} 天
+                      </span>
                     </div>
                     <div className={styles.clueAside}>
-                      <span className={styles.clueState} data-state={clue.status}>
-                        {clue.status === 'observing'
-                          ? '观察中'
-                          : clue.status === 'pending'
-                            ? '待确认'
-                            : '已确认'}
+                      <span
+                        className={styles.clueState}
+                        data-state={clue.status}
+                        role="img"
+                        aria-label={
+                          clue.status === 'observing'
+                            ? '观察中'
+                            : clue.status === 'pending'
+                              ? '待确认'
+                              : '已确认'
+                        }
+                      >
+                        {clue.status === 'observing' ? (
+                          <Eye size={14} weight="bold" />
+                        ) : clue.status === 'pending' ? (
+                          <Hourglass size={14} weight="bold" />
+                        ) : (
+                          <CheckCircle size={14} weight="fill" />
+                        )}
                       </span>
                       <CaretDown
                         size={14}
@@ -143,13 +207,24 @@ export function ObserveScreen() {
                 </button>
                 {expandedClue === clue.id ? (
                   <div className={styles.clueDetail}>
-                    <p>{clue.note}。这只是你的个人观察，不代表医学诊断。</p>
-                    <div className={styles.clueDetailMeta}>
-                      <span>来自「{clue.sourceExperimentTitle}」</span>
+                    <p className={styles.clueNote}>{clue.note}</p>
+                    <div className={styles.clueContext}>
+                      <span>
+                        <Flask size={12} weight="fill" />
+                        {clue.sourceExperimentTitle}
+                      </span>
+                      <span>
+                        <CalendarBlank size={12} weight="bold" />
+                        {clue.observationDays} 天
+                      </span>
                       <span>
                         <Seal size={12} weight="fill" /> {clue.shells} 贝壳
                       </span>
                     </div>
+                    <p className={styles.clueDisclaimer}>
+                      <Info size={12} weight="bold" />
+                      个人观察，不代表医学诊断
+                    </p>
                   </div>
                 ) : null}
                 {clue.status === 'pending' ? (
@@ -168,14 +243,6 @@ export function ObserveScreen() {
 
         <button
           type="button"
-          className={shell.cta}
-          onClick={() => setSheet('create')}
-        >
-          <span>开始新的身体小实验</span>
-          <Path size={18} weight="bold" />
-        </button>
-        <button
-          type="button"
           className={styles.linkCal}
           onClick={() => setTab(Tabs.home)}
         >
@@ -192,38 +259,109 @@ export function ObserveScreen() {
           }}
         />
       ) : null}
-      {sheet === 'record' && active ? (
+      {recordingExperiment ? (
         <RecordObservationSheet
-          experiment={active}
-          onClose={() => setSheet(null)}
+          experiment={recordingExperiment}
+          onClose={() => setRecordingExperimentId(null)}
           onSave={(result, note) => {
+            const completesExperiment =
+              getExperimentProgress(recordingExperiment).currentDay + 1 >=
+              recordingExperiment.totalDays
             recordObservation(
-              active.id,
+              recordingExperiment.id,
               result.values,
               result.completedTry,
               note,
             )
-            setSheet(null)
+            setRecordingExperimentId(null)
+            if (completesExperiment) {
+              setCompletedExperimentId(recordingExperiment.id)
+            }
           }}
         />
       ) : null}
       {pathOpen ? (
         <ExperimentPathSheet
-          active={Boolean(active)}
+          active={activeExperiments.length > 0}
           onClose={() => setPathOpen(false)}
+        />
+      ) : null}
+      {completedExperiment ? (
+        <ExperimentCompleteSheet
+          experiment={completedExperiment}
+          onClose={() => setCompletedExperimentId(null)}
+          onArchive={() => {
+            archiveExperimentClue(completedExperiment.id)
+            setCompletedExperimentId(null)
+          }}
         />
       ) : null}
     </div>
   )
 }
 
+function ExperimentCompleteSheet({
+  experiment,
+  onClose,
+  onArchive,
+}: {
+  experiment: Experiment
+  onClose: () => void
+  onArchive: () => void
+}) {
+  const conclusion = buildExperimentConclusion(experiment)
+
+  return (
+    <Sheet title="这次实验完成了" onClose={onClose}>
+      <div className={styles.completionBadge}>
+        <Seal size={18} weight="fill" />
+        <span>{conclusion.observationDays} 天观察完成</span>
+      </div>
+      <div className={styles.conclusionCard}>
+        <p className={styles.groupKicker}>本次实验结论</p>
+        <h3>{conclusion.title}</h3>
+        <p>{conclusion.summary}</p>
+        <div className={styles.metricConclusionList}>
+          {conclusion.metrics.map((metric) => (
+            <div
+              key={metric.metric}
+              className={styles.metricConclusion}
+              data-trend={metric.trend}
+            >
+              <span className={styles.metricName}>{metric.metric}</span>
+              <strong>{metric.result}</strong>
+              <span>{metric.detail}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+      <p className={styles.completionHint}>
+        以上结论来自本次 {conclusion.observationDays} 天记录中的关联，不代表因果关系或医学诊断。你可以确认后将它收入身体线索档案。
+      </p>
+      <button type="button" className={shell.cta} onClick={onArchive}>
+        <span>确认并收入身体线索档案</span>
+        <ArrowRight size={16} weight="bold" />
+      </button>
+      <button type="button" className={styles.deferArchive} onClick={onClose}>
+        暂不归档
+      </button>
+    </Sheet>
+  )
+}
+
 function ActiveExperiment({
   experiment,
   onRecord,
+  feedbackExpanded,
+  onToggleFeedback,
 }: {
   experiment: Experiment
   onRecord: () => void
+  feedbackExpanded: boolean
+  onToggleFeedback: () => void
 }) {
+  const progress = getExperimentProgress(experiment)
+
   return (
     <section className={`${shell.card} ${styles.active}`}>
       <div className={styles.activeTop}>
@@ -232,20 +370,33 @@ function ActiveExperiment({
           进行中
         </span>
         <span className={styles.days}>
-          Day {experiment.currentDay}/{experiment.totalDays}
+          Day {progress.currentDay}/{experiment.totalDays}
         </span>
       </div>
       <h2 className={shell.cardTitle}>{experiment.question}</h2>
-      <p className={shell.cardMeta}>
-        尝试：{experiment.try}
-        <br />
-        观察：{experiment.watch.join(' · ')}
-      </p>
+      <div className={styles.tryBlock}>
+        <div className={styles.tryLabel}>
+          <Sparkle size={13} weight="fill" />
+          <span>现在要做</span>
+        </div>
+        <strong className={styles.tryValue}>{experiment.try}</strong>
+      </div>
+      <div className={styles.watchRow} aria-label="观察这些变量">
+        <span className={styles.watchLabel}>
+          <Eye size={13} weight="bold" />
+          看看
+        </span>
+        {experiment.watch.map((item) => (
+          <span key={item} className={styles.watchChip}>
+            {item}
+          </span>
+        ))}
+      </div>
       <div className={styles.track} aria-hidden="true">
         <span
           className={styles.fill}
           style={{
-            width: `${(experiment.currentDay / experiment.totalDays) * 100}%`,
+            width: `${(progress.currentDay / experiment.totalDays) * 100}%`,
           }}
         />
       </div>
@@ -253,6 +404,20 @@ function ActiveExperiment({
         记录今日观察
         <ArrowRight size={14} weight="bold" />
       </button>
+      <button
+        type="button"
+        className={styles.feedbackTrigger}
+        aria-expanded={feedbackExpanded}
+        onClick={onToggleFeedback}
+      >
+        <span>往期记录 · {experiment.observations.length} 条</span>
+        <CaretDown
+          size={13}
+          weight="bold"
+          className={feedbackExpanded ? styles.feedbackChevronOpen : undefined}
+        />
+      </button>
+      {feedbackExpanded ? <RecentFeedback experiment={experiment} /> : null}
     </section>
   )
 }
@@ -270,26 +435,21 @@ function EmptyExperiment() {
 
 function RecentFeedback({ experiment }: { experiment: Experiment }) {
   const records = experiment.observations
-  const completed = records.filter((item) => item.completedTry).length
+  const progress = getExperimentProgress(experiment)
   const latest = records.at(-1)
 
   return (
-    <section
-      className={`${shell.card} ${styles.feedbackCard}`}
-      aria-label="最近观察反馈"
-    >
+    <div className={styles.feedbackBubble} aria-label="往期观察记录">
       <div className={styles.feedbackTop}>
         <div>
           <p className={styles.groupKicker}>Recent signal</p>
-          <h2 className={`${shell.cardTitle} ${styles.feedbackTitle}`}>
-            最近观察反馈
-          </h2>
+          <h3 className={`${shell.cardTitle} ${styles.feedbackTitle}`}>观察记录</h3>
         </div>
         <span className={styles.feedbackCount}>{records.length} 条记录</span>
       </div>
       {latest ? (
         <p className={styles.feedbackCopy}>
-          最近一次记录：
+          最近：
           {Object.entries(latest.values)
             .map(([key, value]) => `${key} ${value}`)
             .join(' · ')}
@@ -300,14 +460,27 @@ function RecentFeedback({ experiment }: { experiment: Experiment }) {
         </p>
       )}
       <div className={styles.feedbackMeta}>
-        <span>
-          尝试完成 {completed}/{records.length || 0} 天
-        </span>
-        <span>
-          再观察 {Math.max(experiment.totalDays - experiment.currentDay, 0)} 天
-        </span>
+        <span>完成尝试 {progress.completedTryDays}/{experiment.totalDays} 天</span>
+        <span>还剩 {progress.remainingDays} 天</span>
       </div>
-    </section>
+      {records.length > 0 ? (
+        <div className={styles.recordList}>
+          {records
+            .slice()
+            .reverse()
+            .map((record) => (
+              <div key={`${record.day}-${record.date.toISOString()}`} className={styles.recordRow}>
+                <span>Day {record.day}</span>
+                <span>
+                  {Object.entries(record.values)
+                    .map(([key, value]) => `${key} ${value}`)
+                    .join(' · ')}
+                </span>
+              </div>
+            ))}
+        </div>
+      ) : null}
+    </div>
   )
 }
 
@@ -408,17 +581,20 @@ function CreateExperimentSheet({
         ))}
       </div>
       <p className={shell.sectionLabel}>选择一个问题</p>
-      <div className={styles.choiceStack}>
-        {available.map((item) => (
-          <button
-            type="button"
-            key={item.question}
-            data-on={selected.question === item.question}
-            onClick={() => setSelectedQuestion(item.question)}
-          >
-            {item.question}
-          </button>
-        ))}
+      <div className={styles.selectWrap}>
+        <select
+          className={styles.questionSelect}
+          value={selected.question}
+          onChange={(event) => setSelectedQuestion(event.target.value)}
+          aria-label="选择实验问题"
+        >
+          {available.map((item) => (
+            <option key={item.question} value={item.question}>
+              {item.question}
+            </option>
+          ))}
+        </select>
+        <CaretDown size={15} weight="bold" aria-hidden="true" />
       </div>
       <p className={shell.sectionLabel}>观察周期</p>
       <div className={styles.choiceGrid}>
@@ -456,6 +632,7 @@ function RecordObservationSheet({
     note?: string,
   ) => void
 }) {
+  const progress = getExperimentProgress(experiment)
   const [completedTry, setCompletedTry] = useState(true)
   const [values, setValues] = useState<Record<string, string>>(() =>
     Object.fromEntries(experiment.watch.map((item) => [item, '一般'])),
@@ -465,7 +642,7 @@ function RecordObservationSheet({
   return (
     <Sheet title="记录今日观察" onClose={onClose}>
       <p className={shell.cardMeta}>
-        Day {experiment.currentDay + 1} · 今天的状态不需要完美，只要诚实。
+        Day {progress.currentDay + 1} · 今天的状态不需要完美，只要诚实。
       </p>
       <p className={shell.sectionLabel}>今天完成尝试了吗？</p>
       <div className={styles.choiceGrid}>
