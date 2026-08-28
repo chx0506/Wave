@@ -1,0 +1,23 @@
+.section {
+  width: 100%;
+  opacity: 0;
+  transform: translate3d(0, 20px, 0);
+  transition:
+    opacity 0.72s var(--ease),
+    transform 0.72s var(--ease);
+  will-change: opacity, transform;
+}
+
+.section[data-visible='1'] {
+  opacity: 1;
+  transform: translate3d(0, 0, 0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .section {
+    opacity: 1;
+    transform: none;
+    transition: none;
+    will-change: auto;
+  }
+}

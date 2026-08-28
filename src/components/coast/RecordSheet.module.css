@@ -200,48 +200,54 @@
 .moodRow {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
-  gap: 6px;
+  gap: 2px;
 }
 
 .moodCard {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 5px;
+  gap: 6px;
+  padding: 4px 0 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
 }
 
 .moodFace {
-  width: 44px;
-  height: 44px;
+  position: relative;
+  width: 50px;
+  height: 50px;
   border-radius: 50%;
   display: grid;
   place-items: center;
-  color: var(--tide-deep);
-  background: rgba(186, 224, 246, 0.45);
+  border: 1px solid rgba(249, 218, 180, 0.42);
+  box-shadow:
+    0 5px 12px -4px rgba(120, 160, 200, 0.35),
+    inset 0 2px 0 rgba(255, 255, 255, 0.92),
+    inset 0 -3px 8px rgba(168, 203, 230, 0.12);
+  transition:
+    transform 0.22s var(--ease),
+    box-shadow 0.22s var(--ease);
 }
 
-.moodFace[data-tone='low'] {
-  color: #5f8fbc;
-  background: rgba(160, 200, 230, 0.45);
+.moodFace[data-on='1'] {
+  border-color: rgba(141, 183, 219, 0.75);
+  box-shadow:
+    0 8px 16px -6px rgba(90, 150, 200, 0.42),
+    0 0 0 2px rgba(141, 183, 219, 0.35),
+    inset 0 2px 0 rgba(255, 255, 255, 0.95),
+    inset 0 -3px 8px rgba(168, 203, 230, 0.14);
 }
 
-.moodFace[data-tone='irritable'] {
-  color: #6aa0c8;
-  background: rgba(140, 190, 220, 0.4);
+.moodCard[data-on='true'] .moodLabel {
+  color: var(--ink-strong);
+  font-weight: 700;
 }
 
-.moodFace[data-tone='happy'] {
-  color: #4f9bc8;
-  background: rgba(200, 230, 245, 0.7);
-}
-
-.moodFace[data-tone='sensitive'] {
-  color: #7aa8d0;
-  background: rgba(210, 225, 245, 0.65);
-}
-
-.moodCard[data-on='true'] .moodFace {
-  box-shadow: 0 0 0 2px var(--tide);
+.moodCard[data-on='true'] .radio {
+  border-color: #8db7db;
+  background: radial-gradient(circle at center, #8db7db 0 42%, #fff 48%);
 }
 
 .moodLabel {

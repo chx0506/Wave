@@ -2,6 +2,7 @@ import type { LogKey, Phase, TabId, TideState } from './types'
 
 export const APP_NAME = 'MoonWave'
 export const APP_NAME_EN = 'MoonWave'
+export const APP_NAME_ZH = '月潮'
 export const APP_TAGLINE = 'Feel Your Wave. Be Your Wave.'
 export const APP_TAGLINE_ZH = '读懂身体的潮汐，找到自己的节奏。'
 export const USER_DISPLAY_NAME = '阿纯'
@@ -30,12 +31,23 @@ export const PHASE_LABEL: Record<Phase, string> = {
   luteal: '黄体期',
 }
 
-/** Home dial: tide metaphor for each cycle phase */
+/**
+ * Home dial & primary phase label.
+ * Order: 退→涨→满→平 maps to 月经→卵泡→排卵→黄体.
+ */
 export const PHASE_TIDE_LABEL: Record<Phase, string> = {
-  menstrual: '退潮期',
-  follicular: '涨潮期',
-  ovulatory: '满潮期',
-  luteal: '平潮期',
+  menstrual: '月经期',
+  follicular: '卵泡期',
+  ovulatory: '排卵期',
+  luteal: '黄体期',
+}
+
+/** Short tide metaphor for subtitles (退=月经, 涨=卵泡, 满=排卵, 平=黄体). */
+export const TIDE_METAPHOR_SHORT: Record<Phase, string> = {
+  menstrual: '退潮',
+  follicular: '涨潮',
+  ovulatory: '满潮',
+  luteal: '平潮',
 }
 
 export const TIDE_LABEL: Record<TideState, string> = {
@@ -90,7 +102,7 @@ export const PHASE_TODAY_TIP: Record<Phase, string> = {
 }
 
 export const CRAB_LINES: Record<Phase, string> = {
-  menstrual: '今天潮位偏低，要不要先记下疼痛和睡眠？我帮你看着海岸。',
+  menstrual: '退潮开始了。记一下经量和睡眠，帮你看清这波节奏。',
   follicular: '涨潮中呢。记一下精力和情绪，过几天会更好对照。',
   ovulatory: '满潮附近了。压力如果偏高，也可以去静谧海湾待三分钟。',
   luteal: '平潮期常见睡眠变浅。要不要开一个「经前睡眠」小观察？',

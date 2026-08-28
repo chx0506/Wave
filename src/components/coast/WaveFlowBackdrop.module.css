@@ -1,0 +1,67 @@
+.wrap {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+  opacity: calc(0.64 + var(--wave-reveal) * 0.36);
+}
+
+.layers {
+  position: absolute;
+  inset: 0;
+}
+
+.poster,
+.frame {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.poster {
+  z-index: 0;
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center bottom;
+  opacity: 1;
+}
+
+.frame {
+  z-index: 1;
+  object-fit: cover;
+  object-position: center bottom;
+  opacity: 0;
+  transition: opacity 0.25s ease;
+}
+
+.wrap[data-frames-ready='1'] .frame {
+  opacity: 1;
+}
+
+.bottomFade {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  background:
+    linear-gradient(
+      180deg,
+      rgba(242, 248, 252, 0.28) 0%,
+      transparent 28%,
+      transparent calc(48% - var(--wave-flow) * 6%),
+      rgba(242, 248, 252, calc(0.08 + var(--wave-flow) * 0.18)) 72%,
+      rgba(234, 243, 250, calc(0.42 + var(--wave-flow) * 0.38)) 100%
+    );
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .frame {
+    opacity: 0 !important;
+  }
+
+  .poster {
+    opacity: 1 !important;
+  }
+}

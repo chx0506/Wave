@@ -80,11 +80,11 @@
     0 10px 24px rgba(247, 251, 254, 0.95);
 }
 
-.day {
-  margin: 10px 0 0;
+.tide {
+  margin: 8px 0 0;
   font-size: 13px;
   font-weight: 500;
-  letter-spacing: 0.24em;
+  letter-spacing: 0.12em;
   color: #7a96ab;
   text-shadow: 0 1px 0 rgba(255, 255, 255, 0.9);
 }

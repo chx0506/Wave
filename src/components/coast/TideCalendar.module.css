@@ -60,6 +60,10 @@
   gap: 14px;
 }
 
+.scroll > * {
+  flex-shrink: 0;
+}
+
 .pager {
   display: flex;
   align-items: center;
@@ -81,11 +85,57 @@
 }
 
 .calCard {
+  --phase-menstrual: 232, 145, 122;
+  --phase-follicular: 107, 191, 160;
+  --phase-ovulatory: 61, 127, 212;
+  --phase-luteal: 224, 192, 106;
   padding: 12px 10px 14px;
   border-radius: 22px;
   background: rgba(255, 255, 255, 0.78);
   border: 1px solid rgba(255, 255, 255, 0.95);
   box-shadow: var(--shadow-card);
+}
+
+.phaseLegend {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px 10px;
+  margin-bottom: 10px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(126, 184, 232, 0.14);
+}
+
+.phaseLegendItem {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 9px;
+  color: var(--ink-soft);
+  letter-spacing: 0.04em;
+}
+
+.phaseSwatch {
+  width: 8px;
+  height: 8px;
+  border-radius: 3px;
+  flex-shrink: 0;
+}
+
+.phaseLegendItem[data-phase='menstrual'] .phaseSwatch {
+  background: rgba(var(--phase-menstrual), 0.62);
+}
+
+.phaseLegendItem[data-phase='follicular'] .phaseSwatch {
+  background: rgba(var(--phase-follicular), 0.62);
+}
+
+.phaseLegendItem[data-phase='ovulatory'] .phaseSwatch {
+  background: rgba(var(--phase-ovulatory), 0.62);
+}
+
+.phaseLegendItem[data-phase='luteal'] .phaseSwatch {
+  background: rgba(var(--phase-luteal), 0.68);
 }
 
 .weekdays {
@@ -106,15 +156,37 @@
 
 .day {
   position: relative;
-  min-height: 48px;
+  min-height: 58px;
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: flex-start;
   gap: 2px;
-  padding: 4px 0 2px;
+  padding: 3px 0 4px;
   border-radius: 14px;
   color: var(--ink);
   background: transparent;
+  border: 1px solid transparent;
+}
+
+.day[data-phase='menstrual'] {
+  background: rgba(var(--phase-menstrual), 0.22);
+  border-color: rgba(var(--phase-menstrual), 0.28);
+}
+
+.day[data-phase='follicular'] {
+  background: rgba(var(--phase-follicular), 0.24);
+  border-color: rgba(var(--phase-follicular), 0.3);
+}
+
+.day[data-phase='ovulatory'] {
+  background: rgba(var(--phase-ovulatory), 0.22);
+  border-color: rgba(var(--phase-ovulatory), 0.32);
+}
+
+.day[data-phase='luteal'] {
+  background: rgba(var(--phase-luteal), 0.18);
+  border-color: rgba(var(--phase-luteal), 0.24);
 }
 
 .day[data-today='true'] {
@@ -122,7 +194,8 @@
 }
 
 .day[data-selected='true'] {
-  background: rgba(186, 224, 246, 0.35);
+  background: rgba(186, 224, 246, 0.42);
+  box-shadow: inset 0 0 0 1.5px rgba(111, 168, 212, 0.65);
 }
 
 .dayNum {
@@ -131,26 +204,43 @@
   line-height: 1.2;
 }
 
-.drop,
-.moon {
+.phaseMark {
   display: grid;
   place-items: center;
-  color: var(--tide-deep);
+  width: 22px;
+  height: 22px;
+  opacity: 0.95;
+  filter: drop-shadow(0 1px 2px rgba(58, 83, 104, 0.12));
 }
 
-.drop[data-kind='period'] {
-  color: #d97868;
+.phaseMark img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  pointer-events: none;
 }
 
-.drop[data-kind='predicted'] {
-  color: #e8917a;
+.phaseMark[data-predicted='true'] {
+  opacity: 0.55;
+  filter: none;
 }
 
-.moon {
-  color: #5f9fcb;
+.phaseMark[data-predicted='true'] img {
+  outline: 1.5px dashed rgba(217, 120, 104, 0.75);
+  outline-offset: 1px;
+  border-radius: 4px;
+}
+
+.phaseMarkMini {
+  display: block;
+  object-fit: contain;
 }
 
 .phaseRow {
+  --phase-menstrual: 232, 145, 122;
+  --phase-follicular: 107, 191, 160;
+  --phase-ovulatory: 61, 127, 212;
+  --phase-luteal: 224, 192, 106;
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 8px;
@@ -168,8 +258,18 @@
 .phaseCard strong {
   display: block;
   margin-top: 2px;
-  font-size: 12px;
+  font-size: 13px;
+  font-weight: 700;
   color: var(--ink-strong);
+  letter-spacing: 0.02em;
+}
+
+.phaseSub {
+  display: block;
+  margin-top: 2px;
+  font-size: 10px;
+  color: var(--ink-soft);
+  letter-spacing: 0.06em;
 }
 
 .phaseCard p {
@@ -178,6 +278,22 @@
   line-height: 1.4;
   color: var(--ink-soft);
   white-space: pre-line;
+}
+
+.phaseCard[data-phase='menstrual'] {
+  background: linear-gradient(180deg, rgba(var(--phase-menstrual), 0.18) 0%, rgba(255, 255, 255, 0.92) 100%);
+}
+
+.phaseCard[data-phase='follicular'] {
+  background: linear-gradient(180deg, rgba(var(--phase-follicular), 0.2) 0%, rgba(255, 255, 255, 0.92) 100%);
+}
+
+.phaseCard[data-phase='ovulatory'] {
+  background: linear-gradient(180deg, rgba(var(--phase-ovulatory), 0.18) 0%, rgba(255, 255, 255, 0.92) 100%);
+}
+
+.phaseCard[data-phase='luteal'] {
+  background: linear-gradient(180deg, rgba(var(--phase-luteal), 0.14) 0%, rgba(255, 255, 255, 0.92) 100%);
 }
 
 .phaseIcon {
@@ -192,8 +308,8 @@
 }
 
 .phaseImg {
-  width: 40px;
-  height: 40px;
+  width: 44px;
+  height: 44px;
   object-fit: contain;
   pointer-events: none;
   user-select: none;
@@ -214,6 +330,21 @@
     linear-gradient(180deg, rgba(255, 255, 255, 0.92) 0%, rgba(240, 248, 253, 0.88) 100%);
   border: 1px solid rgba(255, 255, 255, 0.95);
   box-shadow: var(--shadow-card);
+  min-height: min-content;
+}
+
+.rhythm::after {
+  content: '';
+  position: absolute;
+  right: 8px;
+  bottom: 10px;
+  width: 72px;
+  height: 36px;
+  pointer-events: none;
+  z-index: 0;
+  border-radius: 0 0 18px 0;
+  background:
+    radial-gradient(ellipse 100% 90% at 100% 100%, rgba(111, 168, 212, 0.12) 0%, transparent 72%);
 }
 
 .rhythmHead {
@@ -221,6 +352,8 @@
   flex-direction: column;
   gap: 8px;
   margin-bottom: 4px;
+  position: relative;
+  z-index: 1;
 }
 
 .rhythmHead h3 {
@@ -235,15 +368,16 @@
 .legend {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px 10px;
-  font-size: 10px;
+  gap: 5px 8px;
+  font-size: 9px;
   color: var(--ink-soft);
 }
 
 .legend span {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: 3px;
+  white-space: nowrap;
 }
 
 .legToday {
@@ -258,21 +392,12 @@
 .chart {
   width: 100%;
   height: auto;
+  min-height: 128px;
   aspect-ratio: 320 / 128;
   display: block;
   position: relative;
   z-index: 1;
-}
-
-.seaweed {
-  position: absolute;
-  right: 6px;
-  bottom: 4px;
-  width: 72px;
-  height: 40px;
-  pointer-events: none;
-  z-index: 0;
-  opacity: 0.9;
+  flex-shrink: 0;
 }
 
 .markCta {
@@ -293,6 +418,18 @@
 
 .markCta:active {
   transform: scale(0.985);
+}
+
+.markCtaIcon {
+  width: 18px;
+  height: 18px;
+  object-fit: contain;
+  filter: brightness(1.05);
+}
+
+.hormoneSection {
+  width: 100%;
+  padding: 4px 0 2px;
 }
 
 @keyframes fadeIn {

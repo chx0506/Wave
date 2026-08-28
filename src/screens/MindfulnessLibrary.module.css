@@ -1,0 +1,379 @@
+.screen {
+  background:
+    radial-gradient(92% 52% at 10% -6%, rgba(197, 223, 242, 0.58) 0%, transparent 54%),
+    radial-gradient(72% 42% at 98% 2%, rgba(210, 232, 248, 0.42) 0%, transparent 50%),
+    linear-gradient(172deg, #eef5fb 0%, #f6fafd 44%, #eaf3fa 100%);
+}
+
+.screen::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image: var(--texture-paper);
+  background-size: 220px 220px;
+  opacity: 0.14;
+  mix-blend-mode: multiply;
+}
+
+.header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.iconBtn {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  color: var(--tide-deep);
+  background:
+    linear-gradient(180deg, #ffffff 0%, #f4f8fb 100%),
+    var(--texture-paper);
+  background-blend-mode: multiply, normal;
+  background-size: auto, 180px 180px;
+  border: 1px solid rgba(145, 186, 220, 0.28);
+  box-shadow: var(--shadow-emboss);
+  flex: 0 0 auto;
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.iconBtn:active {
+  transform: scale(0.94);
+}
+
+.body {
+  gap: 0;
+  padding-bottom: 16px;
+}
+
+/* ── 今日推荐大卡片 ── */
+.hero {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 160px;
+  margin-bottom: 26px;
+  padding: 0;
+  border: none;
+  border-radius: 22px;
+  text-align: left;
+  overflow: hidden;
+  box-shadow: var(--shadow-float);
+  transition:
+    transform 0.22s cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 0.22s ease;
+}
+
+.hero:active {
+  transform: scale(0.988);
+  box-shadow: var(--shadow-paper);
+}
+
+.heroSurface {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  border-radius: inherit;
+  background-color: #e3edf5;
+  background-image: url('/textures/mindfulness/hero-recommend-bg.png');
+  background-repeat: no-repeat;
+  background-size: 101% 102%;
+  background-position: center center;
+}
+
+.heroSurface::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background-image: var(--texture-paper);
+  background-size: 200px 200px;
+  opacity: 0.12;
+  mix-blend-mode: multiply;
+  pointer-events: none;
+}
+
+.heroTag {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 4;
+  padding: 4px 10px 4px 14px;
+  font-family: var(--font-display);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  line-height: 1.2;
+  white-space: nowrap;
+  color: var(--ink-strong);
+  background:
+    linear-gradient(180deg, #fcfdff 0%, #eef4fa 100%),
+    var(--texture-paper);
+  background-blend-mode: multiply, normal;
+  background-size: auto, 120px 120px;
+  clip-path: polygon(
+    12% 0%,
+    16% 14%,
+    11% 28%,
+    17% 42%,
+    12% 56%,
+    18% 70%,
+    13% 84%,
+    19% 100%,
+    100% 100%,
+    100% 0%
+  );
+  box-shadow:
+    0 2px 5px rgba(70, 100, 130, 0.14),
+    0 1px 0 rgba(255, 255, 255, 0.85) inset;
+}
+
+.heroCopy {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  gap: 8px;
+  width: 56%;
+  height: 100%;
+  min-height: 160px;
+  padding: 17px 6px 18px 18px;
+  box-sizing: border-box;
+}
+
+.heroTop {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.heroKicker {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--ink-strong);
+}
+
+.heroPhase {
+  margin: 0;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--ink-soft);
+}
+
+.heroTitleWrap {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  min-height: 0;
+}
+
+.heroTitle {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  line-height: 1.36;
+  color: var(--ink-strong);
+}
+
+.heroHint {
+  margin: 0;
+  font-size: 10px;
+  line-height: 1.5;
+  letter-spacing: 0.03em;
+  color: var(--ink-soft);
+  max-width: 20em;
+}
+
+/* ── 分区 ── */
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 11px;
+}
+
+.section + .section {
+  margin-top: 22px;
+}
+
+.sectionHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 1px;
+}
+
+.sectionTitle {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: var(--ink-strong);
+}
+
+.sectionMore {
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  color: var(--ink-faint);
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid rgba(145, 186, 220, 0.22);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.9) inset,
+    0 2px 6px -3px rgba(90, 140, 180, 0.18);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 11px;
+}
+
+/* ── 冥想小卡片 ── */
+.card {
+  position: relative;
+  display: grid;
+  grid-template-columns: 80px 1fr;
+  min-height: 84px;
+  border-radius: 20px;
+  overflow: hidden;
+  text-align: left;
+  isolation: isolate;
+  background: var(--foam);
+  border: 1px solid rgba(160, 200, 225, 0.36);
+  box-shadow: var(--shadow-paper);
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 14px;
+  right: 14px;
+  height: 1px;
+  z-index: 2;
+  pointer-events: none;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.92) 30%,
+    rgba(255, 255, 255, 0.92) 70%,
+    transparent 100%
+  );
+}
+
+.card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  border-radius: inherit;
+  background-image: var(--texture-paper);
+  background-size: 130px 130px;
+  opacity: 0.16;
+  mix-blend-mode: multiply;
+}
+
+.card:active {
+  transform: scale(0.982);
+}
+
+.cardArt {
+  position: relative;
+  display: block;
+  overflow: hidden;
+  background: linear-gradient(165deg, #dceaf5 0%, #c8dff0 100%);
+  box-shadow:
+    1px 0 0 rgba(255, 255, 255, 0.55) inset,
+    -2px 0 6px rgba(70, 110, 150, 0.1);
+}
+
+.cardArt::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: var(--texture-paper);
+  background-size: 90px 90px;
+  opacity: 0.14;
+  mix-blend-mode: multiply;
+  pointer-events: none;
+}
+
+.cardBody {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 6px;
+  padding: 10px 10px 10px 8px;
+  background:
+    linear-gradient(180deg, #fbfdff 0%, #f3f8fc 55%, #eaf2f8 100%),
+    var(--texture-paper);
+  background-blend-mode: multiply, normal;
+  background-size: auto, 110px 110px;
+  box-shadow:
+    -1px 0 0 rgba(180, 205, 225, 0.28) inset,
+    0 1px 0 rgba(255, 255, 255, 0.75) inset;
+}
+
+.cardTitle {
+  font-family: var(--font-display);
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.38;
+  letter-spacing: 0.04em;
+  color: var(--ink-strong);
+}
+
+.cardMeta {
+  display: inline-flex;
+  align-self: flex-start;
+  padding: 2px 7px;
+  border-radius: 6px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  color: var(--tide-deep);
+  background: rgba(159, 200, 232, 0.2);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.65) inset;
+}
+
+.thumbImg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  min-height: 84px;
+  object-fit: cover;
+  object-position: center;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero,
+  .card,
+  .iconBtn {
+    transition: none;
+  }
+
+  .hero:active,
+  .card:active,
+  .iconBtn:active {
+    transform: none;
+  }
+}

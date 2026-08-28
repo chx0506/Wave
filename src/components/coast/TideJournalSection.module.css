@@ -1,0 +1,433 @@
+.section {
+  position: relative;
+  isolation: isolate;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+  padding: 6px 0 6px;
+}
+
+.section::before {
+  content: '';
+  position: absolute;
+  inset: -6px -18px -14px;
+  z-index: -1;
+  pointer-events: none;
+  border-radius: 24px;
+  background:
+    linear-gradient(
+      180deg,
+      rgba(250, 252, 254, 0.42) 0%,
+      rgba(248, 251, 254, 0.52) 100%
+    );
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  mask-image: linear-gradient(180deg, transparent 0%, #000 12%, #000 90%, transparent 100%);
+  -webkit-mask-image: linear-gradient(180deg, transparent 0%, #000 12%, #000 90%, transparent 100%);
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .section::before {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    background:
+      linear-gradient(
+        180deg,
+        rgba(250, 252, 254, 0.72) 0%,
+        rgba(248, 251, 254, 0.82) 100%
+      );
+  }
+}
+
+/* ── 今日解读：直接浮在背景上 ── */
+
+.todayPanel {
+  padding: 0 4px;
+  text-align: center;
+}
+
+.cycleMeta {
+  margin: 0;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  color: var(--ink-soft);
+}
+
+.todayHeadline {
+  margin: 10px 0 0;
+  font-family: var(--font-display);
+  font-size: clamp(22px, 5.8vw, 26px);
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  line-height: 1.32;
+  color: var(--ink-strong);
+}
+
+.todayIntro {
+  margin: 10px auto 0;
+  max-width: 34ch;
+  font-size: 13px;
+  line-height: 1.78;
+  color: #3a5368;
+  letter-spacing: 0.02em;
+}
+
+/* ── 解读区：Stardust 故事流，无容器卡 ── */
+
+.decodeFlow {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  overflow: visible;
+}
+
+.decodePanel {
+  padding: 0 6px 4px;
+}
+
+.decodeProgress {
+  display: flex;
+  gap: 5px;
+  margin-bottom: 14px;
+}
+
+.decodeSegment {
+  flex: 1;
+  height: 3px;
+  border-radius: 999px;
+  background: rgba(145, 186, 220, 0.22);
+  transition: background 0.28s var(--ease), opacity 0.28s var(--ease);
+}
+
+.decodeSegment[data-active='1'] {
+  background: linear-gradient(90deg, #9fc8e8 0%, #7eb4dc 100%);
+}
+
+.decodeEyebrow {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--ink-strong);
+}
+
+.decodeBody {
+  margin: 10px 0 0;
+  font-size: 14px;
+  line-height: 1.78;
+  color: #3a5368;
+  letter-spacing: 0.02em;
+}
+
+/* ── 分类：放大纸浮雕图标横滑 ── */
+
+.decodeCards {
+  display: flex;
+  gap: 12px;
+  width: 100%;
+  margin: 0;
+  padding: 10px 20px 4px;
+  overflow-x: auto;
+  overflow-y: visible;
+  overscroll-behavior-x: contain;
+  touch-action: pan-x;
+  -webkit-overflow-scrolling: touch;
+  scroll-snap-type: x proximity;
+  scrollbar-width: none;
+}
+
+.decodeCards::-webkit-scrollbar {
+  display: none;
+}
+
+.decodeCard {
+  flex: 0 0 96px;
+  scroll-snap-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 8px;
+  min-height: 0;
+  padding: 0 2px 4px;
+  border: none;
+  background: transparent;
+  color: var(--ink-soft);
+  cursor: pointer;
+  transition:
+    color 0.24s var(--ease),
+    transform 0.24s var(--ease),
+    opacity 0.24s var(--ease);
+  opacity: 0.68;
+}
+
+.decodeCard[data-active='1'] {
+  color: var(--ink-strong);
+  opacity: 1;
+  transform: translateY(-3px) scale(1.04);
+}
+
+.decodeCard:active {
+  transform: scale(0.97);
+}
+
+.decodeCardLabel {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  line-height: 1.2;
+}
+
+.decodeCardIcon {
+  display: grid;
+  place-items: center;
+  width: 96px;
+  height: 96px;
+  margin: 0 auto;
+  background: transparent;
+}
+
+.decodeCardIcon img {
+  width: 96px;
+  height: 96px;
+  object-fit: contain;
+  filter: drop-shadow(0 5px 12px rgba(90, 140, 180, 0.2));
+  user-select: none;
+  pointer-events: none;
+  transition: filter 0.24s var(--ease), transform 0.24s var(--ease);
+}
+
+.decodeCard[data-active='1'] .decodeCardIcon img {
+  filter: drop-shadow(0 8px 16px rgba(90, 150, 200, 0.32));
+  transform: scale(1.04);
+}
+
+/* ── 知识区：phase 色晕 + 无硬边框 ── */
+
+.knowledgeBlock {
+  --phase-menstrual: 232, 145, 122;
+  --phase-follicular: 107, 191, 160;
+  --phase-ovulatory: 61, 127, 212;
+  --phase-luteal: 224, 192, 106;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 4px 4px 0;
+}
+
+.knowledgeBlock[data-phase='menstrual'] {
+  --phase-rgb: var(--phase-menstrual);
+}
+
+.knowledgeBlock[data-phase='follicular'] {
+  --phase-rgb: var(--phase-follicular);
+}
+
+.knowledgeBlock[data-phase='ovulatory'] {
+  --phase-rgb: var(--phase-ovulatory);
+}
+
+.knowledgeBlock[data-phase='luteal'] {
+  --phase-rgb: var(--phase-luteal);
+}
+
+.knowledgeHero {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 10px;
+  padding: 8px 0 4px;
+  position: relative;
+}
+
+.knowledgeHero::before {
+  content: '';
+  position: absolute;
+  inset: -20px -40px 0;
+  z-index: -1;
+  pointer-events: none;
+  background: radial-gradient(
+    70% 80% at 50% 30%,
+    rgba(var(--phase-rgb), 0.22) 0%,
+    transparent 72%
+  );
+}
+
+.knowledgeIcon {
+  display: grid;
+  place-items: center;
+  width: 72px;
+  height: 72px;
+}
+
+.knowledgeIcon img {
+  width: 72px;
+  height: 72px;
+  object-fit: contain;
+  filter: drop-shadow(0 3px 8px rgba(58, 83, 104, 0.14));
+  user-select: none;
+  pointer-events: none;
+}
+
+.knowledgeHeroText {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.knowledgePhase {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  line-height: 1.25;
+  color: var(--ink-strong);
+}
+
+.knowledgeTide {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  color: var(--ink-soft);
+}
+
+.knowledgeHint {
+  margin: 4px 0 0;
+  font-size: 11px;
+  line-height: 1.55;
+  color: var(--ink-soft);
+  white-space: pre-line;
+  letter-spacing: 0.02em;
+}
+
+.knowledgeToggle {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 0;
+  border: 0;
+  border-top: 1px solid rgba(145, 186, 220, 0.18);
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+}
+
+.knowledgeHeadText {
+  min-width: 0;
+}
+
+.knowledgeTitle {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--ink-strong);
+}
+
+.knowledgeMeta {
+  margin: 3px 0 0;
+  font-size: 11px;
+  color: var(--ink-soft);
+  letter-spacing: 0.02em;
+}
+
+.knowledgeChevron {
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  color: var(--ink-faint);
+  background: rgba(255, 255, 255, 0.55);
+  border: 1px solid rgba(126, 184, 232, 0.2);
+  transition: transform 0.22s var(--ease);
+}
+
+.knowledgeChevron[data-open='1'] {
+  transform: rotate(180deg);
+}
+
+.knowledgeBody {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding-bottom: 4px;
+}
+
+.knowledgeBlocks {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.knowledgeItem {
+  padding: 0;
+}
+
+.knowledgeItem h4 {
+  margin: 0;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--ink-strong);
+}
+
+.knowledgeItem p {
+  margin: 6px 0 0;
+  font-size: 12px;
+  line-height: 1.68;
+  color: var(--ink);
+}
+
+.knowledgeNote {
+  margin: 0;
+  padding: 0;
+  font-size: 11px;
+  line-height: 1.62;
+  color: var(--ink-soft);
+  letter-spacing: 0.02em;
+}
+
+.blessing {
+  margin: 0;
+  padding: 10px 12px;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  color: #5a4838;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.58);
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+}
+
+.blessing p {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 13px;
+  line-height: 1.65;
+  letter-spacing: 0.04em;
+}
+
+.blessing svg {
+  flex: 0 0 auto;
+  margin-top: 2px;
+  opacity: 0.65;
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .blessing {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    background: rgba(255, 255, 255, 0.9);
+  }
+}

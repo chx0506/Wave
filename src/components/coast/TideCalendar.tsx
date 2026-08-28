@@ -1,10 +1,12 @@
 import { SAMPLE_CYCLE, TODAY } from '@/data/sample'
-import phaseEbb from '@/assets/phases/ebb.png'
-import phaseHigh from '@/assets/phases/high.png'
-import phaseRise from '@/assets/phases/rise.png'
-import phaseSlack from '@/assets/phases/slack.png'
 import { monthCells, WEEKDAYS } from '@/domain/calendar'
-import { APP_NAME, PHASE_TIDE_LABEL } from '@/domain/copy'
+import { APP_NAME, PHASE_LABEL, TIDE_METAPHOR_SHORT } from '@/domain/copy'
+import {
+  PHASE_HINT,
+  PHASE_ICON,
+  PHASE_ORDER,
+  PHASE_RGB,
+} from '@/domain/phaseTheme'
 import {
   cycleDayNumber,
   phaseForCycleDay,
@@ -12,32 +14,17 @@ import {
 } from '@/domain/cycle'
 import { addDays, formatYearMonth, sameDay, startOfDay } from '@/domain/dates'
 import type { CalendarCell, Phase } from '@/domain/types'
+import { HormoneCurveChart } from '@/components/coast/HormoneCurveChart'
 import { CaretLeft, CaretRight, Drop, X } from '@phosphor-icons/react'
 import { useMemo, useState } from 'react'
 import styles from './TideCalendar.module.css'
 
-const PHASE_HINT: Record<Phase, string> = {
-  menstrual: '能量较低\n适合休息',
-  follicular: '状态上升\n适合行动',
-  ovulatory: '能量高峰\n释放光芒',
-  luteal: '平稳平衡\n适合整合',
-}
-
-const PHASE_ICON: Record<Phase, string> = {
-  menstrual: phaseEbb,
-  follicular: phaseRise,
-  ovulatory: phaseHigh,
-  luteal: phaseSlack,
-}
-
-const PHASE_ORDER: Phase[] = ['menstrual', 'follicular', 'ovulatory', 'luteal']
-
 const RHYTHM = {
-  period: '#E8917A',
-  periodDeep: '#D97868',
-  follicular: '#7EB8D8',
-  ovulatory: '#5F9FCB',
-  luteal: '#E0C06A',
+  period: '#D97868',
+  menstrual: `rgb(${PHASE_RGB.menstrual})`,
+  follicular: `rgb(${PHASE_RGB.follicular})`,
+  ovulatory: `rgb(${PHASE_RGB.ovulatory})`,
+  luteal: `rgb(${PHASE_RGB.luteal})`,
   today: '#6FA8D4',
   ink: '#3A5368',
   soft: '#A8BFCF',
@@ -84,6 +71,9 @@ export function TideCalendar({ onClose }: { onClose: () => void }) {
     setMonth(d.getMonth() + 1)
   }
 
+  const todayCycleDay = cycleDayNumber(TODAY, SAMPLE_CYCLE)
+  const selectedCycleDay = cycleDayNumber(selected, SAMPLE_CYCLE)
+
   return (
     <div className={styles.overlay} role="dialog" aria-modal="true" aria-label="潮汐日历">
       <header className={styles.header}>
@@ -111,6 +101,14 @@ export function TideCalendar({ onClose }: { onClose: () => void }) {
         </div>
 
         <section className={styles.calCard}>
+          <div className={styles.phaseLegend}>
+            {PHASE_ORDER.map((phase) => (
+              <span key={phase} className={styles.phaseLegendItem} data-phase={phase}>
+                <i className={styles.phaseSwatch} aria-hidden="true" />
+                {PHASE_LABEL[phase].replace('期', '')}
+              </span>
+            ))}
+          </div>
           <div className={styles.weekdays}>
             {WEEKDAYS.map((d) => (
               <span key={d}>{d}</span>
@@ -120,6 +118,7 @@ export function TideCalendar({ onClose }: { onClose: () => void }) {
             {cells.map((cell) => {
               if (cell.kind === 'empty') return <div key={cell.key} />
               const mark = dayMark(cell)
+              const phase = cell.snapshot.phase
               const isToday = sameDay(cell.date, TODAY)
               const isSelected = sameDay(cell.date, selected)
               return (
@@ -127,27 +126,22 @@ export function TideCalendar({ onClose }: { onClose: () => void }) {
                   key={cell.key}
                   type="button"
                   className={styles.day}
+                  data-phase={phase}
                   data-today={isToday}
                   data-selected={isSelected}
                   data-mark={mark}
                   onClick={() => setSelected(cell.date)}
+                  aria-label={`${cell.date.getDate()}日 ${PHASE_LABEL[phase]} ${TIDE_METAPHOR_SHORT[phase]}`}
                 >
                   <span className={styles.dayNum}>{cell.date.getDate()}</span>
-                  {mark === 'period' && (
-                    <span className={styles.drop} data-kind="period" aria-hidden="true">
-                      <DropFace />
-                    </span>
-                  )}
-                  {mark === 'predicted' && (
-                    <span className={styles.drop} data-kind="predicted" aria-hidden="true">
-                      <DropFace dashed />
-                    </span>
-                  )}
-                  {mark === 'ovulation' && (
-                    <span className={styles.moon} aria-hidden="true">
-                      <MoonGlyph />
-                    </span>
-                  )}
+                  <span
+                    className={styles.phaseMark}
+                    data-phase={phase}
+                    data-predicted={mark === 'predicted'}
+                    aria-hidden="true"
+                  >
+                    <img src={PHASE_ICON[phase]} alt="" />
+                  </span>
                 </button>
               )
             })}
@@ -160,7 +154,8 @@ export function TideCalendar({ onClose }: { onClose: () => void }) {
               <span className={styles.phaseIcon} aria-hidden="true">
                 <img className={styles.phaseImg} src={PHASE_ICON[phase]} alt="" />
               </span>
-              <strong>{PHASE_TIDE_LABEL[phase].replace('期', '')}</strong>
+              <strong>{PHASE_LABEL[phase]}</strong>
+              <span className={styles.phaseSub}>{TIDE_METAPHOR_SHORT[phase]}</span>
               <p>{PHASE_HINT[phase]}</p>
             </article>
           ))}
@@ -173,94 +168,46 @@ export function TideCalendar({ onClose }: { onClose: () => void }) {
               <span>
                 <i className={styles.legToday} /> 今日
               </span>
-              <span>
-                <MoonGlyph size={11} /> 排卵
-              </span>
-              <span>
-                <DropFace mini /> 经期
-              </span>
-              <span>
-                <DropFace mini dashed /> 预测
-              </span>
+              {PHASE_ORDER.map((phase) => (
+                <span key={phase}>
+                  <PhaseMark mini phase={phase} />
+                  {PHASE_LABEL[phase]}
+                </span>
+              ))}
             </div>
           </div>
           <RhythmChart todayCycleDay={cycleDayNumber(TODAY, SAMPLE_CYCLE)} />
-          <SeaweedDecor />
         </section>
 
         <button type="button" className={styles.markCta}>
-          <Drop size={16} weight="fill" />
+          <img className={styles.markCtaIcon} src={PHASE_ICON.menstrual} alt="" aria-hidden="true" />
           标记退潮开始
         </button>
+
+        <section className={styles.hormoneSection} aria-label="激素曲线">
+          <HormoneCurveChart
+            cycleLength={SAMPLE_CYCLE.cycleLength}
+            selectedDay={selectedCycleDay}
+            todayDay={todayCycleDay}
+            cycleConfig={SAMPLE_CYCLE}
+          />
+        </section>
       </div>
     </div>
   )
 }
 
-function DropFace({
-  dashed,
-  mini,
-}: {
-  dashed?: boolean
-  mini?: boolean
-}) {
-  const w = mini ? 10 : 16
-  const h = mini ? 12 : 18
+function PhaseMark({ phase, mini }: { phase: Phase; mini?: boolean }) {
+  const size = mini ? 14 : 22
   return (
-    <svg viewBox="0 0 24 28" width={w} height={h} aria-hidden="true">
-      <DropFaceMarks dashed={dashed} smile={!dashed && !mini} />
-    </svg>
-  )
-}
-
-function DropFaceMarks({ dashed, smile }: { dashed?: boolean; smile?: boolean }) {
-  return (
-    <>
-      <path
-        d="M12 2 C12 2 4 12 4 18 A8 8 0 0 0 20 18 C20 12 12 2 12 2 Z"
-        fill={dashed ? 'none' : RHYTHM.period}
-        stroke={dashed ? RHYTHM.period : 'none'}
-        strokeWidth={dashed ? 1.6 : 0}
-        strokeDasharray={dashed ? '2.4 1.8' : undefined}
-      />
-      {smile && (
-        <>
-          <circle cx="9.5" cy="17" r="1.1" fill="#fff" opacity="0.95" />
-          <circle cx="14.5" cy="17" r="1.1" fill="#fff" opacity="0.95" />
-          <path
-            d="M10 20.5 Q12 22 14 20.5"
-            fill="none"
-            stroke="#fff"
-            strokeWidth="1.1"
-            strokeLinecap="round"
-          />
-        </>
-      )}
-    </>
-  )
-}
-
-function MoonGlyph({ size = 14 }: { size?: number }) {
-  return (
-    <svg viewBox="0 0 20 20" width={size} height={size} aria-hidden="true">
-      <MoonMarks />
-    </svg>
-  )
-}
-
-function MoonMarks() {
-  return (
-    <>
-      <path
-        d="M12.8 3.2A7 7 0 1 0 16.8 13 5.6 5.6 0 0 1 12.8 3.2Z"
-        fill={RHYTHM.ovulatory}
-      />
-      <path
-        d="M15.2 4.2 L15.7 5.4 L17 5.6 L16 6.5 L16.3 7.8 L15.2 7.1 L14.1 7.8 L14.4 6.5 L13.4 5.6 L14.7 5.4 Z"
-        fill={RHYTHM.ovulatory}
-        opacity="0.85"
-      />
-    </>
+    <img
+      className={styles.phaseMarkMini}
+      src={PHASE_ICON[phase]}
+      alt=""
+      width={size}
+      height={size}
+      aria-hidden="true"
+    />
   )
 }
 
@@ -280,15 +227,10 @@ function rhythmPoint(day: number, length: number, w: number, padX: number, midY:
   return { x, y, phase: phaseForCycleDay(day, SAMPLE_CYCLE) }
 }
 
-function phaseStroke(phase: Phase, day: number): { color: string; dashed: boolean } {
-  const { menstrual } = SAMPLE_CYCLE.phaseWindows
-  // Soft predicted buffer just after known period length (common tracker pattern)
-  if (day > menstrual && day <= menstrual + 2) {
-    return { color: RHYTHM.period, dashed: true }
-  }
+function phaseStroke(phase: Phase): { color: string; dashed: boolean } {
   switch (phase) {
     case 'menstrual':
-      return { color: RHYTHM.period, dashed: false }
+      return { color: RHYTHM.menstrual, dashed: false }
     case 'follicular':
       return { color: RHYTHM.follicular, dashed: false }
     case 'ovulatory':
@@ -296,6 +238,43 @@ function phaseStroke(phase: Phase, day: number): { color: string; dashed: boolea
     case 'luteal':
       return { color: RHYTHM.luteal, dashed: false }
   }
+}
+
+function rhythmPhaseIconDay(phase: Phase, config = SAMPLE_CYCLE): number {
+  const { menstrual, follicular, ovulatory, luteal } = config.phaseWindows
+  switch (phase) {
+    case 'menstrual':
+      return Math.max(1, Math.round(menstrual / 2))
+    case 'follicular':
+      return menstrual + Math.round(follicular / 2)
+    case 'ovulatory':
+      return menstrual + follicular + Math.round(ovulatory / 2)
+    case 'luteal':
+      return menstrual + follicular + ovulatory + Math.round(luteal / 2)
+  }
+}
+
+function RhythmPhaseIcon({
+  phase,
+  x,
+  y,
+  size = 24,
+}: {
+  phase: Phase
+  x: number
+  y: number
+  size?: number
+}) {
+  return (
+    <image
+      href={PHASE_ICON[phase]}
+      x={x - size / 2}
+      y={y - size - 6}
+      width={size}
+      height={size}
+      aria-hidden="true"
+    />
+  )
 }
 
 function RhythmChart({ todayCycleDay }: { todayCycleDay: number }) {
@@ -314,7 +293,7 @@ function RhythmChart({ todayCycleDay }: { todayCycleDay: number }) {
   const polylines: { points: string; color: string; dashed: boolean }[] = []
   let current: { points: string[]; color: string; dashed: boolean } | null = null
   for (let i = 0; i < pts.length; i += 1) {
-    const stroke = phaseStroke(pts[i].phase, i + 1)
+    const stroke = phaseStroke(pts[i].phase)
     const pair = `${pts[i].x.toFixed(2)},${pts[i].y.toFixed(2)}`
     if (!current || current.color !== stroke.color || current.dashed !== stroke.dashed) {
       if (current) {
@@ -332,27 +311,14 @@ function RhythmChart({ todayCycleDay }: { todayCycleDay: number }) {
   }
 
   const labelDays = [1, 4, 7, 10, 13, 16, 19, 22, 25, 28].filter((d) => d <= length)
-  const { menstrual, follicular, ovulatory } = SAMPLE_CYCLE.phaseWindows
-  const iconDays = {
-    waves: 2,
-    drop: Math.max(2, Math.round(menstrual * 0.55)),
-    sun: Math.min(
-      length - 1,
-      menstrual + follicular + ovulatory + Math.round(SAMPLE_CYCLE.phaseWindows.luteal * 0.35),
-    ),
-    moon: menstrual + follicular + Math.ceil(ovulatory / 2),
-  }
 
   return (
     <svg className={styles.chart} viewBox={`0 0 ${w} ${h}`} role="img" aria-label="28天潮汐节律曲线">
-      <WaveCrestIcon x={pts[iconDays.waves - 1].x} y={pts[iconDays.waves - 1].y - 18} />
-      <g transform={`translate(${pts[iconDays.drop - 1].x - 9}, ${pts[iconDays.drop - 1].y - 28}) scale(0.75)`}>
-        <DropFaceMarks smile />
-      </g>
-      <HorizonIcon x={pts[iconDays.sun - 1].x} y={pts[iconDays.sun - 1].y - 16} />
-      <g transform={`translate(${pts[iconDays.moon - 1].x - 8}, ${pts[iconDays.moon - 1].y - 22}) scale(0.9)`}>
-        <MoonMarks />
-      </g>
+      {PHASE_ORDER.map((phase) => {
+        const iconDay = rhythmPhaseIconDay(phase)
+        const p = pts[iconDay - 1]
+        return <RhythmPhaseIcon key={phase} phase={phase} x={p.x} y={p.y} />
+      })}
 
       {polylines.map((line, i) => (
         <polyline
@@ -370,7 +336,7 @@ function RhythmChart({ todayCycleDay }: { todayCycleDay: number }) {
 
       {pts.map((p, i) => {
         const d = i + 1
-        const stroke = phaseStroke(p.phase, d)
+        const stroke = phaseStroke(p.phase)
         return (
           <circle
             key={`dot-${d}`}
@@ -406,99 +372,6 @@ function RhythmChart({ todayCycleDay }: { todayCycleDay: number }) {
           </g>
         )
       })}
-    </svg>
-  )
-}
-
-function WaveCrestIcon({ x, y }: { x: number; y: number }) {
-  return (
-    <g transform={`translate(${x - 12}, ${y - 8})`} opacity="0.95">
-      <path
-        d="M2 12 Q6 6 10 12 Q14 6 18 12"
-        fill="none"
-        stroke={RHYTHM.follicular}
-        strokeWidth="1.8"
-        strokeLinecap="round"
-      />
-      <path
-        d="M1 8 Q6 2 11 8 Q16 2 21 8"
-        fill="none"
-        stroke={RHYTHM.ovulatory}
-        strokeWidth="1.8"
-        strokeLinecap="round"
-      />
-      <path
-        d="M3 15 Q7 11 11 15 Q15 11 19 15"
-        fill="none"
-        stroke={RHYTHM.follicular}
-        strokeWidth="1.5"
-        strokeLinecap="round"
-        opacity="0.7"
-      />
-    </g>
-  )
-}
-
-function HorizonIcon({ x, y }: { x: number; y: number }) {
-  return (
-    <g transform={`translate(${x - 11}, ${y - 10})`}>
-      <path d="M3 12 A9 9 0 0 1 19 12" fill={RHYTHM.luteal} opacity="0.95" />
-      <path
-        d="M1 14 Q6 11 11 14 Q16 11 21 14"
-        fill="none"
-        stroke={RHYTHM.follicular}
-        strokeWidth="1.4"
-        strokeLinecap="round"
-      />
-      <path
-        d="M2 17 Q7 14.5 11 17 Q15 14.5 20 17"
-        fill="none"
-        stroke={RHYTHM.follicular}
-        strokeWidth="1.2"
-        strokeLinecap="round"
-        opacity="0.75"
-      />
-    </g>
-  )
-}
-
-function SeaweedDecor() {
-  return (
-    <svg className={styles.seaweed} viewBox="0 0 72 40" aria-hidden="true">
-      <path
-        d="M12 38 C10 28 16 24 14 14 C13 8 18 4 18 4"
-        fill="none"
-        stroke="#7EB8D8"
-        strokeWidth="2.2"
-        strokeLinecap="round"
-        opacity="0.55"
-      />
-      <path
-        d="M22 38 C24 30 20 26 23 16 C25 10 22 6 22 6"
-        fill="none"
-        stroke="#E8917A"
-        strokeWidth="2"
-        strokeLinecap="round"
-        opacity="0.45"
-      />
-      <path
-        d="M32 38 C30 29 34 25 31 15 C29 9 33 5 33 5"
-        fill="none"
-        stroke="#6FA8D4"
-        strokeWidth="2.4"
-        strokeLinecap="round"
-        opacity="0.5"
-      />
-      <circle cx="48" cy="30" r="3.5" fill="#E0C06A" opacity="0.4" />
-      <circle cx="56" cy="24" r="2.6" fill="#E8917A" opacity="0.35" />
-      <path
-        d="M60 38 C58 32 62 28 60 20"
-        fill="none"
-        stroke="#9FC8E8"
-        strokeWidth="1.8"
-        strokeLinecap="round"
-        opacity="0.45"
-      />
     </svg>
   )
 }

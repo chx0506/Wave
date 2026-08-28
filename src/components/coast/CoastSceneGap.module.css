@@ -1,0 +1,134 @@
+.gap {
+  position: relative;
+  width: 100%;
+  flex: 0 0 auto;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.gap[data-size='regular'] {
+  height: 34px;
+  margin: 6px 0 2px;
+}
+
+.gap[data-size='compact'] {
+  height: 22px;
+  margin: 2px 0;
+}
+
+.gap[data-size='spacious'] {
+  height: 28px;
+  margin: 14px 0 6px;
+}
+
+.gap[data-variant='crab'][data-size='spacious'] {
+  height: 116px;
+  margin: 6px 0 2px;
+}
+
+.rippleSvg,
+.surgeSvg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.rippleA,
+.rippleB {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+.gap[data-variant='ripple'][data-active='1'] .rippleA {
+  animation: rippleDrift 5.6s linear infinite;
+}
+
+.gap[data-variant='ripple'][data-active='1'] .rippleB {
+  animation: rippleDrift 7.2s linear infinite reverse;
+}
+
+.surgeCrest {
+  transform-box: fill-box;
+  transform-origin: center bottom;
+  transform: translate3d(0, 8px, 0) scaleY(0.82);
+  opacity: 0.5;
+}
+
+.surgeLine {
+  transform-box: fill-box;
+  transform-origin: center;
+  opacity: 0.65;
+}
+
+.gap[data-variant='surge'][data-active='1'] .surgeCrest {
+  animation: surgeLift 1.1s var(--ease) forwards;
+}
+
+.gap[data-variant='surge'][data-active='1'] .surgeLine {
+  animation: surgeLineDrift 4.8s linear infinite;
+}
+
+.crabTrack {
+  position: absolute;
+  inset: 0;
+}
+
+.crab {
+  position: absolute;
+  left: -14%;
+  top: 50%;
+  width: 112px;
+  height: 112px;
+  object-fit: contain;
+  object-position: center;
+  transform: translate3d(0, -50%, 0);
+  filter: drop-shadow(0 3px 8px rgba(90, 140, 180, 0.22));
+  opacity: 0;
+  pointer-events: none;
+  will-change: left, transform, opacity;
+}
+
+.gap[data-size='spacious'] .crab {
+  width: 116px;
+  height: 116px;
+}
+
+@keyframes rippleDrift {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(-12px, 0, 0);
+  }
+}
+
+@keyframes surgeLift {
+  to {
+    transform: translate3d(0, 0, 0) scaleY(1);
+    opacity: 1;
+  }
+}
+
+@keyframes surgeLineDrift {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(-16px, 0, 0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rippleA,
+  .rippleB,
+  .surgeCrest,
+  .surgeLine {
+    animation: none !important;
+  }
+
+  .surgeCrest {
+    transform: none;
+    opacity: 0.75;
+  }
+}

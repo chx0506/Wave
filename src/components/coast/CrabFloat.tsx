@@ -1,3 +1,4 @@
+import { CrabMark } from '@/components/coast/CrabMark'
 import { CRAB_LINES, CRAB_NAME } from '@/domain/copy'
 import type { Phase } from '@/domain/types'
 import { X } from '@phosphor-icons/react'
@@ -59,34 +60,3 @@ export function CrabFloat({
   )
 }
 
-function CrabMark() {
-  return (
-    <svg width="28" height="28" viewBox="0 0 28 28" aria-hidden="true">
-      <circle cx="14" cy="14" r="14" fill="var(--tide-wash)" />
-      <ellipse cx="14" cy="16" rx="7.5" ry="5.5" fill="var(--tide)" />
-      <circle cx="11" cy="14.5" r="1.2" fill="#fff" />
-      <circle cx="17" cy="14.5" r="1.2" fill="#fff" />
-      <path
-        d="M6 15 C4 12, 5 9, 7.5 10"
-        fill="none"
-        stroke="var(--tide-deep)"
-        strokeWidth="1.6"
-        strokeLinecap="round"
-      />
-      <path
-        d="M22 15 C24 12, 23 9, 20.5 10"
-        fill="none"
-        stroke="var(--tide-deep)"
-        strokeWidth="1.6"
-        strokeLinecap="round"
-      />
-      <path
-        d="M9 20 C11 22, 17 22, 19 20"
-        fill="none"
-        stroke="var(--tide-deep)"
-        strokeWidth="1.4"
-        strokeLinecap="round"
-      />
-    </svg>
-  )
-}

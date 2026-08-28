@@ -1,3 +1,4 @@
+import { MoodGlyph, moodDiscStyle } from '@/components/coast/MoodGlyph'
 import { Leaf, X } from '@phosphor-icons/react'
 import { useState } from 'react'
 import flowDry from '@/assets/flow/flow-dry.png'
@@ -127,21 +128,30 @@ export function RecordSheet({
           <section className={styles.section}>
             <h3 className={styles.sectionTitle}>心情</h3>
             <div className={styles.moodRow}>
-              {MOODS.map((item) => (
-                <button
-                  key={item.id}
-                  type="button"
-                  className={styles.moodCard}
-                  data-on={mood === item.id}
-                  onClick={() => setMood(item.id)}
-                >
-                  <span className={styles.moodFace} data-tone={item.tone} aria-hidden="true">
-                    <MoodGlyph tone={item.tone} />
-                  </span>
-                  <span className={styles.moodLabel}>{item.label}</span>
-                  <span className={styles.radio} data-on={mood === item.id} />
-                </button>
-              ))}
+              {MOODS.map((item) => {
+                const selected = mood === item.id
+                return (
+                  <button
+                    key={item.id}
+                    type="button"
+                    className={styles.moodCard}
+                    data-on={selected}
+                    onClick={() => setMood(item.id)}
+                  >
+                    <span
+                      className={styles.moodFace}
+                      data-tone={item.tone}
+                      data-on={selected ? '1' : '0'}
+                      style={moodDiscStyle(item.tone, selected)}
+                      aria-hidden="true"
+                    >
+                      <MoodGlyph tone={item.tone} />
+                    </span>
+                    <span className={styles.moodLabel}>{item.label}</span>
+                    <span className={styles.radio} data-on={selected} />
+                  </button>
+                )
+              })}
             </div>
           </section>
 
@@ -176,28 +186,5 @@ export function RecordSheet({
         </div>
       </div>
     </div>
-  )
-}
-
-function MoodGlyph({ tone }: { tone: string }) {
-  return (
-    <svg viewBox="0 0 44 44" width="40" height="40">
-      <circle cx="22" cy="22" r="20" fill="currentColor" opacity="0.18" />
-      <circle cx="15" cy="19" r="2" fill="currentColor" />
-      <circle cx="29" cy="19" r="2" fill="currentColor" />
-      {tone === 'happy' ? (
-        <path d="M15 26 Q22 32 29 26" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-      ) : tone === 'low' ? (
-        <path d="M15 30 Q22 24 29 30" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-      ) : tone === 'irritable' ? (
-        <>
-          <path d="M14 27 H30" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-          <path d="M10 12 L14 16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-          <path d="M34 12 L30 16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-        </>
-      ) : (
-        <path d="M16 28 Q22 30 28 28" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-      )}
-    </svg>
   )
 }

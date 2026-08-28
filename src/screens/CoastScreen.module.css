@@ -1,4 +1,6 @@
 .screen {
+  --wave-reveal: 0.55;
+  --wave-flow: 0;
   position: relative;
   flex: 1;
   min-height: 0;
@@ -6,27 +8,56 @@
   flex-direction: column;
   overflow: hidden;
   background:
-    radial-gradient(90% 50% at 50% 0%, rgba(210, 230, 244, 0.45) 0%, transparent 55%),
-    linear-gradient(180deg, #f4f8fb 0%, #f8fbfc 42%, #eef4f8 100%);
+    radial-gradient(92% 52% at 50% 0%, rgba(196, 224, 244, 0.42) 0%, transparent 58%),
+    linear-gradient(180deg, #f8fbfe 0%, #f2f8fc 40%, #eaf3fa 100%);
 }
 
-.botany {
+.waveMist {
   position: absolute;
   inset: 0;
-  width: 100%;
-  height: 100%;
   pointer-events: none;
-  z-index: 0;
+  z-index: 1;
+  background:
+    linear-gradient(
+      180deg,
+      transparent 0%,
+      transparent 52%,
+      rgba(242, 248, 252, calc(var(--wave-reveal) * 0.08 + var(--wave-flow) * 0.06)) 72%,
+      rgba(234, 243, 250, calc(var(--wave-reveal) * 0.14 + var(--wave-flow) * 0.22)) 100%
+    );
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .waveMist {
+    background:
+      linear-gradient(
+        180deg,
+        transparent 0%,
+        transparent 40%,
+        rgba(248, 251, 254, calc(var(--wave-reveal) * 0.58)) 62%,
+        rgba(246, 250, 253, calc(var(--wave-reveal) * 0.72)) 100%
+      );
+  }
 }
 
 .header {
-  position: relative;
-  z-index: 2;
-  padding: calc(var(--statusbar-h) + 6px) 22px 0;
+  position: sticky;
+  top: 0;
+  z-index: 3;
+  flex-shrink: 0;
+  padding: calc(var(--statusbar-h) + 6px) 22px 10px;
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
   gap: 12px;
+  background: linear-gradient(
+    180deg,
+    rgba(248, 251, 254, 0.94) 0%,
+    rgba(248, 251, 254, 0.82) 72%,
+    rgba(248, 251, 254, 0) 100%
+  );
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
 }
 
 .brandBlock {
@@ -81,70 +112,103 @@
   display: grid;
   place-items: center;
   color: var(--ink-strong);
-  background: var(--foam);
-  border: 1px solid rgba(145, 186, 220, 0.28);
-  box-shadow: var(--shadow-emboss);
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid rgba(145, 186, 220, 0.22);
+  box-shadow: 0 4px 14px -8px rgba(90, 140, 180, 0.35);
 }
 
-.body {
+.scroll {
   position: relative;
   z-index: 2;
   flex: 1;
   min-height: 0;
-  overflow: auto;
+  overflow-x: hidden;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  outline: none;
+  touch-action: pan-y;
+}
+
+.body {
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 12px;
-  padding: 12px 18px 20px;
+  gap: 8px;
+  padding: 8px 18px 20px;
 }
 
-.metrics {
+.scrollTail {
+  flex-shrink: 0;
   width: 100%;
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 10px;
+  height: clamp(240px, 40vh, 320px);
 }
 
-.metric {
+.body > * {
+  flex-shrink: 0;
+  width: 100%;
+}
+
+.dialStack {
+  width: 100%;
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
+  align-items: center;
   gap: 6px;
-  padding: 14px 12px 16px;
-  border-radius: 22px;
-  background: var(--foam);
-  border: 1px solid rgba(145, 186, 220, 0.18);
-  box-shadow: var(--shadow-paper);
-  min-width: 0;
 }
 
-.metricIcon {
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  display: grid;
-  place-items: center;
-  color: var(--tide-deep);
-  background: rgba(197, 223, 242, 0.45);
+.journalLead {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 
-.metricLabel {
-  margin: 2px 0 0;
-  font-size: 11px;
-  font-weight: 600;
-  color: var(--ink-soft);
-  letter-spacing: 0.02em;
+.body[data-other-day='1'] {
+  gap: 4px;
+  padding-bottom: 12px;
 }
 
-.metricValue {
+.body[data-other-day='1'] .journalLead {
+  gap: 6px;
+}
+
+.otherDayPanel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 4px 16px 0;
+  text-align: center;
+}
+
+.otherDayHint {
   margin: 0;
+  font-size: 13px;
+  line-height: 1.55;
+  letter-spacing: 0.02em;
+  color: var(--ink-soft);
+}
+
+.epigraph {
+  margin: 0;
+  padding: 0 8px;
+  max-width: min(86vw, 320px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
   font-family: var(--font-display);
-  font-size: 18px;
-  font-weight: 700;
-  color: var(--ink-strong);
-  letter-spacing: 0.04em;
-  line-height: 1.15;
+  font-size: clamp(13px, 3.6vw, 15px);
+  font-weight: 600;
+  line-height: 1.55;
+  letter-spacing: 0.12em;
+  color: #5a7890;
+}
+
+.epigraph span {
+  display: block;
+  white-space: nowrap;
 }
 
 .cta {

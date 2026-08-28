@@ -1,6 +1,6 @@
 import type { CycleConfig } from '@/domain/types'
 
-/** Mock cycle aligned with home dial (today = day 8, 涨潮期). */
+/** Mock cycle aligned with home dial (today = day 8, 卵泡期). */
 export const TODAY = new Date(2026, 7, 26)
 
 export const SAMPLE_CYCLE: CycleConfig = {

@@ -1,7 +1,7 @@
 import { PhoneFrame } from '@/components/chrome/PhoneFrame'
 import { StatusBar } from '@/components/chrome/StatusBar'
 import { TabBar } from '@/components/chrome/TabBar'
-import { BayScreen } from '@/screens/BayScreen'
+import { MindfulnessScreen } from '@/screens/MindfulnessScreen'
 import { CoastScreen } from '@/screens/CoastScreen'
 import { ExploreScreen } from '@/screens/ExploreScreen'
 import { MeScreen } from '@/screens/MeScreen'
@@ -20,7 +20,7 @@ export function AppShell() {
         <main className={styles.main}>
           {tab === Tabs.home ? <CoastScreen /> : null}
           {tab === Tabs.observe ? <ObserveScreen /> : null}
-          {tab === Tabs.bay ? <BayScreen /> : null}
+          {tab === Tabs.bay ? <MindfulnessScreen /> : null}
           {tab === Tabs.explore ? <ExploreScreen /> : null}
           {tab === Tabs.me ? <MeScreen /> : null}
         </main>
