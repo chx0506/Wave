@@ -1,10 +1,11 @@
 import {
+  EXPLORE_ARTICLES,
   EXPLORE_ISLANDS,
   EXPLORE_STARS,
   type ExploreIsland,
 } from '@/data/content'
 import { USER_DISPLAY_NAME } from '@/domain/copy'
-import { LockSimple, Star } from '@phosphor-icons/react'
+import { BookOpen, Check, LockSimple, Star, X } from '@phosphor-icons/react'
 import { useState } from 'react'
 import shell from './shared/pageShell.module.css'
 import styles from './ExploreScreen.module.css'
@@ -24,9 +25,19 @@ const PATH = [
 export function ExploreScreen() {
   const current = EXPLORE_ISLANDS.find((i) => i.current) ?? EXPLORE_ISLANDS[0]
   const [selectedId, setSelectedId] = useState<string>(current.id)
+  const [sheet, setSheet] = useState<{
+    island: ExploreIsland
+    kind: 'explore' | 'article'
+  } | null>(null)
+  const [completed, setCompleted] = useState<string[]>([])
   const selected =
     EXPLORE_ISLANDS.find((i) => i.id === selectedId) ?? current
+  const selectedStars = Math.min(
+    selected.stars + (completed.includes(selected.id) ? 1 : 0),
+    selected.starsMax,
+  )
   const unlocked = EXPLORE_ISLANDS.filter((i) => !i.locked).length
+  const earnedStars = completed.length
 
   return (
     <div className={shell.screen}>
@@ -52,7 +63,7 @@ export function ExploreScreen() {
           </div>
           <div className={styles.starsHud}>
             <Star size={14} weight="fill" />
-            <span>{EXPLORE_STARS}</span>
+            <span>{EXPLORE_STARS + earnedStars}</span>
             <em>{unlocked}/{EXPLORE_ISLANDS.length} 岛</em>
           </div>
         </div>
@@ -113,13 +124,16 @@ export function ExploreScreen() {
               </p>
               <h2 className={styles.detailTitle}>{selected.title}</h2>
             </div>
-            <div className={styles.starRow} aria-label={`星星 ${selected.stars}/${selected.starsMax}`}>
+            <div
+              className={styles.starRow}
+              aria-label={`星星 ${selectedStars}/${selected.starsMax}`}
+            >
               {Array.from({ length: selected.starsMax }, (_, i) => (
                 <Star
                   key={i}
                   size={16}
-                  weight={i < selected.stars ? 'fill' : 'regular'}
-                  className={i < selected.stars ? styles.starOn : styles.starOff}
+                  weight={i < selectedStars ? 'fill' : 'regular'}
+                  className={i < selectedStars ? styles.starOn : styles.starOff}
                 />
               ))}
             </div>
@@ -133,10 +147,19 @@ export function ExploreScreen() {
               </button>
             ) : (
               <>
-                <button type="button" className={styles.primaryBtn}>
+                <button
+                  type="button"
+                  className={styles.primaryBtn}
+                  onClick={() => setSheet({ island: selected, kind: 'explore' })}
+                >
                   继续探索
                 </button>
-                <button type="button" className={styles.ghostBtn}>
+                <button
+                  type="button"
+                  className={styles.ghostBtn}
+                  onClick={() => setSheet({ island: selected, kind: 'article' })}
+                >
+                  <BookOpen size={14} weight="bold" />
                   阅读科普
                 </button>
               </>
@@ -147,6 +170,119 @@ export function ExploreScreen() {
           </p>
         </article>
       </div>
+      {sheet ? (
+        <ArticleSheet
+          island={sheet.island}
+          kind={sheet.kind}
+          article={
+            EXPLORE_ARTICLES.find(
+              (item) => item.islandId === sheet.island.id,
+            ) ?? EXPLORE_ARTICLES[0]
+          }
+          completed={completed.includes(sheet.island.id)}
+          onClose={() => setSheet(null)}
+          onComplete={() => {
+            setCompleted((items) =>
+              items.includes(sheet.island.id)
+                ? items
+                : [...items, sheet.island.id],
+            )
+            setSheet(null)
+          }}
+        />
+      ) : null}
+    </div>
+  )
+}
+
+function ArticleSheet({
+  island,
+  kind,
+  article,
+  completed,
+  onClose,
+  onComplete,
+}: {
+  island: ExploreIsland
+  kind: 'explore' | 'article'
+  article: (typeof EXPLORE_ARTICLES)[number]
+  completed: boolean
+  onClose: () => void
+  onComplete: () => void
+}) {
+  const isExplore = kind === 'explore'
+
+  return (
+    <div className={styles.sheetBackdrop} role="presentation" onClick={onClose}>
+      <section
+        className={styles.sheet}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="article-title"
+        onClick={(event) => event.stopPropagation()}
+      >
+        <span className={styles.sheetHandle} aria-hidden="true" />
+        <button
+          type="button"
+          className={styles.sheetClose}
+          onClick={onClose}
+          aria-label="关闭内容"
+        >
+          <X size={18} />
+        </button>
+        <p className={styles.detailKicker}>
+          {isExplore ? '探索路径' : article.eyebrow} · {article.readTime}
+        </p>
+        <h2 id="article-title" className={styles.sheetTitle}>
+          {isExplore ? `继续探索 · ${island.title}` : island.title}
+        </h2>
+        <p className={styles.sheetLead}>
+          {isExplore
+            ? '沿着这座岛留下的线索，完成一次轻量探索。'
+            : article.lead}
+        </p>
+        <div className={styles.articleBody}>
+          {isExplore ? (
+            <ol className={styles.exploreSteps}>
+              <li>
+                <span>1</span>
+                <p>先发现：看看这座岛正在讲什么，找到一个和你有关的问题。</p>
+              </li>
+              <li>
+                <span>2</span>
+                <p>再观察：回到今天的身体感受，记下出现的时间、强度和变化。</p>
+              </li>
+              <li>
+                <span>3</span>
+                <p>留线索：完成探索后点亮一颗星，下次回来和过去的自己比较。</p>
+              </li>
+            </ol>
+          ) : (
+            <>
+              {article.paragraphs.map((paragraph) => (
+                <p key={paragraph}>{paragraph}</p>
+              ))}
+              <p className={styles.articleTakeaway}>{article.takeaway}</p>
+            </>
+          )}
+        </div>
+        <button
+          type="button"
+          className={styles.sheetCta}
+          onClick={onComplete}
+          disabled={completed}
+        >
+          {completed ? (
+            <>
+              <Check size={17} weight="bold" /> 已点亮一颗星
+            </>
+          ) : isExplore ? (
+            '完成探索，点亮一颗星'
+          ) : (
+            '完成阅读，点亮一颗星'
+          )}
+        </button>
+      </section>
     </div>
   )
 }
