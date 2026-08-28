@@ -1,6 +1,7 @@
 import {
   EXPLORE_ARTICLES,
   EXPLORE_ISLANDS,
+  EXPLORE_LOCKED_ARTICLE_IDS,
   EXPLORE_STARS,
   type ExploreArticle,
   type ExploreIsland,
@@ -65,6 +66,7 @@ export function ExploreScreen() {
   const [dragging, setDragging] = useState(false)
   const [sheet, setSheet] = useState<SheetState | null>(null)
   const [completed, setCompleted] = useState<string[]>([])
+  const [unlockedArticles, setUnlockedArticles] = useState<string[]>([])
 
   const selected = EXPLORE_ISLANDS.find((island) => island.id === selectedId) ?? current
   const selectedArticles = EXPLORE_ARTICLES.filter((article) => article.islandId === selected.id)
@@ -148,6 +150,9 @@ export function ExploreScreen() {
   }
 
   const completeKey = sheet?.kind === 'article' ? sheet.article.id : `explore:${sheet?.island.id}`
+  const articleLocked = sheet?.kind === 'article'
+    ? EXPLORE_LOCKED_ARTICLE_IDS.has(sheet.article.id) && !unlockedArticles.includes(sheet.article.id)
+    : false
 
   return (
     <div className={shell.screen}>
@@ -271,7 +276,12 @@ export function ExploreScreen() {
           completed={completed.includes(completeKey)}
           onClose={() => setSheet(null)}
           onOpenArticle={(article) => setSheet({ island: selected, kind: 'article', article })}
+          locked={articleLocked}
           onComplete={() => {
+            if (articleLocked && sheet?.kind === 'article') {
+              setUnlockedArticles((items) => [...items, sheet.article.id])
+              return
+            }
             setCompleted((items) => (items.includes(completeKey) ? items : [...items, completeKey]))
             setSheet(null)
           }}
@@ -344,6 +354,7 @@ function IslandNode({
           type="button"
           key={article.id}
           className={styles.mapObject}
+          data-locked={EXPLORE_LOCKED_ARTICLE_IDS.has(article.id)}
           data-completed={completed.includes(article.id)}
           style={{
             left: `calc(50% + ${article.objectX * 5}px)`,
@@ -354,7 +365,7 @@ function IslandNode({
         >
           <ObjectGlyph kind={article.objectKind} />
           <span className={styles.objectLabel}>{article.objectLabel}</span>
-          {completed.includes(article.id) ? <span className={styles.paperMark} aria-label="已阅读">✦</span> : null}
+          {completed.includes(article.id) ? <span className={styles.paperMark} aria-label="已阅读">✦</span> : EXPLORE_LOCKED_ARTICLE_IDS.has(article.id) ? <span className={styles.articleLockMark} aria-label="需要解锁"><LockSimple size={7} weight="bold" /></span> : null}
         </button>
       )) : null}
     </div>
@@ -379,7 +390,7 @@ function ObjectGlyph({ kind }: { kind: ExploreObjectKind }) {
   )
 }
 
-function ArticleSheet({ sheet, articles, completed, onClose, onOpenArticle, onComplete }: { sheet: SheetState; articles: ExploreArticle[]; completed: boolean; onClose: () => void; onOpenArticle: (article: ExploreArticle) => void; onComplete: () => void }) {
+function ArticleSheet({ sheet, articles, completed, locked, onClose, onOpenArticle, onComplete }: { sheet: SheetState; articles: ExploreArticle[]; completed: boolean; locked: boolean; onClose: () => void; onOpenArticle: (article: ExploreArticle) => void; onComplete: () => void }) {
   const article = sheet.kind === 'article' ? sheet.article : null
   return (
     <div className={styles.sheetBackdrop} role="presentation" onClick={onClose}>
@@ -388,16 +399,19 @@ function ArticleSheet({ sheet, articles, completed, onClose, onOpenArticle, onCo
         <button type="button" className={styles.sheetClose} onClick={onClose} aria-label="关闭内容"><X size={18} /></button>
         <p className={styles.detailKicker}>{article ? `${article.eyebrow} · ${article.readTime}` : '探索路径 · 约 1 分钟'}</p>
         <h2 id="article-title" className={styles.sheetTitle}>{article?.title ?? `探索 ${sheet.island.title}`}</h2>
-        <p className={styles.sheetLead}>{article?.lead ?? '放大岛屿，寻找物件，再沿着物件进入一篇具体的科普文章。'}</p>
+        <p className={styles.sheetLead}>{locked ? '这篇科普文章是岛上的特别藏品，解锁后即可阅读完整内容。' : article?.lead ?? '放大岛屿，寻找物件，再沿着物件进入一篇具体的科普文章。'}</p>
         <div className={styles.articleBody}>
-          {article ? <>{article.paragraphs.map((paragraph) => <p key={paragraph}>{paragraph}</p>)}<p className={styles.articleTakeaway}>{article.takeaway}</p></> : (
+          {locked ? <div className={styles.articleLocked}><LockSimple size={22} /><strong>特别文章，尚未解锁</strong><span>岛屿可以自由探索，部分知识物件需要额外解锁。</span></div> : article ? <>{article.paragraphs.map((paragraph) => <p key={paragraph}>{paragraph}</p>)}<p className={styles.articleTakeaway}>{article.takeaway}</p></> : (
             <>
               <p>这座岛藏着 {articles.length} 个物件，每个物件都对应一篇科普文章。沿着地图里的地貌慢慢寻找，找到哪个就读哪个。</p>
               <div className={styles.objectList}>
                 {articles.map((item) => (
-                  <button type="button" key={item.id} className={styles.objectListItem} onClick={() => onOpenArticle(item)}>
-                    <span>{item.objectLabel}</span>
-                    <strong>{item.title}</strong>
+                  <button type="button" key={item.id} className={styles.objectListItem} data-locked={EXPLORE_LOCKED_ARTICLE_IDS.has(item.id)} onClick={() => onOpenArticle(item)}>
+                    <span className={styles.objectListGlyph}><ObjectGlyph kind={item.objectKind} /></span>
+                    <span className={styles.objectListCopy}>
+                      <small>{EXPLORE_LOCKED_ARTICLE_IDS.has(item.id) ? '需解锁 · ' : ''}{item.objectLabel}</small>
+                      <strong>{item.title}</strong>
+                    </span>
                     <em>{item.readTime}</em>
                   </button>
                 ))}
@@ -406,7 +420,7 @@ function ArticleSheet({ sheet, articles, completed, onClose, onOpenArticle, onCo
           )}
         </div>
         <button type="button" className={styles.sheetCta} onClick={article ? onComplete : onClose} disabled={article ? completed : false}>
-          {completed ? <><Check size={17} weight="bold" /> 已完成</> : article ? '完成阅读，留下探索标记' : '返回地图寻找物件'}
+          {locked ? '解锁这篇文章' : completed ? <><Check size={17} weight="bold" /> 已完成</> : article ? '完成阅读，留下探索标记' : '返回地图寻找物件'}
         </button>
       </section>
     </div>
@@ -415,13 +429,13 @@ function ArticleSheet({ sheet, articles, completed, onClose, onOpenArticle, onCo
 
 function IslandGlyph({ tone, locked }: { tone: ExploreIsland['tone']; locked: boolean }) {
   const palette: Record<ExploreIsland['tone'], [string, string, string]> = {
-    meadow: ['#86bf91', '#b8dfa9', '#5f956a'], autumn: ['#d99a5e', '#efc27b', '#bd6848'], frost: ['#c7deed', '#eef7fa', '#8eb5cb'], magic: ['#ad91d2', '#d7c7ec', '#7552a8'], rock: ['#929eac', '#c2c9cf', '#6f7a89'], tropic: ['#dbbd78', '#f1dda4', '#5d9d6b'], sand: ['#d7b985', '#f0d6a6', '#bc8f62'], harbor: ['#80b9df', '#b7d9ed', '#4f8db8'],
+    meadow: ['#86bf91', '#b8dfa9', '#5f956a'], autumn: ['#d99a5e', '#efc27b', '#bd6848'], frost: ['#c7deed', '#eef7fa', '#8eb5cb'], magic: ['#ad91d2', '#d7c7ec', '#7552a8'], rock: ['#929eac', '#c2c9cf', '#6f7a89'], tropic: ['#dbbd78', '#f1dda4', '#5d9d6b'], sand: ['#d7b985', '#f0d6a6', '#bc8f62'],
   }
   const [base, top, accent] = palette[tone]
   return (
     <svg viewBox="0 0 72 54" width="72" height="54" aria-hidden="true" style={{ opacity: locked ? 0.48 : 1 }}>
       <ellipse cx="36" cy="46" rx="30" ry="6" fill="rgba(48,91,128,.2)" /><ellipse cx="36" cy="36" rx="29" ry="14" fill={base} /><ellipse cx="36" cy="32" rx="21" ry="10" fill={top} />
-      {tone === 'rock' || tone === 'harbor' ? <><path d="M28 35 36 14l9 21Z" fill={accent} /><rect x="35" y="18" width="4" height="12" fill="#f3f0df" /></> : <><circle cx="25" cy="27" r="7" fill={accent} /><circle cx="48" cy="25" r="8" fill={accent} /><rect x="33" y="28" width="8" height="8" rx="1" fill="#f4ead8" /></>}
+      {tone === 'rock' ? <><path d="M28 35 36 14l9 21Z" fill={accent} /><rect x="35" y="18" width="4" height="12" fill="#f3f0df" /></> : <><circle cx="25" cy="27" r="7" fill={accent} /><circle cx="48" cy="25" r="8" fill={accent} /><rect x="33" y="28" width="8" height="8" rx="1" fill="#f4ead8" /></>}
     </svg>
   )
 }

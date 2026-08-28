@@ -181,10 +181,10 @@ export const EXPLORE_STARS = 14
 
 export const EXPLORE_ISLANDS = [
   {
-    id: 'cycle',
-    title: '周期四季',
-    short: '周期',
-    blurb: '退潮、涨潮、满潮、平潮分别意味着什么',
+    id: 'pain',
+    title: '疼痛',
+    short: '疼痛',
+    blurb: '识别疼痛的表现、强度与生活背景',
     stars: 3,
     starsMax: 3,
     locked: false,
@@ -194,10 +194,10 @@ export const EXPLORE_ISLANDS = [
     tone: 'meadow',
   },
   {
-    id: 'pms',
-    title: 'PMS 小岛',
-    short: 'PMS',
-    blurb: '经前情绪、睡眠与身体变化的常见线索',
+    id: 'relief',
+    title: '缓解',
+    short: '缓解',
+    blurb: '从呼吸、休息和轻量调整开始照顾自己',
     stars: 1,
     starsMax: 3,
     locked: false,
@@ -208,7 +208,7 @@ export const EXPLORE_ISLANDS = [
   },
   {
     id: 'sleep',
-    title: '睡眠潮汐',
+    title: '睡眠',
     short: '睡眠',
     blurb: '为什么有些夜晚更容易醒',
     stars: 1,
@@ -221,7 +221,7 @@ export const EXPLORE_ISLANDS = [
   },
   {
     id: 'mood',
-    title: '情绪海湾',
+    title: '情绪',
     short: '情绪',
     blurb: '情绪像天气一样变化，也可以被温柔观察',
     stars: 0,
@@ -233,10 +233,10 @@ export const EXPLORE_ISLANDS = [
     tone: 'magic',
   },
   {
-    id: 'pain',
-    title: '疼痛灯塔',
-    short: '痛经',
-    blurb: '痛经与压力、睡眠的关系',
+    id: 'disease',
+    title: '疾病',
+    short: '疾病',
+    blurb: '理解健康边界，知道何时寻求专业帮助',
     stars: 0,
     starsMax: 3,
     locked: false,
@@ -247,21 +247,21 @@ export const EXPLORE_ISLANDS = [
   },
   {
     id: 'move',
-    title: '运动海岸',
+    title: '运动',
     short: '运动',
     blurb: '不同阶段适合怎样的活动强度',
     stars: 0,
     starsMax: 3,
-    locked: true,
+    locked: false,
     current: false,
     x: 48,
     y: 78,
     tone: 'tropic',
   },
   {
-    id: 'food',
-    title: '饮食潮池',
-    short: '饮食',
+    id: 'nutrition',
+    title: '营养',
+    short: '营养',
     blurb: '轻量调整饮食，观察身体反馈',
     stars: 1,
     starsMax: 3,
@@ -270,19 +270,6 @@ export const EXPLORE_ISLANDS = [
     x: 42,
     y: 48,
     tone: 'sand',
-  },
-  {
-    id: 'health',
-    title: '健康灯塔',
-    short: '健康',
-    blurb: '女性健康知识的起点，慢慢展开',
-    stars: 0,
-    starsMax: 3,
-    locked: true,
-    current: false,
-    x: 12,
-    y: 42,
-    tone: 'harbor',
   },
 ] as const
 
@@ -315,12 +302,25 @@ export type ExploreArticle = {
   lead: string
   paragraphs: string[]
   takeaway: string
+  locked?: boolean
 }
+
+/** Demo-only article locks; islands themselves remain freely viewable. */
+export const EXPLORE_LOCKED_ARTICLE_IDS = new Set([
+  'cycle-length',
+  'pms-observe',
+  'sleep-caffeine',
+  'mood-space',
+  'pain-help',
+  'move-build',
+  'food-after-period',
+  'health-boundary',
+])
 
 export const EXPLORE_ARTICLES: ExploreArticle[] = [
   {
     id: 'cycle-four-seasons',
-    islandId: 'cycle',
+    islandId: 'disease',
     title: '认识周期的四个季节',
     objectLabel: '四季树',
     objectKind: 'tree',
@@ -337,7 +337,7 @@ export const EXPLORE_ARTICLES: ExploreArticle[] = [
   },
   {
     id: 'cycle-length',
-    islandId: 'cycle',
+    islandId: 'disease',
     title: '周期一定是 28 天吗？',
     objectLabel: '潮汐石',
     objectKind: 'shell',
@@ -354,7 +354,7 @@ export const EXPLORE_ARTICLES: ExploreArticle[] = [
   },
   {
     id: 'cycle-follicular',
-    islandId: 'cycle',
+    islandId: 'disease',
     title: '经后为什么常感觉轻快？',
     objectLabel: '新芽帐篷',
     objectKind: 'tent',
@@ -371,7 +371,7 @@ export const EXPLORE_ARTICLES: ExploreArticle[] = [
   },
   {
     id: 'pms-signals',
-    islandId: 'pms',
+    islandId: 'relief',
     title: '经前身体会发出哪些信号？',
     objectLabel: '红叶营地',
     objectKind: 'camp',
@@ -388,7 +388,7 @@ export const EXPLORE_ARTICLES: ExploreArticle[] = [
   },
   {
     id: 'pms-self-care',
-    islandId: 'pms',
+    islandId: 'relief',
     title: '经前不舒服时，先做什么？',
     objectLabel: '暖茶桌',
     objectKind: 'tea',
@@ -405,7 +405,7 @@ export const EXPLORE_ARTICLES: ExploreArticle[] = [
   },
   {
     id: 'pms-observe',
-    islandId: 'pms',
+    islandId: 'relief',
     title: '怎样判断变化是否反复出现？',
     objectLabel: '观察手册',
     objectKind: 'book',
@@ -626,7 +626,7 @@ export const EXPLORE_ARTICLES: ExploreArticle[] = [
   },
   {
     id: 'food-energy',
-    islandId: 'food',
+    islandId: 'nutrition',
     title: '一餐怎样更稳定地补充能量？',
     objectLabel: '能量餐桌',
     objectKind: 'tea',
@@ -643,7 +643,7 @@ export const EXPLORE_ARTICLES: ExploreArticle[] = [
   },
   {
     id: 'food-iron',
-    islandId: 'food',
+    islandId: 'nutrition',
     title: '经期饮食可以关注什么？',
     objectLabel: '铁元素贝壳',
     objectKind: 'shell',
@@ -660,7 +660,7 @@ export const EXPLORE_ARTICLES: ExploreArticle[] = [
   },
   {
     id: 'food-after-period',
-    islandId: 'food',
+    islandId: 'nutrition',
     title: '经后如何把能量慢慢补回来？',
     objectLabel: '椰子树',
     objectKind: 'coconut',
@@ -677,7 +677,7 @@ export const EXPLORE_ARTICLES: ExploreArticle[] = [
   },
   {
     id: 'health-map',
-    islandId: 'health',
+    islandId: 'disease',
     title: '怎样建立自己的身体地图？',
     objectLabel: '健康图书馆',
     objectKind: 'book',
@@ -694,7 +694,7 @@ export const EXPLORE_ARTICLES: ExploreArticle[] = [
   },
   {
     id: 'health-record',
-    islandId: 'health',
+    islandId: 'disease',
     title: '记录什么，才真正有帮助？',
     objectLabel: '观察花圃',
     objectKind: 'flower',
@@ -711,7 +711,7 @@ export const EXPLORE_ARTICLES: ExploreArticle[] = [
   },
   {
     id: 'health-boundary',
-    islandId: 'health',
+    islandId: 'disease',
     title: '科普、观察和诊断有什么不同？',
     objectLabel: '边界灯塔',
     objectKind: 'lighthouse',
