@@ -124,7 +124,7 @@ export function ObserveScreen() {
           )}
           <button
             type="button"
-            className={shell.cta}
+            className={`${shell.cta} ${styles.paperPrimary}`}
             onClick={() => setSheet('create')}
           >
             <span>开始新的身体小实验</span>
@@ -373,11 +373,14 @@ function ActiveExperiment({
           Day {progress.currentDay}/{experiment.totalDays}
         </span>
       </div>
-      <h2 className={shell.cardTitle}>{experiment.question}</h2>
+      <div className={styles.questionBlock}>
+        <span className={styles.questionLabel}>想验证</span>
+        <h2 className={styles.questionTitle}>{experiment.question}</h2>
+      </div>
       <div className={styles.tryBlock}>
         <div className={styles.tryLabel}>
           <Sparkle size={13} weight="fill" />
-          <span>现在要做</span>
+          <span>今天这样做</span>
         </div>
         <strong className={styles.tryValue}>{experiment.try}</strong>
       </div>
@@ -401,7 +404,7 @@ function ActiveExperiment({
         />
       </div>
       <button type="button" className={styles.secondary} onClick={onRecord}>
-        记录今日观察
+        <span>记录今日观察</span>
         <ArrowRight size={14} weight="bold" />
       </button>
       <button

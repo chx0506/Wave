@@ -18,7 +18,7 @@
 .mapViewport[data-dragging='true'] { cursor: grabbing; }
 .mapWorld { position: absolute; inset: 0; transform-origin: 0 0; transition: transform .58s cubic-bezier(.22,.75,.22,1); will-change: transform; }
 .mapViewport[data-dragging='true'] .mapWorld { transition: none; }
-.oceanSvg { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.oceanSvg { position: absolute; inset: 0; width: 100%; height: 100%; display: block; object-fit: cover; object-position: center; pointer-events: none; user-select: none; }
 .mapGuide { position: absolute; z-index: 8; right: 10px; bottom: 10px; left: 10px; display: flex; align-items: center; justify-content: space-between; gap: 8px; pointer-events: none; }
 .mapGuide span { position: relative; min-width: 0; padding: 5px 9px 5px 17px; color: rgba(49,91,115,.82); background: rgba(255,253,246,.56); border: 0; border-bottom: 1px solid rgba(84,135,164,.34); border-radius: 2px 8px 3px 3px; font-size: 9px; font-weight: 700; letter-spacing: .02em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; transform: rotate(-1.2deg); }
 .mapGuide span::before { content: ''; position: absolute; top: 50%; left: 7px; width: 4px; height: 4px; border-radius: 50%; background: var(--paper-wave-deep); box-shadow: 0 0 0 2px rgba(255,255,255,.64); transform: translateY(-50%); }

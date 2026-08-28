@@ -19,7 +19,6 @@ import shell from './shared/pageShell.module.css'
 import styles from './ExploreScreen.module.css'
 
 const MAP_ZOOM = 2.15
-const PATH = EXPLORE_ISLANDS.map(({ x, y }) => [x, y])
 
 type Camera = { scale: number; x: number; y: number }
 type SheetState =
@@ -292,27 +291,7 @@ export function ExploreScreen() {
 }
 
 function OceanBackdrop() {
-  return (
-    <svg className={styles.oceanSvg} viewBox="0 0 100 100" aria-hidden="true">
-      <defs>
-        <linearGradient id="sea" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#cbeaf7" />
-          <stop offset="58%" stopColor="#94ccec" />
-          <stop offset="100%" stopColor="#72b4e3" />
-        </linearGradient>
-        <pattern id="ripples" width="12" height="8" patternUnits="userSpaceOnUse">
-          <path d="M1 4 Q3 2.5 5 4 T9 4" fill="none" stroke="rgba(255,255,255,.42)" strokeWidth=".38" />
-        </pattern>
-      </defs>
-      <rect width="100" height="100" fill="url(#sea)" />
-      <rect width="100" height="100" fill="url(#ripples)" opacity=".78" />
-      <polyline points={PATH.map(([x, y]) => `${x},${y}`).join(' ')} fill="none" stroke="rgba(255,255,255,.68)" strokeWidth=".7" strokeDasharray="1.3 1.2" strokeLinecap="round" />
-      <g fill="rgba(255,255,255,.55)">
-        <ellipse cx="7" cy="8" rx="12" ry="5" /><ellipse cx="94" cy="12" rx="11" ry="4" />
-        <ellipse cx="91" cy="91" rx="13" ry="5" /><ellipse cx="8" cy="92" rx="11" ry="4" />
-      </g>
-    </svg>
-  )
+  return <img className={styles.oceanSvg} src="/textures/explore-map-bg.png" alt="" aria-hidden="true" draggable={false} />
 }
 
 function IslandNode({
