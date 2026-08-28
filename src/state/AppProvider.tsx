@@ -1,6 +1,15 @@
 import { SAMPLE_CYCLE, TODAY } from '@/data/sample'
+import { OBSERVE_ACTIVE, OBSERVE_CLUES } from '@/data/content'
 import { snapshotForDate } from '@/domain/cycle'
-import { DayModes, Tabs, type DayMode, type TabId } from '@/domain/types'
+import {
+  DayModes,
+  Tabs,
+  type BodyClue,
+  type DayMode,
+  type Experiment,
+  type ExperimentCategory,
+  type TabId,
+} from '@/domain/types'
 import { AppContext } from '@/state/useAppState'
 import { useCallback, useMemo, useState, type ReactNode } from 'react'
 
@@ -10,6 +19,28 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [selectedDate, setSelectedDate] = useState<Date>(TODAY)
   const [viewedYear, setViewedYear] = useState(TODAY.getFullYear())
   const [viewedMonthNum, setViewedMonthNum] = useState(TODAY.getMonth() + 1)
+  const [experiments, setExperiments] = useState<Experiment[]>([
+    {
+      id: 'exp-sleep',
+      category: 'sleep',
+      question: OBSERVE_ACTIVE.question,
+      try: OBSERVE_ACTIVE.try,
+      watch: OBSERVE_ACTIVE.watch,
+      totalDays: OBSERVE_ACTIVE.total,
+      currentDay: OBSERVE_ACTIVE.day,
+      status: 'active',
+      startedAt: new Date(2026, 7, 22),
+      observations: [],
+    },
+  ])
+  const [clues, setClues] = useState<BodyClue[]>(
+    OBSERVE_CLUES.map((clue, index) => ({
+      ...clue,
+      id: `clue-${index}`,
+      category: index === 0 ? 'sleep' : index === 1 ? 'energy' : 'pain',
+      status: clue.status as BodyClue['status'],
+    })),
+  )
 
   const setViewedMonth = useCallback((year: number, month: number) => {
     setViewedYear(year)
@@ -26,6 +57,86 @@ export function AppProvider({ children }: { children: ReactNode }) {
     [selectedDate, snapshotFor],
   )
 
+  const createExperiment = useCallback(
+    (input: {
+      category: ExperimentCategory
+      question: string
+      try: string
+      watch: readonly string[]
+      totalDays: number
+    }) => {
+      setExperiments((previous) => [
+        {
+          ...input,
+          watch: [...input.watch],
+          id: `exp-${Date.now()}`,
+          currentDay: 0,
+          status: 'active',
+          startedAt: new Date(),
+          observations: [],
+        },
+        ...previous,
+      ])
+    },
+    [],
+  )
+
+  const recordObservation = useCallback(
+    (
+      id: string,
+      values: Record<string, string>,
+      completedTry: boolean,
+      note?: string,
+    ) => {
+      const target = experiments.find((item) => item.id === id)
+      if (!target || target.status === 'completed') return
+
+      const day = target.currentDay + 1
+      const completed = day >= target.totalDays
+      setExperiments((previous) =>
+        previous.map((item) =>
+          item.id === id
+            ? {
+                ...item,
+                currentDay: day,
+                status: completed ? 'completed' : 'active',
+                observations: [
+                  ...item.observations,
+                  { day, date: new Date(), values, completedTry, note },
+                ],
+              }
+            : item,
+        ),
+      )
+
+      if (completed) {
+        setClues((previous) => [
+          {
+            id: `clue-${Date.now()}`,
+            title: `${target.question.replace('为什么', '').replace('？', '')} · 出现了新的线索`,
+            note: '完成一次身体实验后生成，继续在下个周期观察',
+            category: target.category,
+            status: 'pending',
+            shells: 1,
+            sourceExperimentTitle: target.question,
+            observationDays: target.totalDays,
+            sourceExperimentId: target.id,
+          },
+          ...previous,
+        ])
+      }
+    },
+    [experiments],
+  )
+
+  const confirmClue = useCallback((id: string) => {
+    setClues((previous) =>
+      previous.map((clue) =>
+        clue.id === id ? { ...clue, status: 'confirmed' } : clue,
+      ),
+    )
+  }, [])
+
   const value = useMemo(
     () => ({
       tab,
@@ -40,8 +151,27 @@ export function AppProvider({ children }: { children: ReactNode }) {
       today: TODAY,
       snapshot,
       snapshotFor,
+      experiments,
+      clues,
+      createExperiment,
+      recordObservation,
+      confirmClue,
     }),
-    [tab, mode, selectedDate, viewedYear, viewedMonthNum, setViewedMonth, snapshot, snapshotFor],
+    [
+      tab,
+      mode,
+      selectedDate,
+      viewedYear,
+      viewedMonthNum,
+      setViewedMonth,
+      snapshot,
+      snapshotFor,
+      experiments,
+      clues,
+      createExperiment,
+      recordObservation,
+      confirmClue,
+    ],
   )
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>
