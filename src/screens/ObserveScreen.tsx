@@ -73,7 +73,7 @@ export function ObserveScreen() {
       </header>
 
       <div className={styles.paperWaveBand} aria-hidden="true">
-        <span className={styles.waveFoamLine} />
+        {/* <span className={styles.waveFoamLine} /> */}
       </div>
 
       <div className={`${shell.body} ${styles.observeBody}`}>
@@ -383,6 +383,10 @@ function ActiveExperiment({
           <span>今天这样做</span>
         </div>
         <strong className={styles.tryValue}>{experiment.try}</strong>
+        <button type="button" className={styles.actionRecord} onClick={onRecord}>
+          <span>记录今天</span>
+          <ArrowRight size={13} weight="bold" />
+        </button>
       </div>
       <div className={styles.watchRow} aria-label="观察这些变量">
         <span className={styles.watchLabel}>
@@ -403,10 +407,6 @@ function ActiveExperiment({
           }}
         />
       </div>
-      <button type="button" className={styles.secondary} onClick={onRecord}>
-        <span>记录今日观察</span>
-        <ArrowRight size={14} weight="bold" />
-      </button>
       <button
         type="button"
         className={styles.feedbackTrigger}
