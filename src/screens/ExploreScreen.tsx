@@ -2,42 +2,152 @@ import {
   EXPLORE_ARTICLES,
   EXPLORE_ISLANDS,
   EXPLORE_STARS,
+  type ExploreArticle,
   type ExploreIsland,
+  type ExploreObjectKind,
 } from '@/data/content'
 import { USER_DISPLAY_NAME } from '@/domain/copy'
-import { BookOpen, Check, LockSimple, Star, X } from '@phosphor-icons/react'
-import { useState } from 'react'
+import { Check, LockSimple, Star, X } from '@phosphor-icons/react'
+import {
+  useEffect,
+  useRef,
+  useState,
+  type PointerEvent as ReactPointerEvent,
+} from 'react'
 import shell from './shared/pageShell.module.css'
 import styles from './ExploreScreen.module.css'
 
-/** Soft path through the archipelago (percent coords). */
-const PATH = [
-  [18, 62],
-  [28, 28],
-  [42, 48],
-  [58, 18],
-  [78, 38],
-  [72, 68],
-  [48, 78],
-  [12, 42],
-]
+const MAP_ZOOM = 2.15
+const PATH = EXPLORE_ISLANDS.map(({ x, y }) => [x, y])
+
+type Camera = { scale: number; x: number; y: number }
+type SheetState =
+  | { island: ExploreIsland; kind: 'explore' }
+  | { island: ExploreIsland; kind: 'article'; article: ExploreArticle }
+
+function clampCamera(camera: Camera, width: number, height: number): Camera {
+  const minX = Math.min(0, width - width * camera.scale)
+  const minY = Math.min(0, height - height * camera.scale)
+  return {
+    ...camera,
+    x: Math.min(0, Math.max(minX, camera.x)),
+    y: Math.min(0, Math.max(minY, camera.y)),
+  }
+}
+
+function cameraForIsland(island: ExploreIsland, width: number, height: number) {
+  return clampCamera(
+    {
+      scale: MAP_ZOOM,
+      x: width / 2 - width * MAP_ZOOM * (island.x / 100),
+      y: height / 2 - height * MAP_ZOOM * (island.y / 100),
+    },
+    width,
+    height,
+  )
+}
 
 export function ExploreScreen() {
-  const current = EXPLORE_ISLANDS.find((i) => i.current) ?? EXPLORE_ISLANDS[0]
-  const [selectedId, setSelectedId] = useState<string>(current.id)
-  const [sheet, setSheet] = useState<{
-    island: ExploreIsland
-    kind: 'explore' | 'article'
+  const current = EXPLORE_ISLANDS.find((island) => island.current) ?? EXPLORE_ISLANDS[0]
+  const viewportRef = useRef<HTMLDivElement>(null)
+  const dragRef = useRef<{
+    pointerId: number
+    startX: number
+    startY: number
+    cameraX: number
+    cameraY: number
+    captured: boolean
   } | null>(null)
+  const draggedRef = useRef(false)
+  const [selectedId, setSelectedId] = useState<string>(current.id)
+  const [focusedId, setFocusedId] = useState<string | null>(null)
+  const [camera, setCamera] = useState<Camera>({ scale: 1, x: 0, y: 0 })
+  const [dragging, setDragging] = useState(false)
+  const [sheet, setSheet] = useState<SheetState | null>(null)
   const [completed, setCompleted] = useState<string[]>([])
-  const selected =
-    EXPLORE_ISLANDS.find((i) => i.id === selectedId) ?? current
-  const selectedStars = Math.min(
-    selected.stars + (completed.includes(selected.id) ? 1 : 0),
-    selected.starsMax,
-  )
-  const unlocked = EXPLORE_ISLANDS.filter((i) => !i.locked).length
-  const earnedStars = completed.length
+
+  const selected = EXPLORE_ISLANDS.find((island) => island.id === selectedId) ?? current
+  const selectedArticles = EXPLORE_ARTICLES.filter((article) => article.islandId === selected.id)
+  const selectedCompleted = selectedArticles.filter((article) => completed.includes(article.id)).length
+  const selectedStars = Math.min(selected.stars + selectedCompleted, selected.starsMax)
+  const unlocked = EXPLORE_ISLANDS.filter((island) => !island.locked).length
+  const isFocused = focusedId !== null
+  const nextArticle = selectedArticles.find((article) => !completed.includes(article.id)) ?? selectedArticles[0]
+
+  const focusIsland = (island: ExploreIsland) => {
+    if (draggedRef.current) return
+    const viewport = viewportRef.current
+    if (!viewport) return
+    setSelectedId(island.id)
+    setFocusedId(island.id)
+    setCamera(cameraForIsland(island, viewport.clientWidth, viewport.clientHeight))
+  }
+
+  const showOverview = () => {
+    setFocusedId(null)
+    setCamera({ scale: 1, x: 0, y: 0 })
+  }
+
+  useEffect(() => {
+    const viewport = viewportRef.current
+    if (!viewport) return
+    const observer = new ResizeObserver(() => {
+      const island = EXPLORE_ISLANDS.find((item) => item.id === focusedId)
+      setCamera(
+        island
+          ? cameraForIsland(island, viewport.clientWidth, viewport.clientHeight)
+          : { scale: 1, x: 0, y: 0 },
+      )
+    })
+    observer.observe(viewport)
+    return () => observer.disconnect()
+  }, [focusedId])
+
+  const handlePointerDown = (event: ReactPointerEvent<HTMLDivElement>) => {
+    if (!isFocused || event.button !== 0) return
+    draggedRef.current = false
+    dragRef.current = {
+      pointerId: event.pointerId,
+      startX: event.clientX,
+      startY: event.clientY,
+      cameraX: camera.x,
+      cameraY: camera.y,
+      captured: false,
+    }
+  }
+
+  const handlePointerMove = (event: ReactPointerEvent<HTMLDivElement>) => {
+    const drag = dragRef.current
+    const viewport = viewportRef.current
+    if (!drag || !viewport || drag.pointerId !== event.pointerId) return
+    const deltaX = event.clientX - drag.startX
+    const deltaY = event.clientY - drag.startY
+    if (Math.hypot(deltaX, deltaY) <= 5) return
+    if (!drag.captured) {
+      event.currentTarget.setPointerCapture(event.pointerId)
+      drag.captured = true
+      draggedRef.current = true
+      setDragging(true)
+    }
+    setCamera((value) =>
+      clampCamera(
+        { ...value, x: drag.cameraX + deltaX, y: drag.cameraY + deltaY },
+        viewport.clientWidth,
+        viewport.clientHeight,
+      ),
+    )
+  }
+
+  const handlePointerEnd = (event: ReactPointerEvent<HTMLDivElement>) => {
+    if (dragRef.current?.pointerId !== event.pointerId) return
+    if (event.currentTarget.hasPointerCapture(event.pointerId)) {
+      event.currentTarget.releasePointerCapture(event.pointerId)
+    }
+    dragRef.current = null
+    setDragging(false)
+  }
+
+  const completeKey = sheet?.kind === 'article' ? sheet.article.id : `explore:${sheet?.island.id}`
 
   return (
     <div className={shell.screen}>
@@ -45,74 +155,61 @@ export function ExploreScreen() {
       <header className={shell.header}>
         <p className={shell.kicker}>Explore</p>
         <h1 className={shell.title}>海岛探秘</h1>
-        <p className={shell.subtitle}>
-          把科普变成一场持续探索。阅读、记录、点亮星星，解锁下一座岛。
-        </p>
+        <p className={shell.subtitle}>放大岛屿，寻找藏在地貌里的健康知识。</p>
       </header>
 
       <div className={`${shell.body} ${styles.body}`}>
         <div className={styles.hud}>
           <div className={styles.player}>
-            <span className={styles.avatar} aria-hidden="true">
-              {USER_DISPLAY_NAME.slice(0, 1)}
-            </span>
+            <span className={styles.avatar} aria-hidden="true">{USER_DISPLAY_NAME.slice(0, 1)}</span>
             <div>
               <p className={styles.playerName}>{USER_DISPLAY_NAME}</p>
-              <p className={styles.playerMeta}>正在探索 · {current.short}</p>
+              <p className={styles.playerMeta}>正在探索 · {selected.short}</p>
             </div>
           </div>
           <div className={styles.starsHud}>
             <Star size={14} weight="fill" />
-            <span>{EXPLORE_STARS + earnedStars}</span>
+            <span>{EXPLORE_STARS + completed.length}</span>
             <em>{unlocked}/{EXPLORE_ISLANDS.length} 岛</em>
           </div>
         </div>
 
-        <section className={styles.mapCard} aria-label="知识地图">
-          <div className={styles.ocean}>
-            <svg className={styles.oceanSvg} viewBox="0 0 100 100" aria-hidden="true">
-              <defs>
-                <linearGradient id="sea" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#c5e6f7" />
-                  <stop offset="55%" stopColor="#9fd0ef" />
-                  <stop offset="100%" stopColor="#7eb8e8" />
-                </linearGradient>
-                <pattern id="ripples" width="12" height="8" patternUnits="userSpaceOnUse">
-                  <path
-                    d="M1 4 Q3 2.5 5 4 T9 4"
-                    fill="none"
-                    stroke="rgba(255,255,255,0.35)"
-                    strokeWidth="0.4"
-                  />
-                </pattern>
-              </defs>
-              <rect width="100" height="100" fill="url(#sea)" rx="8" />
-              <rect width="100" height="100" fill="url(#ripples)" opacity="0.7" />
-              {/* soft clouds */}
-              <ellipse cx="8" cy="10" rx="10" ry="5" fill="rgba(255,255,255,0.55)" />
-              <ellipse cx="92" cy="14" rx="9" ry="4.5" fill="rgba(255,255,255,0.5)" />
-              <ellipse cx="88" cy="90" rx="11" ry="5" fill="rgba(255,255,255,0.4)" />
-              <ellipse cx="12" cy="88" rx="9" ry="4" fill="rgba(255,255,255,0.35)" />
-
-              {/* dashed exploration path */}
-              <polyline
-                points={PATH.map(([x, y]) => `${x},${y}`).join(' ')}
-                fill="none"
-                stroke="rgba(255,255,255,0.65)"
-                strokeWidth="0.7"
-                strokeDasharray="1.4 1.2"
-                strokeLinecap="round"
-              />
-            </svg>
-
-            {EXPLORE_ISLANDS.map((island) => (
-              <IslandNode
-                key={island.id}
-                island={island}
-                active={island.id === selected.id}
-                onSelect={() => setSelectedId(island.id)}
-              />
-            ))}
+        <section className={styles.mapCard} aria-label="海岛知识地图">
+          <div
+            ref={viewportRef}
+            className={styles.mapViewport}
+            data-focused={isFocused}
+            data-dragging={dragging}
+            onPointerDown={handlePointerDown}
+            onPointerMove={handlePointerMove}
+            onPointerUp={handlePointerEnd}
+            onPointerCancel={handlePointerEnd}
+          >
+            <div
+              className={styles.mapWorld}
+              style={{ transform: `translate3d(${camera.x}px, ${camera.y}px, 0) scale(${camera.scale})` }}
+            >
+              <OceanBackdrop />
+              {EXPLORE_ISLANDS.map((island) => (
+                <IslandNode
+                  key={island.id}
+                  island={island}
+                  active={island.id === selected.id}
+                  focused={island.id === focusedId}
+                  articles={EXPLORE_ARTICLES.filter((article) => article.islandId === island.id)}
+                  completed={completed}
+                  onSelect={() => focusIsland(island)}
+                  onOpenArticle={(article) => {
+                    if (draggedRef.current) return
+                    setSheet({ island, kind: 'article', article })
+                  }}
+                />
+              ))}
+            </div>
+          </div>
+          <div className={styles.mapGuide}>
+            <span>{isFocused ? '拖动地图，寻找岛上的可点击物件' : '点击一座岛，进入近景探索'}</span>
+            {isFocused ? <button type="button" onClick={showOverview}>返回全景</button> : null}
           </div>
         </section>
 
@@ -120,73 +217,62 @@ export function ExploreScreen() {
           <div className={styles.detailTop}>
             <div>
               <p className={styles.detailKicker}>
-                {selected.locked ? '尚未解锁' : selected.current ? '当前岛屿' : '知识岛屿'}
+                {selected.locked ? '尚未解锁' : isFocused ? '岛屿探索中' : '知识岛屿'}
               </p>
               <h2 className={styles.detailTitle}>{selected.title}</h2>
             </div>
-            <div
-              className={styles.starRow}
-              aria-label={`星星 ${selectedStars}/${selected.starsMax}`}
-            >
-              {Array.from({ length: selected.starsMax }, (_, i) => (
+            <div className={styles.starRow} aria-label={`星星 ${selectedStars}/${selected.starsMax}`}>
+              {Array.from({ length: selected.starsMax }, (_, index) => (
                 <Star
-                  key={i}
+                  key={index}
                   size={16}
-                  weight={i < selectedStars ? 'fill' : 'regular'}
-                  className={i < selectedStars ? styles.starOn : styles.starOff}
+                  weight={index < selectedStars ? 'fill' : 'regular'}
+                  className={index < selectedStars ? styles.starOn : styles.starOff}
                 />
               ))}
             </div>
           </div>
           <p className={styles.detailBlurb}>{selected.blurb}</p>
-          <div className={styles.detailActions}>
-            {selected.locked ? (
-              <button type="button" className={styles.unlockBtn}>
-                <LockSimple size={14} weight="bold" />
-                用星星或贝壳解锁
-              </button>
-            ) : (
-              <>
-                <button
-                  type="button"
-                  className={styles.primaryBtn}
-                  onClick={() => setSheet({ island: selected, kind: 'explore' })}
-                >
-                  继续探索
-                </button>
-                <button
-                  type="button"
-                  className={styles.ghostBtn}
-                  onClick={() => setSheet({ island: selected, kind: 'article' })}
-                >
-                  <BookOpen size={14} weight="bold" />
-                  阅读科普
-                </button>
-              </>
-            )}
+          <div className={styles.discoveryRow}>
+            <span>{selectedArticles.length} 个知识物件</span>
+            <span>{selectedCompleted}/{selectedArticles.length} 已阅读</span>
           </div>
-          <p className={styles.hint}>
-            通过阅读、记录与完成小观察获得星星，点亮下一座岛。
-          </p>
+          {selected.locked ? (
+            <button type="button" className={styles.unlockBtn}>
+              <LockSimple size={14} weight="bold" /> 用星星或贝壳解锁
+            </button>
+          ) : (
+            <div className={styles.detailActions}>
+              <button
+                type="button"
+                className={styles.primaryBtn}
+                onClick={() => {
+                  if (!isFocused) {
+                    focusIsland(selected)
+                  } else if (nextArticle) {
+                    setSheet({ island: selected, kind: 'article', article: nextArticle })
+                  }
+                }}
+              >
+                {!isFocused ? '进入岛屿' : selectedCompleted === selectedArticles.length ? '再读一篇' : '发现下一个物件'}
+              </button>
+              <button type="button" className={styles.ghostBtn} onClick={() => setSheet({ island: selected, kind: 'explore' })}>
+                查看物件清单
+              </button>
+            </div>
+          )}
         </article>
       </div>
+
       {sheet ? (
         <ArticleSheet
-          island={sheet.island}
-          kind={sheet.kind}
-          article={
-            EXPLORE_ARTICLES.find(
-              (item) => item.islandId === sheet.island.id,
-            ) ?? EXPLORE_ARTICLES[0]
-          }
-          completed={completed.includes(sheet.island.id)}
+          sheet={sheet}
+          articles={selectedArticles}
+          completed={completed.includes(completeKey)}
           onClose={() => setSheet(null)}
+          onOpenArticle={(article) => setSheet({ island: selected, kind: 'article', article })}
           onComplete={() => {
-            setCompleted((items) =>
-              items.includes(sheet.island.id)
-                ? items
-                : [...items, sheet.island.id],
-            )
+            setCompleted((items) => (items.includes(completeKey) ? items : [...items, completeKey]))
             setSheet(null)
           }}
         />
@@ -195,222 +281,147 @@ export function ExploreScreen() {
   )
 }
 
-function ArticleSheet({
-  island,
-  kind,
-  article,
-  completed,
-  onClose,
-  onComplete,
-}: {
-  island: ExploreIsland
-  kind: 'explore' | 'article'
-  article: (typeof EXPLORE_ARTICLES)[number]
-  completed: boolean
-  onClose: () => void
-  onComplete: () => void
-}) {
-  const isExplore = kind === 'explore'
-
+function OceanBackdrop() {
   return (
-    <div className={styles.sheetBackdrop} role="presentation" onClick={onClose}>
-      <section
-        className={styles.sheet}
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="article-title"
-        onClick={(event) => event.stopPropagation()}
-      >
-        <span className={styles.sheetHandle} aria-hidden="true" />
-        <button
-          type="button"
-          className={styles.sheetClose}
-          onClick={onClose}
-          aria-label="关闭内容"
-        >
-          <X size={18} />
-        </button>
-        <p className={styles.detailKicker}>
-          {isExplore ? '探索路径' : article.eyebrow} · {article.readTime}
-        </p>
-        <h2 id="article-title" className={styles.sheetTitle}>
-          {isExplore ? `继续探索 · ${island.title}` : island.title}
-        </h2>
-        <p className={styles.sheetLead}>
-          {isExplore
-            ? '沿着这座岛留下的线索，完成一次轻量探索。'
-            : article.lead}
-        </p>
-        <div className={styles.articleBody}>
-          {isExplore ? (
-            <ol className={styles.exploreSteps}>
-              <li>
-                <span>1</span>
-                <p>先发现：看看这座岛正在讲什么，找到一个和你有关的问题。</p>
-              </li>
-              <li>
-                <span>2</span>
-                <p>再观察：回到今天的身体感受，记下出现的时间、强度和变化。</p>
-              </li>
-              <li>
-                <span>3</span>
-                <p>留线索：完成探索后点亮一颗星，下次回来和过去的自己比较。</p>
-              </li>
-            </ol>
-          ) : (
-            <>
-              {article.paragraphs.map((paragraph) => (
-                <p key={paragraph}>{paragraph}</p>
-              ))}
-              <p className={styles.articleTakeaway}>{article.takeaway}</p>
-            </>
-          )}
-        </div>
-        <button
-          type="button"
-          className={styles.sheetCta}
-          onClick={onComplete}
-          disabled={completed}
-        >
-          {completed ? (
-            <>
-              <Check size={17} weight="bold" /> 已点亮一颗星
-            </>
-          ) : isExplore ? (
-            '完成探索，点亮一颗星'
-          ) : (
-            '完成阅读，点亮一颗星'
-          )}
-        </button>
-      </section>
-    </div>
+    <svg className={styles.oceanSvg} viewBox="0 0 100 100" aria-hidden="true">
+      <defs>
+        <linearGradient id="sea" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#cbeaf7" />
+          <stop offset="58%" stopColor="#94ccec" />
+          <stop offset="100%" stopColor="#72b4e3" />
+        </linearGradient>
+        <pattern id="ripples" width="12" height="8" patternUnits="userSpaceOnUse">
+          <path d="M1 4 Q3 2.5 5 4 T9 4" fill="none" stroke="rgba(255,255,255,.42)" strokeWidth=".38" />
+        </pattern>
+      </defs>
+      <rect width="100" height="100" fill="url(#sea)" />
+      <rect width="100" height="100" fill="url(#ripples)" opacity=".78" />
+      <polyline points={PATH.map(([x, y]) => `${x},${y}`).join(' ')} fill="none" stroke="rgba(255,255,255,.68)" strokeWidth=".7" strokeDasharray="1.3 1.2" strokeLinecap="round" />
+      <g fill="rgba(255,255,255,.55)">
+        <ellipse cx="7" cy="8" rx="12" ry="5" /><ellipse cx="94" cy="12" rx="11" ry="4" />
+        <ellipse cx="91" cy="91" rx="13" ry="5" /><ellipse cx="8" cy="92" rx="11" ry="4" />
+      </g>
+    </svg>
   )
 }
 
 function IslandNode({
   island,
   active,
+  focused,
+  articles,
+  completed,
   onSelect,
+  onOpenArticle,
 }: {
   island: ExploreIsland
   active: boolean
+  focused: boolean
+  articles: ExploreArticle[]
+  completed: string[]
   onSelect: () => void
+  onOpenArticle: (article: ExploreArticle) => void
 }) {
   return (
-    <button
-      type="button"
-      className={styles.node}
-      data-tone={island.tone}
-      data-locked={island.locked}
-      data-active={active}
-      data-current={island.current}
-      style={{ left: `${island.x}%`, top: `${island.y}%` }}
-      onClick={onSelect}
-      aria-label={island.title}
-      aria-pressed={active}
-    >
-      <span className={styles.land} aria-hidden="true">
-        <IslandGlyph tone={island.tone} locked={island.locked} />
-      </span>
-      <span className={styles.nodeLabel}>{island.short}</span>
-      {island.locked ? (
-        <span className={styles.lockBadge}>
-          <LockSimple size={10} weight="bold" />
-        </span>
-      ) : (
-        <span className={styles.starBadge}>
-          <Star size={9} weight="fill" />
-          {island.stars}
-        </span>
-      )}
-      {island.current ? <span className={styles.youAreHere}>你在这里</span> : null}
-    </button>
+    <div className={styles.islandGroup} style={{ left: `${island.x}%`, top: `${island.y}%` }} data-focused={focused}>
+      <button
+        type="button"
+        className={styles.node}
+        data-tone={island.tone}
+        data-locked={island.locked}
+        data-active={active}
+        data-current={island.current}
+        onClick={onSelect}
+        aria-label={`${island.title}，${island.locked ? '尚未解锁' : `${articles.length} 个知识物件`}`}
+        aria-pressed={active}
+      >
+        <span className={styles.land} aria-hidden="true"><IslandGlyph tone={island.tone} locked={island.locked} /></span>
+        <span className={styles.nodeLabel}>{island.short}</span>
+        {island.locked ? <span className={styles.lockBadge}><LockSimple size={9} weight="bold" /></span> : <span className={styles.starBadge}><Star size={8} weight="fill" />{island.stars}</span>}
+      </button>
+      {focused && !island.locked ? articles.map((article) => (
+        <button
+          type="button"
+          key={article.id}
+          className={styles.mapObject}
+          data-completed={completed.includes(article.id)}
+          style={{
+            left: `calc(50% + ${article.objectX * 5}px)`,
+            top: `calc(50% + ${article.objectY * 5}px)`,
+          }}
+          onClick={(event) => { event.stopPropagation(); onOpenArticle(article) }}
+          aria-label={`${article.objectLabel}：${article.title}`}
+        >
+          <ObjectGlyph kind={article.objectKind} />
+          <span className={styles.objectLabel}>{article.objectLabel}</span>
+          {completed.includes(article.id) ? <span className={styles.paperMark} aria-label="已阅读">✦</span> : null}
+        </button>
+      )) : null}
+    </div>
   )
 }
 
-function IslandGlyph({
-  tone,
-  locked,
-}: {
-  tone: ExploreIsland['tone']
-  locked: boolean
-}) {
-  const opacity = locked ? 0.45 : 1
+function ObjectGlyph({ kind }: { kind: ExploreObjectKind }) {
   return (
-    <svg viewBox="0 0 64 48" width="64" height="48" aria-hidden="true" style={{ opacity }}>
-      <ellipse cx="32" cy="40" rx="26" ry="6" fill="rgba(60,110,150,0.18)" />
-      {tone === 'meadow' ? (
-        <>
-          <ellipse cx="32" cy="30" rx="24" ry="12" fill="#9fd0a8" />
-          <ellipse cx="32" cy="28" rx="18" ry="8" fill="#b7e0bc" />
-          <circle cx="22" cy="24" r="5" fill="#6aaa78" />
-          <circle cx="38" cy="22" r="6" fill="#5f9f6d" />
-          <rect x="28" y="24" width="7" height="8" rx="1" fill="#e8f4ef" />
-        </>
-      ) : null}
-      {tone === 'autumn' ? (
-        <>
-          <ellipse cx="32" cy="30" rx="23" ry="11" fill="#e2b57a" />
-          <ellipse cx="32" cy="28" rx="16" ry="7" fill="#efc892" />
-          <circle cx="24" cy="23" r="5" fill="#d9784a" />
-          <circle cx="40" cy="22" r="6" fill="#e08a4f" />
-          <path d="M30 28 L34 18 L38 28 Z" fill="#c9a06a" />
-        </>
-      ) : null}
-      {tone === 'frost' ? (
-        <>
-          <ellipse cx="32" cy="30" rx="23" ry="11" fill="#d7e8f4" />
-          <ellipse cx="32" cy="27" rx="15" ry="7" fill="#eef6fb" />
-          <circle cx="24" cy="24" r="5" fill="#b7d0e2" />
-          <circle cx="40" cy="22" r="6" fill="#a8c4d8" />
-          <rect x="29" y="25" width="8" height="7" rx="1" fill="#f7fbff" />
-        </>
-      ) : null}
-      {tone === 'magic' ? (
-        <>
-          <ellipse cx="32" cy="30" rx="23" ry="11" fill="#c9b6e8" />
-          <ellipse cx="32" cy="28" rx="15" ry="7" fill="#ddd0f4" />
-          <circle cx="22" cy="26" r="4" fill="#9b7fd0" />
-          <path d="M36 30 L40 16 L44 30 Z" fill="#8f6fc4" />
-          <circle cx="40" cy="15" r="2.5" fill="#f0e9ff" />
-        </>
-      ) : null}
-      {tone === 'rock' ? (
-        <>
-          <ellipse cx="32" cy="31" rx="22" ry="10" fill="#b7c0cc" />
-          <path d="M18 30 L26 16 L34 30 Z" fill="#8e99a8" />
-          <path d="M30 30 L38 14 L48 30 Z" fill="#7d8898" />
-          <rect x="35" y="18" width="3" height="6" fill="#d7dee6" />
-        </>
-      ) : null}
-      {tone === 'tropic' ? (
-        <>
-          <ellipse cx="32" cy="31" rx="23" ry="10" fill="#e8d29a" />
-          <ellipse cx="32" cy="29" rx="16" ry="7" fill="#f0dfa8" />
-          <path d="M24 28 C24 18, 20 16, 18 14" stroke="#5f9f6d" strokeWidth="2" fill="none" />
-          <path d="M40 28 C40 18, 44 16, 46 14" stroke="#5f9f6d" strokeWidth="2" fill="none" />
-          <circle cx="18" cy="14" r="4" fill="#7ec88a" />
-          <circle cx="46" cy="14" r="4" fill="#7ec88a" />
-        </>
-      ) : null}
-      {tone === 'sand' ? (
-        <>
-          <ellipse cx="32" cy="31" rx="23" ry="10" fill="#e6c9a0" />
-          <ellipse cx="32" cy="29" rx="15" ry="6" fill="#f0d9b0" />
-          <rect x="26" y="24" width="12" height="8" rx="1" fill="#d2b48c" />
-          <circle cx="20" cy="28" r="2" fill="#c4a574" />
-          <circle cx="44" cy="27" r="2.5" fill="#c4a574" />
-        </>
-      ) : null}
-      {tone === 'harbor' ? (
-        <>
-          <ellipse cx="32" cy="31" rx="23" ry="10" fill="#9ec9ea" />
-          <ellipse cx="32" cy="29" rx="15" ry="7" fill="#b7d8f2" />
-          <rect x="30" y="18" width="5" height="14" fill="#6aa9dc" />
-          <circle cx="32.5" cy="16" r="3" fill="#f7fbff" />
-          <path d="M20 30 Q32 24 44 30" fill="none" stroke="#fff" strokeWidth="1.2" />
-        </>
-      ) : null}
+    <svg viewBox="0 0 32 32" aria-hidden="true">
+      <ellipse cx="16" cy="27" rx="11" ry="3" fill="rgba(62,92,112,.18)" />
+      {kind === 'tree' || kind === 'coconut' ? <><path d="M16 25V12" stroke="#856a48" strokeWidth="3" /><circle cx="12" cy="10" r="6" fill="#72ad78" /><circle cx="20" cy="9" r="6" fill="#86bf82" /></> : null}
+      {kind === 'moon' ? <path d="M21 5a9 9 0 1 0 5 15A10 10 0 0 1 21 5Z" fill="#f8edb7" stroke="#7c91b5" /> : null}
+      {kind === 'mushroom' ? <><path d="M9 15c0-6 14-6 14 0Z" fill="#d86f69" /><rect x="13" y="15" width="6" height="10" rx="2" fill="#f5e5c9" /></> : null}
+      {kind === 'lighthouse' ? <><path d="m12 25 2-15h5l2 15Z" fill="#f3f5f4" /><path d="M13 18h7" stroke="#d66e64" strokeWidth="3" /><path d="M12 10h9l-2-4h-5Z" fill="#6e8fa8" /></> : null}
+      {kind === 'tea' ? <><path d="M8 12h14v11H8Z" fill="#e0a66f" /><path d="M22 15h3v5h-3" fill="none" stroke="#9b704e" strokeWidth="2" /><path d="M11 9c0-2 2-2 2-4M17 9c0-2 2-2 2-4" fill="none" stroke="#fff" /></> : null}
+      {kind === 'book' ? <><path d="M6 9c5-2 8 1 10 3v14c-2-2-5-4-10-2Z" fill="#f4eee2" stroke="#6d91a8" /><path d="M26 9c-5-2-8 1-10 3v14c2-2 5-4 10-2Z" fill="#fff8e9" stroke="#6d91a8" /></> : null}
+      {kind === 'flower' ? <><g fill="#d58bb2"><circle cx="16" cy="7" r="5" /><circle cx="23" cy="14" r="5" /><circle cx="16" cy="21" r="5" /><circle cx="9" cy="14" r="5" /></g><circle cx="16" cy="14" r="3" fill="#f1c668" /></> : null}
+      {kind === 'crystal' ? <path d="m16 4 8 9-6 13h-7L8 14Z" fill="#9e8bd5" stroke="#fff" strokeLinejoin="round" /> : null}
+      {kind === 'shell' ? <><path d="M7 23c0-10 4-17 9-17s9 7 9 17c-6 4-12 4-18 0Z" fill="#f4c5a5" stroke="#b47d73" /><path d="M16 7v18M10 11l3 14M22 11l-3 14" stroke="#fff" opacity=".7" /></> : null}
+      {kind === 'camp' || kind === 'tent' ? <><path d="m5 25 11-18 11 18Z" fill="#d98b65" /><path d="m16 7 2 18h-5Z" fill="#f0c495" /></> : null}
+    </svg>
+  )
+}
+
+function ArticleSheet({ sheet, articles, completed, onClose, onOpenArticle, onComplete }: { sheet: SheetState; articles: ExploreArticle[]; completed: boolean; onClose: () => void; onOpenArticle: (article: ExploreArticle) => void; onComplete: () => void }) {
+  const article = sheet.kind === 'article' ? sheet.article : null
+  return (
+    <div className={styles.sheetBackdrop} role="presentation" onClick={onClose}>
+      <section className={styles.sheet} role="dialog" aria-modal="true" aria-labelledby="article-title" onClick={(event) => event.stopPropagation()}>
+        <span className={styles.sheetHandle} aria-hidden="true" />
+        <button type="button" className={styles.sheetClose} onClick={onClose} aria-label="关闭内容"><X size={18} /></button>
+        <p className={styles.detailKicker}>{article ? `${article.eyebrow} · ${article.readTime}` : '探索路径 · 约 1 分钟'}</p>
+        <h2 id="article-title" className={styles.sheetTitle}>{article?.title ?? `探索 ${sheet.island.title}`}</h2>
+        <p className={styles.sheetLead}>{article?.lead ?? '放大岛屿，寻找物件，再沿着物件进入一篇具体的科普文章。'}</p>
+        <div className={styles.articleBody}>
+          {article ? <>{article.paragraphs.map((paragraph) => <p key={paragraph}>{paragraph}</p>)}<p className={styles.articleTakeaway}>{article.takeaway}</p></> : (
+            <>
+              <p>这座岛藏着 {articles.length} 个物件，每个物件都对应一篇科普文章。沿着地图里的地貌慢慢寻找，找到哪个就读哪个。</p>
+              <div className={styles.objectList}>
+                {articles.map((item) => (
+                  <button type="button" key={item.id} className={styles.objectListItem} onClick={() => onOpenArticle(item)}>
+                    <span>{item.objectLabel}</span>
+                    <strong>{item.title}</strong>
+                    <em>{item.readTime}</em>
+                  </button>
+                ))}
+              </div>
+            </>
+          )}
+        </div>
+        <button type="button" className={styles.sheetCta} onClick={article ? onComplete : onClose} disabled={article ? completed : false}>
+          {completed ? <><Check size={17} weight="bold" /> 已完成</> : article ? '完成阅读，留下探索标记' : '返回地图寻找物件'}
+        </button>
+      </section>
+    </div>
+  )
+}
+
+function IslandGlyph({ tone, locked }: { tone: ExploreIsland['tone']; locked: boolean }) {
+  const palette: Record<ExploreIsland['tone'], [string, string, string]> = {
+    meadow: ['#86bf91', '#b8dfa9', '#5f956a'], autumn: ['#d99a5e', '#efc27b', '#bd6848'], frost: ['#c7deed', '#eef7fa', '#8eb5cb'], magic: ['#ad91d2', '#d7c7ec', '#7552a8'], rock: ['#929eac', '#c2c9cf', '#6f7a89'], tropic: ['#dbbd78', '#f1dda4', '#5d9d6b'], sand: ['#d7b985', '#f0d6a6', '#bc8f62'], harbor: ['#80b9df', '#b7d9ed', '#4f8db8'],
+  }
+  const [base, top, accent] = palette[tone]
+  return (
+    <svg viewBox="0 0 72 54" width="72" height="54" aria-hidden="true" style={{ opacity: locked ? 0.48 : 1 }}>
+      <ellipse cx="36" cy="46" rx="30" ry="6" fill="rgba(48,91,128,.2)" /><ellipse cx="36" cy="36" rx="29" ry="14" fill={base} /><ellipse cx="36" cy="32" rx="21" ry="10" fill={top} />
+      {tone === 'rock' || tone === 'harbor' ? <><path d="M28 35 36 14l9 21Z" fill={accent} /><rect x="35" y="18" width="4" height="12" fill="#f3f0df" /></> : <><circle cx="25" cy="27" r="7" fill={accent} /><circle cx="48" cy="25" r="8" fill={accent} /><rect x="33" y="28" width="8" height="8" rx="1" fill="#f4ead8" /></>}
     </svg>
   )
 }
