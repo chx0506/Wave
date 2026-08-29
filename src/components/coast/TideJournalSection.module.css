@@ -87,11 +87,12 @@
 .decodeFlow {
   display: flex;
   flex-direction: column;
-  gap: 18px;
+  gap: 0px;
   overflow: visible;
 }
 
 .decodePanel {
+  margin-top: -20px;
   padding: 0 6px 4px;
 }
 
@@ -129,56 +130,101 @@
   letter-spacing: 0.02em;
 }
 
-/* ── 分类：放大纸浮雕图标横滑 ── */
+/* ── 分类：3D 主题圆环 ── */
 
 .decodeCards {
-  display: flex;
-  gap: 12px;
-  width: 100%;
+  position: relative;
+  width: min(100%, 340px);
+  height: 184px;
   margin: 0;
-  padding: 10px 20px 4px;
-  overflow-x: auto;
-  overflow-y: visible;
-  overscroll-behavior-x: contain;
+  align-self: center;
+  overflow: visible;
   touch-action: pan-x;
-  -webkit-overflow-scrolling: touch;
-  scroll-snap-type: x proximity;
-  scrollbar-width: none;
+  perspective: 520px;
+  transform-style: preserve-3d;
+  outline: none;
 }
 
-.decodeCards::-webkit-scrollbar {
-  display: none;
+.decodeCards[data-dragging='1'] {
+  cursor: grabbing;
+}
+
+.decodeCards::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 72px;
+  width: 270px;
+  height: 84px;
+  transform: translateX(-50%) rotateX(66deg);
+  border-radius: 50%;
+  border: 1px solid rgba(126, 180, 220, 0.2);
+  background:
+    radial-gradient(
+      circle at 50% 50%,
+      rgba(255, 255, 255, 0.62) 0%,
+      rgba(232, 244, 252, 0.24) 52%,
+      transparent 72%
+    );
+  pointer-events: none;
 }
 
 .decodeCard {
-  flex: 0 0 96px;
-  scroll-snap-align: center;
+  position: absolute;
+  left: 50%;
+  top: 12px;
+  z-index: var(--decode-order);
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: flex-start;
   gap: 8px;
-  min-height: 0;
+  width: 102px;
+  min-height: 126px;
   padding: 0 2px 4px;
   border: none;
   background: transparent;
   color: var(--ink-soft);
   cursor: pointer;
+  opacity: var(--decode-opacity);
+  transform:
+    translateX(calc(-50% + var(--decode-x)))
+    translateY(var(--decode-y))
+    translateZ(var(--decode-z))
+    rotateY(var(--decode-rotate))
+    scale(var(--decode-scale));
   transition:
     color 0.24s var(--ease),
     transform 0.24s var(--ease),
     opacity 0.24s var(--ease);
-  opacity: 0.68;
+  transform-style: preserve-3d;
 }
 
 .decodeCard[data-active='1'] {
   color: var(--ink-strong);
   opacity: 1;
-  transform: translateY(-3px) scale(1.04);
 }
 
 .decodeCard:active {
-  transform: scale(0.97);
+  opacity: 0.8;
+}
+
+.decodeCards[data-dragging='1'] .decodeCard {
+  cursor: grabbing;
+  transition: color 0.24s var(--ease), opacity 0.24s var(--ease);
+}
+
+.decodeCards:focus-visible .decodeCard[data-active='1'] .decodeCardIcon {
+  outline: 2px solid rgba(126, 180, 220, 0.58);
+  outline-offset: 3px;
+}
+
+.decodeCard[data-side='left'] {
+  transform-origin: right center;
+}
+
+.decodeCard[data-side='right'] {
+  transform-origin: left center;
 }
 
 .decodeCardLabel {
@@ -195,6 +241,7 @@
   height: 96px;
   margin: 0 auto;
   background: transparent;
+  border-radius: 50%;
 }
 
 .decodeCardIcon img {
@@ -210,6 +257,12 @@
 .decodeCard[data-active='1'] .decodeCardIcon img {
   filter: drop-shadow(0 8px 16px rgba(90, 150, 200, 0.32));
   transform: scale(1.04);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .decodeCard {
+    transition: none;
+  }
 }
 
 /* ── 知识区：phase 色晕 + 无硬边框 ── */
