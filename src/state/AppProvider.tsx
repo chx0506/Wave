@@ -18,10 +18,15 @@ import {
   type DayMode,
   type Experiment,
   type ExperimentCategory,
+  type PeriodRecord,
   type StackScreenId,
   type TabId,
 } from '@/domain/types'
 import { toKey } from '@/domain/dates'
+import {
+  buildCyclePrediction,
+  predictionSnapshotForDate,
+} from '@/domain/periodPrediction'
 import {
   getDefaultCycleConfig,
   loadCycleData,
@@ -48,6 +53,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
   )
   const [periodStarts, setPeriodStarts] = useState<Date[]>(
     storedCycle?.periodStarts ?? [],
+  )
+  const [periodRecords, setPeriodRecords] = useState<PeriodRecord[]>(
+    storedCycle?.periodRecords ?? [],
   )
   const [importedFrom, setImportedFrom] = useState<string | undefined>(
     storedCycle?.importedFrom,
@@ -106,19 +114,29 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setViewedMonthNum(month)
   }, [])
 
+  const cyclePrediction = useMemo(
+    () => buildCyclePrediction(periodRecords),
+    [periodRecords],
+  )
+
   const snapshotFor = useCallback(
-    (date: Date) => snapshotForDate(date, cycleConfig),
-    [cycleConfig],
+    (date: Date) =>
+      cyclePrediction
+        ? predictionSnapshotForDate(date, cyclePrediction)
+        : snapshotForDate(date, cycleConfig),
+    [cycleConfig, cyclePrediction],
   )
 
   const importCycleData = useCallback(
     (result: Extract<ImportResult, { ok: true }>) => {
       setCycleConfig(result.cycleConfig)
       setPeriodStarts(result.data.periodStarts)
+      setPeriodRecords(result.data.periodRecords)
       setImportedFrom(result.data.sourceLabel)
       saveCycleData(
         result.cycleConfig,
         result.data.periodStarts,
+        result.data.periodRecords,
         result.data.sourceLabel,
       )
     },
@@ -272,6 +290,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       snapshotFor,
       cycleConfig,
       periodStarts,
+      periodRecords,
       importedFrom,
       importCycleData,
       dayLogs,
@@ -301,6 +320,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       snapshotFor,
       cycleConfig,
       periodStarts,
+      periodRecords,
       importedFrom,
       importCycleData,
       dayLogs,

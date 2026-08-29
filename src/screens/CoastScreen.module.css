@@ -229,6 +229,69 @@
   color: var(--ink-soft);
 }
 
+.historyCard {
+  width: 100%;
+  padding: 15px 16px 13px;
+  border: 1px solid rgba(145, 186, 220, 0.28);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.62);
+  box-shadow: 0 8px 24px -18px rgba(75, 125, 165, 0.5);
+}
+
+.historyHead {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.historyTitle {
+  margin: 0;
+  color: var(--ink-strong);
+  font-family: var(--font-display);
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.historyMeta,
+.historySource {
+  margin: 4px 0 0;
+  color: var(--ink-soft);
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.historySource {
+  margin: 0;
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: rgba(186, 216, 236, 0.38);
+  color: #5a7890;
+  white-space: nowrap;
+}
+
+.historyList {
+  display: grid;
+  gap: 8px;
+  margin: 13px 0 0;
+  padding: 0;
+  list-style: none;
+  color: #4d687d;
+  font-size: 13px;
+}
+
+.historyList li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.historyList li span:last-child {
+  color: var(--ink-soft);
+  white-space: nowrap;
+}
+
 .ctaDock {
   position: absolute;
   left: 0;

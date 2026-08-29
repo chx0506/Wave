@@ -1,5 +1,6 @@
 import { SAMPLE_CYCLE } from '@/data/sample'
-import type { CycleConfig } from '@/domain/types'
+import { addDays } from '@/domain/dates'
+import type { CycleConfig, PeriodRecord } from '@/domain/types'
 
 const STORAGE_KEY = 'wave-cycle-v1'
 
@@ -11,12 +12,17 @@ type StoredCycleData = {
     phaseWindows: CycleConfig['phaseWindows']
   }
   periodStarts: string[]
+  periodRecords?: {
+    startDate: string
+    endDate: string
+  }[]
   importedFrom?: string
 }
 
 export type CycleStorageData = {
   cycleConfig: CycleConfig
   periodStarts: Date[]
+  periodRecords: PeriodRecord[]
   importedFrom?: string
 }
 
@@ -41,6 +47,15 @@ export function loadCycleData(): CycleStorageData | null {
     if (!raw) return null
 
     const stored = JSON.parse(raw) as StoredCycleData
+    const periodStarts = stored.periodStarts.map((value) => new Date(value))
+    const periodRecords = stored.periodRecords?.map((record) => ({
+      startDate: new Date(record.startDate),
+      endDate: new Date(record.endDate),
+    })) ?? periodStarts.map((startDate) => ({
+      startDate,
+      endDate: addDays(startDate, 4),
+    }))
+
     return {
       cycleConfig: {
         ...stored.cycleConfig,
@@ -48,7 +63,8 @@ export function loadCycleData(): CycleStorageData | null {
         lastLowTide: new Date(stored.cycleConfig.lastLowTide),
         phaseWindows: { ...stored.cycleConfig.phaseWindows },
       },
-      periodStarts: stored.periodStarts.map((value) => new Date(value)),
+      periodStarts,
+      periodRecords,
       importedFrom: stored.importedFrom,
     }
   } catch {
@@ -59,6 +75,7 @@ export function loadCycleData(): CycleStorageData | null {
 export function saveCycleData(
   cycleConfig: CycleConfig,
   periodStarts: Date[],
+  periodRecords: PeriodRecord[],
   importedFrom?: string,
 ) {
   if (typeof window === 'undefined') return
@@ -71,6 +88,10 @@ export function saveCycleData(
       phaseWindows: cycleConfig.phaseWindows,
     },
     periodStarts: periodStarts.map((date) => date.toISOString()),
+    periodRecords: periodRecords.map((record) => ({
+      startDate: record.startDate.toISOString(),
+      endDate: record.endDate.toISOString(),
+    })),
     importedFrom,
   }
 

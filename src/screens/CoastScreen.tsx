@@ -8,8 +8,8 @@ import { PhaseKnowledgeSheet } from '@/components/coast/PhaseKnowledgeSheet'
 import { RecordSheet } from '@/components/coast/RecordSheet'
 import { TideDial } from '@/components/coast/TideDial'
 import { APP_NAME, RECORD_PROMPT } from '@/domain/copy'
-import { snapshotForCycleDay } from '@/domain/cycle'
-import { formatMonthDay } from '@/domain/dates'
+import { snapshotForDate } from '@/domain/cycle'
+import { addDays, formatMonthDay } from '@/domain/dates'
 import { useScrollScrubWave, type WaveMotion } from '@/lib/scrollScrubWave'
 import { StackScreens } from '@/domain/types'
 import { useAppState } from '@/state/useAppState'
@@ -50,7 +50,7 @@ export function CoastScreen() {
   )
 
   const snapshot = useMemo(
-    () => snapshotForCycleDay(previewDay, cycleConfig),
+    () => snapshotForDate(addDays(cycleConfig.currentCycleStart, previewDay - 1), cycleConfig),
     [previewDay, cycleConfig],
   )
 
