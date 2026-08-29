@@ -1,0 +1,251 @@
+.ringWrap {
+  position: relative;
+  width: 118px;
+  height: 118px;
+  flex: 0 0 auto;
+}
+
+.ringSvg {
+  display: block;
+}
+
+.ringLabel {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  pointer-events: none;
+}
+
+.ringDay {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--ink-strong);
+  line-height: 1.1;
+}
+
+.ringPhase {
+  margin: 0;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--tide-deep);
+}
+
+.barChart {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 4px;
+}
+
+.barPlot {
+  position: relative;
+  padding: 0;
+}
+
+.barTracks {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(var(--bar-cols, 5), minmax(0, 1fr));
+  column-gap: 8px;
+  align-items: end;
+}
+
+.avgLine {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 0;
+  /* value 16 + gap 4 = 20; then (100-pct)% down the 72px track */
+  top: calc(20px + (100 - var(--avg-pct, 50)) * 72px / 100);
+  border-top: 1.5px dashed rgba(111, 168, 212, 0.5);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.barCol {
+  min-width: 0;
+  display: grid;
+  grid-template-rows: 18px 72px 16px;
+  row-gap: 4px;
+  align-items: center;
+  justify-items: center;
+  z-index: 2;
+}
+
+.barValue {
+  font-size: 11px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink-strong);
+  line-height: 1;
+  align-self: end;
+  text-align: center;
+}
+
+.barTrack {
+  width: 100%;
+  max-width: 30px;
+  height: 72px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  justify-self: center;
+  border-radius: 10px;
+  background: rgba(159, 200, 232, 0.12);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.7) inset;
+  overflow: hidden;
+}
+
+.barFill {
+  width: 100%;
+  min-height: 10px;
+  border-radius: 9px 9px 5px 5px;
+  background: linear-gradient(180deg, #b7d8ee 0%, #7eb4dc 58%, #5a9acc 100%);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.55) inset,
+    0 5px 12px -6px rgba(70, 120, 160, 0.45);
+}
+
+.barFillOutlier {
+  background: linear-gradient(180deg, #c5dff2 0%, #6fa8d4 48%, #4f8fbe 100%);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.5) inset,
+    0 -3px 0 rgba(79, 143, 190, 0.35) inset,
+    0 5px 12px -6px rgba(70, 120, 160, 0.42);
+}
+
+.barLabel {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--ink-faint);
+  white-space: nowrap;
+  align-self: start;
+  text-align: center;
+}
+
+.curveWrap {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.curveHead {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.curveUnit {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--ink-strong);
+}
+
+.curveHint {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--ink-faint);
+}
+
+.curveSvg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.curveAxis {
+  display: flex;
+  justify-content: space-between;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--ink-faint);
+  padding: 0 4px;
+}
+
+.freqList,
+.expList {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.freqMeta {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.freqLabel {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ink-strong);
+}
+
+.freqCount {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--tide-deep);
+  font-variant-numeric: tabular-nums;
+}
+
+.freqTrack {
+  height: 10px;
+  border-radius: 999px;
+  background: rgba(159, 200, 232, 0.18);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.65) inset;
+  overflow: hidden;
+}
+
+.freqFill {
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #c9e2f4, #7eb4dc);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.45) inset;
+  min-width: 8px;
+}
+
+.expTitle {
+  margin: 0 0 5px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--ink-strong);
+  line-height: 1.35;
+}
+
+.expFill {
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #d7ebf7, #6fa8d4);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.5) inset;
+  min-width: 6px;
+}
+
+.expMeta {
+  margin: 4px 0 0;
+  font-size: 11px;
+  line-height: 1.4;
+  color: var(--ink-soft);
+}
+
+.emptyHint {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--ink-soft);
+}

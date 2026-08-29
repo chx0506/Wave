@@ -12,13 +12,14 @@ import {
   phaseForCycleDay,
   tideHeightForCycleDay,
 } from '@/domain/cycle'
-import { addDays, daysInMonth, formatMonthDay, formatYearMonth, sameDay } from '@/domain/dates'
+import { hasDailyLog } from '@/domain/dailyLog'
+import { addDays, daysInMonth, formatMonthDay, formatYearMonth, sameDay, toKey } from '@/domain/dates'
 import {
   buildCyclePrediction,
   predictionSnapshotForDate,
   type CyclePrediction,
 } from '@/domain/periodPrediction'
-import type { CalendarCell, CycleConfig, DaySnapshot, Phase } from '@/domain/types'
+import type { CalendarCell, CycleConfig, DayLogsMap, DaySnapshot, Phase } from '@/domain/types'
 import { HormoneCurveChart } from '@/components/coast/HormoneCurveChart'
 import { RecordSheet } from '@/components/coast/RecordSheet'
 import { useAppState } from '@/state/useAppState'
@@ -63,7 +64,8 @@ function isFutureDate(date: Date) {
 }
 
 export function TideCalendar({ onClose }: { onClose?: () => void }) {
-  const { cycleConfig, periodRecords } = useAppState()
+  const { cycleConfig, dayLogs, getDailyLog, saveDailyLog, periodRecords } =
+    useAppState()
   const [year, setYear] = useState(TODAY.getFullYear())
   const [month, setMonth] = useState(TODAY.getMonth() + 1)
   const [selected, setSelected] = useState(TODAY)
@@ -162,6 +164,7 @@ export function TideCalendar({ onClose }: { onClose?: () => void }) {
                 <MonthCalendar
                   cells={cells}
                   selected={selected}
+                  dayLogs={dayLogs}
                   onSelect={(date) => {
                     setSelected(date)
                     setRecordDate(date)
@@ -188,6 +191,7 @@ export function TideCalendar({ onClose }: { onClose?: () => void }) {
             {scale === 'day' && selectedSnapshot ? (
               <DayCalendar
                 prediction={prediction}
+                dayLogs={dayLogs}
                 onSelectDate={(date) => {
                   setSelected(date)
                   setYear(date.getFullYear())
@@ -247,9 +251,11 @@ export function TideCalendar({ onClose }: { onClose?: () => void }) {
       </div>
       {recordDate ? (
         <RecordSheet
+          key={toKey(recordDate)}
           dateLabel={formatMonthDay(recordDate)}
+          initialLog={getDailyLog(recordDate)}
           onClose={() => setRecordDate(null)}
-          onSave={() => setRecordDate(null)}
+          onSave={(input) => saveDailyLog(recordDate, input)}
         />
       ) : null}
     </div>
@@ -283,10 +289,12 @@ function MonthViewPager({
 function MonthCalendar({
   cells,
   selected,
+  dayLogs,
   onSelect,
 }: {
   cells: CalendarCell[]
   selected: Date
+  dayLogs: DayLogsMap
   onSelect: (date: Date) => void
 }) {
   return (
@@ -305,6 +313,7 @@ function MonthCalendar({
           const isToday = sameDay(cell.date, TODAY)
           const isFuture = isFutureDate(cell.date)
           const isSelected = sameDay(cell.date, selected)
+          const logged = hasDailyLog(dayLogs, cell.date)
           return (
             <button
               key={cell.key}
@@ -314,10 +323,11 @@ function MonthCalendar({
               data-today={isToday}
               data-future={isFuture}
               data-selected={isSelected}
+              data-logged={logged}
               data-mark={mark}
               disabled={isFuture}
               onClick={() => onSelect(cell.date)}
-              aria-label={`${cell.date.getDate()}日 ${PHASE_LABEL[phase]} ${TIDE_METAPHOR_SHORT[phase]}`}
+              aria-label={`${cell.date.getDate()}日 ${PHASE_LABEL[phase]} ${TIDE_METAPHOR_SHORT[phase]}${logged ? '，已记录' : ''}`}
             >
               <span className={styles.dayNum}>{cell.date.getDate()}</span>
                 {isToday ? (
@@ -464,9 +474,11 @@ function MiniMonth({
 
 function DayCalendar({
   prediction,
+  dayLogs,
   onSelectDate,
 }: {
   prediction: CyclePrediction
+  dayLogs: DayLogsMap
   onSelectDate: (date: Date) => void
 }) {
   const todayRef = useRef<HTMLButtonElement | null>(null)
@@ -492,6 +504,7 @@ function DayCalendar({
         {days.map(({ date, snapshot }) => {
           const isToday = sameDay(date, TODAY)
           const isFuture = isFutureDate(date)
+          const logged = hasDailyLog(dayLogs, date)
           return (
             <button
               key={date.toISOString()}
@@ -501,9 +514,10 @@ function DayCalendar({
               data-phase={snapshot.phase}
               data-today={isToday}
               data-future={isFuture}
+              data-logged={logged}
               disabled={isFuture}
               onClick={() => onSelectDate(date)}
-              aria-label={`${formatMonthDay(date)}，${isToday ? '今天，' : ''}${PHASE_LABEL[snapshot.phase]}`}
+              aria-label={`${formatMonthDay(date)}，${isToday ? '今天，' : ''}${PHASE_LABEL[snapshot.phase]}${logged ? '，已记录' : ''}`}
             >
               <span className={styles.dayListDate}>
                 <strong>{formatMonthDay(date)}</strong>
@@ -514,7 +528,7 @@ function DayCalendar({
                 {PHASE_LABEL[snapshot.phase]}
               </span>
               <span className={styles.dayListMeta}>
-                第 {snapshot.cycleDay} 天
+                {logged ? '已记录 · ' : ''}第 {snapshot.cycleDay} 天
               </span>
             </button>
           )

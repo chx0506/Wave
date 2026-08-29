@@ -1,4 +1,3 @@
-import { CoastSceneGap } from '@/components/coast/CoastSceneGap'
 import { CoastRecommendations } from '@/components/coast/CoastRecommendations'
 import {
   ADVICE_CATEGORY_LABEL,
@@ -324,9 +323,7 @@ export function TideJournalSection({
         </article>
       </div>
 
-      <CoastSceneGap variant="crab" size="spacious" revealThreshold={0.25} />
-
-      {/* 螃蟹交互之后：科普 / 正念 / 小实验推荐 */}
+      {/* 科普 / 正念 / 小实验推荐 */}
       <CoastRecommendations
         snapshot={snapshot}
         onMindfulnessSelect={(session) => openMindfulnessSession(session.id)}

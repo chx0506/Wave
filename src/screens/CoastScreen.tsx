@@ -1,5 +1,4 @@
 import avatarSrc from '@/assets/me/avatar.png'
-import { SAMPLE_PERIOD_RECORDS } from '@/data/sample'
 import { WaveFlowBackdrop } from '@/components/coast/WaveFlowBackdrop'
 import { CoastScrollSection } from '@/components/coast/CoastScrollSection'
 import { TIDE_JOURNAL_INTRO } from '@/data/tideJournal'
@@ -10,7 +9,7 @@ import { RecordSheet } from '@/components/coast/RecordSheet'
 import { TideDial } from '@/components/coast/TideDial'
 import { APP_NAME, RECORD_PROMPT } from '@/domain/copy'
 import { snapshotForDate } from '@/domain/cycle'
-import { addDays, diffDays, formatMonthDay } from '@/domain/dates'
+import { addDays, formatMonthDay } from '@/domain/dates'
 import { useScrollScrubWave, type WaveMotion } from '@/lib/scrollScrubWave'
 import { StackScreens } from '@/domain/types'
 import { useAppState } from '@/state/useAppState'
@@ -30,9 +29,9 @@ export function CoastScreen() {
     snapshotFor,
     mode,
     cycleConfig,
-    periodRecords,
-    importedFrom,
     openStackScreen,
+    getDailyLog,
+    saveDailyLog,
   } = useAppState()
   const todaySnap = snapshotFor(today)
   const scrollRef = useRef<HTMLDivElement>(null)
@@ -56,27 +55,6 @@ export function CoastScreen() {
   )
 
   const isFutureDay = previewDay > todaySnap.cycleDay
-
-  const displayPeriods = periodRecords.length > 0 ? periodRecords : SAMPLE_PERIOD_RECORDS
-
-  const recentPeriods = useMemo(
-    () =>
-      [...displayPeriods]
-        .sort((a, b) => b.startDate.getTime() - a.startDate.getTime())
-        .slice(0, 3),
-    [displayPeriods],
-  )
-  const averagePeriodLength = useMemo(() => {
-    if (displayPeriods.length === 0) return null
-    return Math.round(
-      (displayPeriods.reduce(
-        (sum, record) => sum + diffDays(record.endDate, record.startDate) + 1,
-        0,
-      ) /
-        displayPeriods.length) *
-        10,
-    ) / 10
-  }, [displayPeriods])
 
   const goToToday = () => {
     setDayFloat(todaySnap.cycleDay)
@@ -206,9 +184,11 @@ export function CoastScreen() {
       {recordOpen &&
         shellPortal(
           <RecordSheet
+            key={today.toISOString()}
             dateLabel={formatMonthDay(today)}
+            initialLog={getDailyLog(today)}
             onClose={() => setRecordOpen(false)}
-            onSave={() => setRecordOpen(false)}
+            onSave={(input) => saveDailyLog(today, input)}
           />,
         )}
     </div>

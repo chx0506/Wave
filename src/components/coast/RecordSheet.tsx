@@ -1,5 +1,13 @@
 import { MoodGlyph, moodDiscStyle } from '@/components/coast/MoodGlyph'
-import { Leaf, X } from '@phosphor-icons/react'
+import {
+  DISCHARGE_OPTIONS,
+  EXERCISE_OPTIONS,
+  INTIMACY_OPTIONS,
+  SYMPTOM_OPTIONS,
+  type RecordChip,
+} from '@/data/recordStatusArt'
+import type { DailyLog, DailyLogInput } from '@/domain/types'
+import { Leaf, Plus, X } from '@phosphor-icons/react'
 import { useState } from 'react'
 import flowDry from '@/assets/flow/flow-dry.png'
 import flowFull from '@/assets/flow/flow-full.png'
@@ -14,17 +22,6 @@ const FLOW_OPTIONS = [
   { id: 'heavy', label: '充盈', src: flowFull },
 ] as const
 
-const SYMPTOMS = [
-  '腹痛',
-  '腰酸',
-  '腹胀',
-  '头痛',
-  '疲惫',
-  '情绪低落',
-  '长痘',
-  '睡眠不佳',
-] as const
-
 const MOODS = [
   { id: 'calm', label: '平静', tone: 'calm' },
   { id: 'low', label: '低落', tone: 'low' },
@@ -33,25 +30,78 @@ const MOODS = [
   { id: 'sensitive', label: '敏感', tone: 'sensitive' },
 ] as const
 
+function toggleId(prev: string[], id: string) {
+  return prev.includes(id) ? prev.filter((s) => s !== id) : [...prev, id]
+}
+
+function ChipGrid({
+  options,
+  selected,
+  onToggle,
+  withMore,
+}: {
+  options: readonly RecordChip[]
+  selected: string[]
+  onToggle: (id: string) => void
+  withMore?: boolean
+}) {
+  return (
+    <div className={styles.chipGrid}>
+      {options.map((item) => {
+        const on = selected.includes(item.id)
+        return (
+          <button
+            key={item.id}
+            type="button"
+            className={styles.chip}
+            data-on={on}
+            onClick={() => onToggle(item.id)}
+          >
+            <span className={styles.chipArt} aria-hidden="true">
+              <img className={styles.chipImg} src={item.src} alt="" draggable={false} />
+            </span>
+            <span className={styles.chipLabel}>{item.label}</span>
+          </button>
+        )
+      })}
+      {withMore ? (
+        <button type="button" className={styles.chipMore}>
+          <span className={styles.chipMoreIcon} aria-hidden="true">
+            <Plus size={18} weight="bold" />
+          </span>
+          <span className={styles.chipLabel}>其他</span>
+        </button>
+      ) : null}
+    </div>
+  )
+}
+
 export function RecordSheet({
   dateLabel,
+  initialLog,
   onClose,
   onSave,
 }: {
   dateLabel: string
+  initialLog?: DailyLog
   onClose: () => void
-  onSave: () => void
+  onSave: (input: DailyLogInput) => void
 }) {
-  const [flow, setFlow] = useState<string>('light')
-  const [symptoms, setSymptoms] = useState<string[]>(['疲惫'])
-  const [mood, setMood] = useState<string>('calm')
-  const [note, setNote] = useState('')
-
-  const toggleSymptom = (item: string) => {
-    setSymptoms((prev) =>
-      prev.includes(item) ? prev.filter((s) => s !== item) : [...prev, item],
-    )
-  }
+  const [flow, setFlow] = useState<string>(initialLog?.flow ?? 'light')
+  const [symptoms, setSymptoms] = useState<string[]>(
+    initialLog?.symptoms ?? [],
+  )
+  const [discharge, setDischarge] = useState<string[]>(
+    initialLog?.discharge ?? [],
+  )
+  const [exercise, setExercise] = useState<string[]>(
+    initialLog?.exercise ?? [],
+  )
+  const [intimacy, setIntimacy] = useState<string[]>(
+    initialLog?.intimacy ?? [],
+  )
+  const [mood, setMood] = useState<string>(initialLog?.mood ?? 'calm')
+  const [note, setNote] = useState(initialLog?.note ?? '')
 
   return (
     <div className={styles.overlay} role="presentation" onClick={onClose}>
@@ -106,23 +156,40 @@ export function RecordSheet({
           </section>
 
           <section className={styles.section}>
-            <h3 className={styles.sectionTitle}>症状</h3>
-            <div className={styles.symptomGrid}>
-              {SYMPTOMS.map((item) => (
-                <button
-                  key={item}
-                  type="button"
-                  className={styles.symptom}
-                  data-on={symptoms.includes(item)}
-                  onClick={() => toggleSymptom(item)}
-                >
-                  {item}
-                </button>
-              ))}
-              <button type="button" className={styles.symptomMore}>
-                + 其他
-              </button>
-            </div>
+            <h3 className={styles.sectionTitle}>身体症状</h3>
+            <ChipGrid
+              options={SYMPTOM_OPTIONS}
+              selected={symptoms}
+              onToggle={(id) => setSymptoms((prev) => toggleId(prev, id))}
+              withMore
+            />
+          </section>
+
+          <section className={styles.section}>
+            <h3 className={styles.sectionTitle}>分泌物</h3>
+            <ChipGrid
+              options={DISCHARGE_OPTIONS}
+              selected={discharge}
+              onToggle={(id) => setDischarge((prev) => toggleId(prev, id))}
+            />
+          </section>
+
+          <section className={styles.section}>
+            <h3 className={styles.sectionTitle}>运动</h3>
+            <ChipGrid
+              options={EXERCISE_OPTIONS}
+              selected={exercise}
+              onToggle={(id) => setExercise((prev) => toggleId(prev, id))}
+            />
+          </section>
+
+          <section className={styles.section}>
+            <h3 className={styles.sectionTitle}>性活动</h3>
+            <ChipGrid
+              options={INTIMACY_OPTIONS}
+              selected={intimacy}
+              onToggle={(id) => setIntimacy((prev) => toggleId(prev, id))}
+            />
           </section>
 
           <section className={styles.section}>
@@ -175,7 +242,15 @@ export function RecordSheet({
             type="button"
             className={styles.save}
             onClick={() => {
-              onSave()
+              onSave({
+                flow,
+                symptoms,
+                discharge,
+                exercise,
+                intimacy,
+                mood,
+                note,
+              })
               onClose()
             }}
           >
