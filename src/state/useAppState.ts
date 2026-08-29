@@ -2,6 +2,9 @@ import type { ImportResult } from '@/domain/importCycle'
 import type {
   BodyClue,
   CycleConfig,
+  DailyLog,
+  DailyLogInput,
+  DayLogsMap,
   DayMode,
   DaySnapshot,
   Experiment,
@@ -31,6 +34,9 @@ export type AppState = {
   periodStarts: Date[]
   importedFrom?: string
   importCycleData: (result: Extract<ImportResult, { ok: true }>) => void
+  dayLogs: DayLogsMap
+  getDailyLog: (date: Date) => DailyLog | undefined
+  saveDailyLog: (date: Date, input: DailyLogInput) => void
   experiments: Experiment[]
   clues: BodyClue[]
   createExperiment: (input: {

@@ -504,6 +504,10 @@
   white-space: nowrap;
 }
 
+.dayListItem[data-logged='true'] .dayListMeta {
+  color: #5f8faf;
+}
+
 .dayCard {
   --phase-menstrual: 232, 145, 122;
   --phase-follicular: 107, 191, 160;

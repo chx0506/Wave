@@ -13,17 +13,21 @@ import {
   Tabs,
   type BodyClue,
   type CycleConfig,
+  type DailyLogInput,
+  type DayLogsMap,
   type DayMode,
   type Experiment,
   type ExperimentCategory,
   type StackScreenId,
   type TabId,
 } from '@/domain/types'
+import { toKey } from '@/domain/dates'
 import {
   getDefaultCycleConfig,
   loadCycleData,
   saveCycleData,
 } from '@/lib/cycleStorage'
+import { loadDayLogs, saveDayLogs, upsertDayLog } from '@/lib/dayLogStorage'
 import { hasImportIntent } from '@/lib/importLink'
 import { AppContext } from '@/state/useAppState'
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react'
@@ -48,6 +52,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [importedFrom, setImportedFrom] = useState<string | undefined>(
     storedCycle?.importedFrom,
   )
+  const [dayLogs, setDayLogs] = useState<DayLogsMap>(() => loadDayLogs())
 
   const setTab = useCallback((next: TabId) => {
     setStackScreen(null)
@@ -119,6 +124,31 @@ export function AppProvider({ children }: { children: ReactNode }) {
     },
     [],
   )
+
+  const getDailyLog = useCallback(
+    (date: Date) => dayLogs[toKey(date)],
+    [dayLogs],
+  )
+
+  const saveDailyLog = useCallback((date: Date, input: DailyLogInput) => {
+    const dateKey = toKey(date)
+    const nextLog = {
+      dateKey,
+      flow: input.flow,
+      symptoms: [...input.symptoms],
+      discharge: [...input.discharge],
+      exercise: [...input.exercise],
+      intimacy: [...input.intimacy],
+      mood: input.mood,
+      note: input.note?.trim() ? input.note.trim() : undefined,
+      updatedAt: new Date().toISOString(),
+    }
+    setDayLogs((previous) => {
+      const next = upsertDayLog(previous, nextLog)
+      saveDayLogs(next)
+      return next
+    })
+  }, [])
 
   const snapshot = useMemo(
     () => snapshotFor(selectedDate),
@@ -244,6 +274,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
       periodStarts,
       importedFrom,
       importCycleData,
+      dayLogs,
+      getDailyLog,
+      saveDailyLog,
       experiments,
       clues,
       createExperiment,
@@ -270,6 +303,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
       periodStarts,
       importedFrom,
       importCycleData,
+      dayLogs,
+      getDailyLog,
+      saveDailyLog,
       experiments,
       clues,
       createExperiment,

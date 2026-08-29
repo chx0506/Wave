@@ -92,6 +92,23 @@ export const LogKeys = {
 
 export type LogKey = (typeof LogKeys)[keyof typeof LogKeys]
 
+/** 今日状态记录（按日期键存，与 DaySnapshot 周期推算分离） */
+export type DailyLog = {
+  dateKey: string
+  flow?: string
+  symptoms: string[]
+  discharge: string[]
+  exercise: string[]
+  intimacy: string[]
+  mood?: string
+  note?: string
+  updatedAt: string
+}
+
+export type DailyLogInput = Omit<DailyLog, 'dateKey' | 'updatedAt'>
+
+export type DayLogsMap = Record<string, DailyLog>
+
 export const ExperimentCategories = {
   sleep: 'sleep',
   mood: 'mood',

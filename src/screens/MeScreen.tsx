@@ -5,16 +5,16 @@ import iconTide from '@/assets/me/icon-tide.png'
 import grainSrc from '@/assets/me/paper-grain.png'
 import wavesSrc from '@/assets/me/waves-clear.png'
 import { DataImportSheet } from '@/components/me/DataImportSheet'
-import { SAMPLE_STREAK_DAYS } from '@/data/sample'
 import {
   APP_NAME,
   PHASE_TIDE_LABEL,
   USER_DISPLAY_NAME,
 } from '@/domain/copy'
+import { computeLogStreak } from '@/domain/dailyLog'
 import { clearImportIntent, hasImportIntent } from '@/lib/importLink'
 import { useAppState } from '@/state/useAppState'
 import { CaretRight, GearSix } from '@phosphor-icons/react'
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { createPortal } from 'react-dom'
 import styles from './MeScreen.module.css'
 
@@ -29,11 +29,16 @@ export function MeScreen({ onClose }: { onClose?: () => void }) {
   const {
     today,
     snapshotFor,
+    dayLogs,
     importCycleData,
     importedFrom,
     closeStackScreen,
   } = useAppState()
   const snap = snapshotFor(today)
+  const streakDays = useMemo(
+    () => computeLogStreak(dayLogs, today),
+    [dayLogs, today],
+  )
   const [importOpen, setImportOpen] = useState(false)
   const [importFromLink, setImportFromLink] = useState(false)
 
@@ -106,7 +111,7 @@ export function MeScreen({ onClose }: { onClose?: () => void }) {
           <article className={styles.stat}>
             <p className={styles.statLabel}>连续记录</p>
             <img className={styles.statIcon} src={iconCalendar} alt="" />
-            <p className={styles.statValue}>{SAMPLE_STREAK_DAYS}天</p>
+            <p className={styles.statValue}>{streakDays}天</p>
           </article>
           <article className={styles.stat}>
             <p className={styles.statLabel}>本周期第</p>

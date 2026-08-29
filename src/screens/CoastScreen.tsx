@@ -24,7 +24,15 @@ function shellPortal(node: ReactNode) {
 }
 
 export function CoastScreen() {
-  const { today, snapshotFor, mode, cycleConfig, openStackScreen } = useAppState()
+  const {
+    today,
+    snapshotFor,
+    mode,
+    cycleConfig,
+    openStackScreen,
+    getDailyLog,
+    saveDailyLog,
+  } = useAppState()
   const todaySnap = snapshotFor(today)
   const scrollRef = useRef<HTMLDivElement>(null)
   const screenRef = useRef<HTMLDivElement>(null)
@@ -176,9 +184,11 @@ export function CoastScreen() {
       {recordOpen &&
         shellPortal(
           <RecordSheet
+            key={today.toISOString()}
             dateLabel={formatMonthDay(today)}
+            initialLog={getDailyLog(today)}
             onClose={() => setRecordOpen(false)}
-            onSave={() => setRecordOpen(false)}
+            onSave={(input) => saveDailyLog(today, input)}
           />,
         )}
     </div>

@@ -10,7 +10,7 @@
 
 .sheet {
   width: 100%;
-  max-height: 78%;
+  max-height: 88%;
   display: flex;
   flex-direction: column;
   border-radius: 28px 28px 0 0;
@@ -170,30 +170,150 @@
   background: radial-gradient(circle at center, var(--tide-deep) 0 40%, #fff 45%);
 }
 
-.symptomGrid {
+.chipGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px 6px;
+}
+
+.chip,
+.chipMore {
   display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 4px 10px;
+  border-radius: 16px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.92) 0%, rgba(247, 251, 253, 0.88) 100%);
+  border: 1px solid rgba(145, 186, 220, 0.18);
+  box-shadow: var(--shadow-paper);
+  color: var(--ink-soft);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.chipArt,
+.chipMoreIcon {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  background: rgba(255, 252, 247, 0.9);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.9) inset,
+    0 4px 10px -6px rgba(90, 140, 180, 0.28);
+}
+
+.chipImg {
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+  pointer-events: none;
+  user-select: none;
+}
+
+.chipLabel {
+  text-align: center;
+  line-height: 1.25;
+  letter-spacing: 0.02em;
+}
+
+.chip[data-on='true'] {
+  color: var(--ink-strong);
+  border-color: rgba(126, 184, 232, 0.55);
+  background: linear-gradient(180deg, #ffffff 0%, #eef6fb 100%);
+  box-shadow:
+    0 0 0 1px rgba(126, 184, 232, 0.35),
+    var(--shadow-paper);
+}
+
+.chip[data-on='true'] .chipArt {
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.95) inset,
+    0 6px 12px -6px rgba(90, 150, 200, 0.4);
+}
+
+.chipMore {
+  color: var(--tide-deep);
+}
+
+.chipMoreIcon {
+  color: var(--tide-deep);
+}
+
+.symptomGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px 6px;
 }
 
 .symptom,
 .symptomMore {
-  padding: 8px 12px;
-  border-radius: 999px;
-  font-size: 12px;
-  font-weight: 600;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 4px 10px;
+  border-radius: 16px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.92) 0%, rgba(247, 251, 253, 0.88) 100%);
+  border: 1px solid rgba(145, 186, 220, 0.18);
+  box-shadow: var(--shadow-paper);
   color: var(--ink-soft);
-  background: rgba(255, 255, 255, 0.8);
-  border: 1px solid rgba(126, 184, 232, 0.22);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.symptomArt,
+.symptomMoreIcon {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  background: rgba(255, 252, 247, 0.9);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.9) inset,
+    0 4px 10px -6px rgba(90, 140, 180, 0.28);
+}
+
+.symptomImg {
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+  pointer-events: none;
+  user-select: none;
+}
+
+.symptomLabel {
+  text-align: center;
+  line-height: 1.25;
+  letter-spacing: 0.02em;
 }
 
 .symptom[data-on='true'] {
-  color: #fff;
-  background: linear-gradient(135deg, var(--tide), var(--tide-deep));
-  border-color: transparent;
+  color: var(--ink-strong);
+  border-color: rgba(126, 184, 232, 0.55);
+  background:
+    linear-gradient(180deg, #ffffff 0%, #eef6fb 100%);
+  box-shadow:
+    0 0 0 1px rgba(126, 184, 232, 0.35),
+    var(--shadow-paper);
+}
+
+.symptom[data-on='true'] .symptomArt {
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.95) inset,
+    0 6px 12px -6px rgba(90, 150, 200, 0.4);
 }
 
 .symptomMore {
+  color: var(--tide-deep);
+}
+
+.symptomMoreIcon {
   color: var(--tide-deep);
 }
 
