@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>MoonWave · 月潮</title>
+    <meta name="description" content="MoonWave 月潮产品介绍视频" />
+    <style>
+      :root {
+        color-scheme: light;
+        --bg: #eef6fc;
+        --ink: #2a4458;
+        --soft: #6d8aa0;
+        --card: rgba(255, 255, 255, 0.82);
+        --line: rgba(126, 184, 232, 0.28);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        margin: 0;
+        min-height: 100%;
+      }
+
+      body {
+        font-family:
+          "PingFang SC",
+          "Hiragino Sans GB",
+          "Noto Sans SC",
+          system-ui,
+          sans-serif;
+        color: var(--ink);
+        background:
+          radial-gradient(90% 55% at 50% -8%, rgba(186, 224, 246, 0.75), transparent 55%),
+          linear-gradient(180deg, #eef7fd 0%, #f7fbff 45%, #e6f2fa 100%);
+        display: grid;
+        place-items: center;
+        padding: 24px 16px 40px;
+      }
+
+      main {
+        width: min(920px, 100%);
+      }
+
+      header {
+        text-align: center;
+        margin-bottom: 18px;
+      }
+
+      .seal {
+        display: inline-grid;
+        place-items: center;
+        width: 28px;
+        height: 28px;
+        margin-bottom: 10px;
+        border-radius: 6px;
+        border: 1px solid rgba(196, 78, 62, 0.45);
+        color: #c44e3e;
+        font-size: 13px;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        background: rgba(255, 255, 255, 0.55);
+      }
+
+      h1 {
+        margin: 0;
+        font-size: clamp(28px, 5vw, 40px);
+        font-weight: 700;
+        letter-spacing: 0.06em;
+      }
+
+      p {
+        margin: 8px 0 0;
+        color: var(--soft);
+        font-size: 14px;
+        letter-spacing: 0.04em;
+      }
+
+      .player {
+        overflow: hidden;
+        border-radius: 18px;
+        border: 1px solid var(--line);
+        background: var(--card);
+        box-shadow:
+          0 18px 40px rgba(74, 118, 150, 0.12),
+          0 2px 0 rgba(255, 255, 255, 0.7) inset;
+        backdrop-filter: blur(8px);
+      }
+
+      video {
+        display: block;
+        width: 100%;
+        aspect-ratio: 16 / 9;
+        background: #0f2230;
+        vertical-align: middle;
+      }
+
+      footer {
+        margin-top: 14px;
+        text-align: center;
+        color: var(--soft);
+        font-size: 12px;
+      }
+
+      footer a {
+        color: inherit;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header>
+        <div class="seal" aria-hidden="true">潮</div>
+        <h1>MoonWave</h1>
+        <p>月潮 · 产品介绍</p>
+      </header>
+      <div class="player">
+        <video
+          controls
+          playsinline
+          preload="metadata"
+          poster=""
+          src="./MoonWave.mp4"
+        >
+          你的浏览器不支持视频播放，请
+          <a href="./MoonWave.mp4">下载视频</a>
+          观看。
+        </video>
+      </div>
+      <footer>
+        <a href="./MoonWave.mp4" download="MoonWave.mp4">下载视频</a>
+      </footer>
+    </main>
+  </body>
+</html>
