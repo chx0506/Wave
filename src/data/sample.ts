@@ -1,7 +1,8 @@
-import type { CycleConfig } from '@/domain/types'
+import type { CycleConfig, PeriodRecord } from '@/domain/types'
 
-/** Mock cycle aligned with home dial (today = day 8, 卵泡期). */
-export const TODAY = new Date(2026, 7, 26)
+const now = new Date()
+
+export const TODAY = new Date(now.getFullYear(), now.getMonth(), now.getDate())
 
 export const SAMPLE_CYCLE: CycleConfig = {
   cycleLength: 28,
@@ -14,6 +15,13 @@ export const SAMPLE_CYCLE: CycleConfig = {
     luteal: 12,
   },
 }
+
+export const SAMPLE_PERIOD_RECORDS: PeriodRecord[] = [
+  { startDate: new Date(2026, 4, 26), endDate: new Date(2026, 4, 30) },
+  { startDate: new Date(2026, 5, 23), endDate: new Date(2026, 5, 27) },
+  { startDate: new Date(2026, 6, 21), endDate: new Date(2026, 6, 25) },
+  { startDate: new Date(2026, 7, 19), endDate: new Date(2026, 7, 23) },
+]
 
 /** Demo streak for home metric card. */
 export const SAMPLE_STREAK_DAYS = 12

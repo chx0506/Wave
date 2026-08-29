@@ -60,8 +60,36 @@
   gap: 14px;
 }
 
+.scroll[data-scale='day'] {
+  padding-bottom: calc(10px + env(safe-area-inset-bottom, 0px));
+}
+
 .scroll > * {
   flex-shrink: 0;
+}
+
+.scaleTabs {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 4px;
+  padding: 4px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.68);
+  border: 1px solid rgba(126, 184, 232, 0.24);
+}
+
+.scaleTab {
+  height: 30px;
+  border-radius: 999px;
+  color: var(--ink-soft);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.scaleTab[data-active='true'] {
+  color: #fff;
+  background: linear-gradient(135deg, #8ec4e6 0%, #6fa8d4 58%, #5a93be 100%);
+  box-shadow: 0 8px 18px -12px rgba(90, 150, 200, 0.72);
 }
 
 .pager {
@@ -175,22 +203,25 @@
 }
 
 .day[data-phase='follicular'] {
-  background: rgba(var(--phase-follicular), 0.24);
-  border-color: rgba(var(--phase-follicular), 0.3);
+  background: transparent;
+  border-color: transparent;
 }
 
 .day[data-phase='ovulatory'] {
-  background: rgba(var(--phase-ovulatory), 0.22);
-  border-color: rgba(var(--phase-ovulatory), 0.32);
+  background: transparent;
+  border-color: transparent;
 }
 
 .day[data-phase='luteal'] {
-  background: rgba(var(--phase-luteal), 0.18);
-  border-color: rgba(var(--phase-luteal), 0.24);
+  background: transparent;
+  border-color: transparent;
 }
 
 .day[data-today='true'] {
-  box-shadow: inset 0 0 0 1.5px var(--tide);
+  border-color: rgba(58, 83, 104, 0.56);
+  box-shadow:
+    inset 0 0 0 1.5px rgba(255, 255, 255, 0.82),
+    0 0 0 1.5px rgba(58, 83, 104, 0.18);
 }
 
 .day[data-selected='true'] {
@@ -198,10 +229,37 @@
   box-shadow: inset 0 0 0 1.5px rgba(111, 168, 212, 0.65);
 }
 
+.day[data-future='true'] {
+  color: rgba(104, 128, 142, 0.42);
+  background: rgba(136, 160, 166, 0.08);
+  border-color: transparent;
+  box-shadow: none;
+  cursor: not-allowed;
+}
+
+.day[data-future='true'] .phaseMark {
+  opacity: 0.22;
+  filter: grayscale(1);
+}
+
 .dayNum {
   font-size: 12px;
   font-weight: 600;
   line-height: 1.2;
+}
+
+.todayMark {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 16px;
+  height: 16px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  color: #fff;
+  background: var(--tide-deep);
+  box-shadow: 0 4px 8px -5px rgba(58, 83, 104, 0.6);
 }
 
 .phaseMark {
@@ -234,6 +292,342 @@
 .phaseMarkMini {
   display: block;
   object-fit: contain;
+}
+
+.yearGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 5px;
+  padding: 0 2px 2px;
+}
+
+.miniMonth {
+  display: block;
+  min-width: 0;
+  padding: 5px 4px 6px;
+  border-radius: 8px;
+  background: rgba(245, 250, 253, 0.78);
+  border: 1px solid rgba(126, 184, 232, 0.16);
+  text-align: left;
+}
+
+.miniMonth[data-future='true'] {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.miniMonth p {
+  margin: 0 0 3px;
+  color: var(--ink-strong);
+  font-size: 10px;
+  font-weight: 800;
+}
+
+.miniGrid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 1px;
+}
+
+.miniGrid span,
+.miniDay {
+  aspect-ratio: 1;
+  border-radius: 50%;
+}
+
+.miniDay {
+  min-width: 0;
+  display: grid;
+  place-items: center;
+  color: var(--ink-soft);
+  background: transparent;
+  border: 0;
+  font-size: 7px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.miniDay[data-phase='menstrual'] {
+  background: rgba(var(--phase-menstrual), 0.72);
+  color: #fff;
+}
+
+.miniDay[data-today='true'] {
+  color: var(--ink-strong);
+}
+
+.miniDay[data-future='true'] {
+  color: rgba(104, 128, 142, 0.28);
+  background: transparent;
+}
+
+.miniDay[data-phase='menstrual'][data-future='true'] {
+  color: rgba(104, 128, 142, 0.32);
+  background: rgba(136, 160, 166, 0.12);
+}
+
+.dayListCard {
+  --phase-menstrual: 232, 145, 122;
+  --phase-follicular: 107, 191, 160;
+  --phase-ovulatory: 61, 127, 212;
+  --phase-luteal: 224, 192, 106;
+  flex: 1 1 auto;
+  min-height: 0;
+  padding: 10px;
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.78);
+  border: 1px solid rgba(255, 255, 255, 0.95);
+  box-shadow: var(--shadow-card);
+}
+
+.dayList {
+  height: 100%;
+  min-height: 0;
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 148px 2px;
+  scroll-padding-block: 148px;
+}
+
+.dayListItem {
+  display: grid;
+  grid-template-columns: 1fr auto 54px;
+  gap: 10px;
+  align-items: center;
+  min-height: 62px;
+  padding: 10px 12px;
+  border-radius: 16px;
+  color: var(--ink);
+  background: rgba(245, 250, 253, 0.7);
+  border: 1px solid rgba(126, 184, 232, 0.14);
+}
+
+.dayListItem[data-phase='menstrual'] {
+  background: rgba(var(--phase-menstrual), 0.18);
+  border-color: rgba(var(--phase-menstrual), 0.26);
+}
+
+.dayListItem[data-today='true'] {
+  background: #fff;
+  border-color: rgba(58, 83, 104, 0.42);
+  box-shadow:
+    inset 0 0 0 1.5px rgba(111, 168, 212, 0.42),
+    0 12px 24px -18px rgba(58, 83, 104, 0.5);
+}
+
+.dayListItem[data-future='true'] {
+  color: rgba(104, 128, 142, 0.42);
+  background: rgba(136, 160, 166, 0.08);
+  border-color: transparent;
+  box-shadow: none;
+  cursor: not-allowed;
+}
+
+.dayListItem[data-future='true'] .dayListDate strong,
+.dayListItem[data-future='true'] .dayListDate em,
+.dayListItem[data-future='true'] .dayListPhase,
+.dayListItem[data-future='true'] .dayListMeta {
+  color: rgba(104, 128, 142, 0.38);
+}
+
+.dayListItem[data-future='true'] .dayListPhase img {
+  opacity: 0.22;
+  filter: grayscale(1);
+}
+
+.dayListDate {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  text-align: left;
+}
+
+.dayListDate strong {
+  color: var(--ink-strong);
+  font-size: 16px;
+  font-weight: 800;
+}
+
+.dayListDate em {
+  color: var(--ink-faint);
+  font-size: 11px;
+  font-style: normal;
+  font-weight: 700;
+}
+
+.dayListPhase {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: var(--ink-soft);
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.dayListPhase img {
+  width: 22px;
+  height: 22px;
+  object-fit: contain;
+}
+
+.dayListMeta {
+  color: var(--ink-faint);
+  font-size: 11px;
+  font-weight: 700;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.dayCard {
+  --phase-menstrual: 232, 145, 122;
+  --phase-follicular: 107, 191, 160;
+  --phase-ovulatory: 61, 127, 212;
+  --phase-luteal: 224, 192, 106;
+  display: grid;
+  grid-template-columns: 76px 1fr;
+  gap: 14px;
+  align-items: center;
+  min-height: 124px;
+  padding: 18px;
+  border-radius: 20px;
+  background: rgba(var(--phase-follicular), 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.95);
+  box-shadow: var(--shadow-card);
+}
+
+.dayCard[data-phase='menstrual'] {
+  background: rgba(var(--phase-menstrual), 0.2);
+}
+
+.dayCard[data-phase='ovulatory'] {
+  background: rgba(var(--phase-ovulatory), 0.18);
+}
+
+.dayCard[data-phase='luteal'] {
+  background: rgba(var(--phase-luteal), 0.22);
+}
+
+.dayLarge {
+  width: 76px;
+  height: 76px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  color: var(--ink-strong);
+  background: rgba(255, 255, 255, 0.82);
+  font-size: 34px;
+  font-weight: 800;
+}
+
+.dayCard strong {
+  display: block;
+  color: var(--ink-strong);
+  font-size: 22px;
+  font-weight: 800;
+}
+
+.dayCard p {
+  margin: 7px 0 0;
+  color: var(--ink-soft);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.rangeCard {
+  display: grid;
+  gap: 8px;
+  padding: 12px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.78);
+  border: 1px solid rgba(255, 255, 255, 0.95);
+  box-shadow: var(--shadow-card);
+}
+
+.phaseRange {
+  display: grid;
+  grid-template-columns: 10px 72px 1fr;
+  gap: 9px;
+  align-items: center;
+  min-height: 36px;
+  padding: 0 2px;
+}
+
+.phaseRange i {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: rgba(var(--phase-follicular), 0.72);
+}
+
+.phaseRange[data-phase='menstrual'] i {
+  background: rgba(var(--phase-menstrual), 0.82);
+}
+
+.phaseRange[data-phase='ovulatory'] i {
+  background: rgba(var(--phase-ovulatory), 0.82);
+}
+
+.phaseRange[data-phase='luteal'] i {
+  background: rgba(var(--phase-luteal), 0.82);
+}
+
+.phaseRange strong {
+  color: var(--ink-strong);
+  font-size: 13px;
+}
+
+.phaseRange span {
+  color: var(--ink-soft);
+  font-size: 12px;
+  font-weight: 700;
+  text-align: right;
+}
+
+.emptyState {
+  min-height: 350px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 28px 20px;
+  border-radius: 22px;
+  text-align: center;
+  color: var(--ink-soft);
+  background: rgba(255, 255, 255, 0.78);
+  border: 1px solid rgba(255, 255, 255, 0.95);
+  box-shadow: var(--shadow-card);
+}
+
+.emptyState svg {
+  color: var(--tide-deep);
+}
+
+.emptyState h3 {
+  max-width: 236px;
+  margin: 12px 0 0;
+  color: var(--ink-strong);
+  font-size: 18px;
+  line-height: 1.35;
+}
+
+.emptyState p {
+  max-width: 280px;
+  margin: 9px 0 14px;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.emptyState span {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: var(--ink-faint);
+  font-size: 11px;
+  font-weight: 700;
 }
 
 .phaseRow {

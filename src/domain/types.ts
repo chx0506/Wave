@@ -50,6 +50,13 @@ export type CycleConfig = {
   phaseWindows: PhaseWindows
 }
 
+export type PeriodRecord = {
+  startDate: Date
+  endDate: Date
+}
+
+export type PredictionSource = 'logged' | 'predicted'
+
 export type DaySnapshot = {
   date: Date
   cycleDay: number
@@ -57,6 +64,7 @@ export type DaySnapshot = {
   tide: TideState
   /** 0–1 water height for calendar cells and illustrations. */
   tideHeight: number
+  source?: PredictionSource
 }
 
 export type CalendarCell =

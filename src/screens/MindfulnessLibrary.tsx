@@ -1,7 +1,6 @@
 import {
   MINDFULNESS_CATEGORY_LABEL,
   MINDFULNESS_THUMB_SRC,
-  mindfulnessSessionById,
   sessionsForCategory,
   type MindfulnessCategory,
   type MindfulnessSession,
