@@ -1,165 +1,220 @@
 <p align="center">
-  <img src="docs/readme/app-icon.png" width="112" alt="MoonWave 月潮" />
+  <img src="docs/readme/app-icon.png" width="96" alt="MoonWave" />
 </p>
 
 <h1 align="center">月潮 · MoonWave</h1>
 
+<p align="center"><strong>Feel Your Wave. Be Your Wave.</strong><br/>
+读懂身体潮汐，找到自己节奏</p>
+
 <p align="center">
-  <strong>Feel Your Wave. Be Your Wave.</strong><br/>
-  读懂身体的潮汐，找到自己的节奏。
+  <a href="https://moon-wave.vercel.app/">在线 Demo</a> ·
+  <a href="https://moon-wave.vercel.app/share/">介绍视频</a> ·
+  <a href="#-本地开发">本地运行</a>
 </p>
 
 <p align="center">
-  <a href="https://moon-wave.vercel.app/"><img src="https://img.shields.io/badge/Live_Demo-moon--wave.vercel.app-5a93be?style=for-the-badge" alt="Live Demo" /></a>
-  <img src="https://img.shields.io/badge/React-19-61dafb?style=for-the-badge&logo=react&logoColor=white" alt="React" />
-  <img src="https://img.shields.io/badge/Vite-8-646cff?style=for-the-badge&logo=vite&logoColor=white" alt="Vite" />
-  <img src="https://img.shields.io/badge/TypeScript-5-3178c6?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript" />
-</p>
-
-<p align="center">
-  <img src="docs/readme/screen-welcome.png" width="280" alt="欢迎页" />
+  <img src="docs/readme/welcome-calendar.jpg" width="720" alt="欢迎页与潮汐日历" />
 </p>
 
 ---
 
-## 这是什么？
+## 先听见身体，再听见自己
 
-**月潮（MoonWave）** 是一款以**潮汐**隐喻经期周期的温暖 Web App。  
-它不把身体当成冰冷的仪表盘，而是把每一次周期写成退潮、涨潮、满潮与平潮——在纸艺海岸的世界里，轻轻记录、观察、练习与探索。
+许多周期 App 最先回答的是：月经什么时候来？什么时候可能排卵？受孕概率有多高？
+
+但对暂时没有生育计划的人来说，记录月经的意义远不止于此。我们还想知道：
+
+- 为什么这几天总是睡不好？
+- 为什么有时格外疲惫、烦躁或没有精力？
+- 今天适合怎样运动、饮食和安排工作？
+- 哪些变化只是短暂波动，哪些情况值得继续观察？
+
+**记录月经，不只是为了判断会不会怀孕，更是为了更好地生活。**
+
+MoonWave 从这里开始：不只告诉用户下一次月经什么时候来，而是结合**今天的状态、过去的记录、周期变化与经医学审核的知识**，帮助她理解——
+
+> **我的身体最近可能发生了什么，以及今天可以为自己做些什么。**
+
+<p align="center">
+  <img src="docs/readme/hero-brand.jpg" width="560" alt="MoonWave 品牌视觉" />
+</p>
+
+我们希望从单纯的周期记录再往前一步：
+
+**记录今天 → 理解此刻 → 获得具体建议 → 看见长期规律 → 找到自己的节奏。**
+
+### 我们想陪伴谁？
+
+- 已有周期记录习惯，但觉得「记完之后没有然后」的人  
+- 经常经历 PMS、痛经、睡眠、疲劳、情绪波动的人  
+- 希望获得更具体的饮食、运动、睡眠与工作学习建议的人  
+- 想了解自己的长期规律，而不是只要一个统一答案的人  
+
+> **她们不是缺一个月经日历，而是缺一个慢慢读懂自己的地方。**
+
+---
+
+## 在 MoonWave，身体变化可以被看见
+
+<p align="center">
+  <img src="docs/readme/home.jpg" width="760" alt="首页、记录、正念与潮池观察" />
+</p>
+
+### 首页｜潮汐日志
+
+> **今天，我的身体怎么样？**
+
+首页呈现当前周期阶段与今日潮汐状态。用户可以轻量记录：
+
+**经期 / 疼痛 / 情绪 / 睡眠 / 精力 / 压力 / 饮食 / 运动**
+
+完成记录后，MoonWave 会结合**今天的状态 + 历史记录 + 周期上下文 + 经医学审核的知识库**，生成简短的**今日洞察**，并从这些方面给出少量建议：
+
+**情绪 · 饮食 · 运动 · 睡眠 · 工作**
+
+它不会因为你处在某个阶段就告诉你「应该怎样」，更关注：
+
+> **结合你最近的记录，今天有什么值得留意，又可以先尝试什么。**
+
+首页还会连接：
+
+| 入口 | 作用 |
+| :--- | :--- |
+| **健康科普短卡** | 与当下阶段相关的轻阅读 |
+| **静谧海湾** | 几分钟呼吸、情绪安抚、睡前放松；正念不是额外任务，而是需要时的靠岸处 |
+| **潮池观察 · 身体小实验** | 一次只改一个变量，把「我好像每次都会这样」变成可观察的线索 |
+| **每日祝福** | 一句轻盈的收束 |
+
+潮汐映射：
+
+| 潮位 | 周期阶段 |
+| :--- | :--- |
+| 退潮 | 月经期 |
+| 涨潮 | 卵泡期 |
+| 满潮 | 排卵期 |
+| 平潮 | 黄体期 |
+
+---
+
+### 日历｜把今天放回周期里
+
+> **一天的感受，放进完整的周期里，才更容易读懂自己。**
+
+潮汐日历支持 **日 / 月 / 年**，查看经期与阶段、排卵窗口、每日状态与长期规律。月历下方还有周期潮汐轨迹、阶段说明，以及**激素变化参考趋势**（示意典型周期，不等于实测激素）。
+
+希望日历不只说「今天是周期第几天」，还能帮助理解：**今天为什么可能和前几天不太一样。**
+
+---
+
+### 统计｜让记录慢慢形成规律
+
+> **记录的意义，不只是留下今天，而是在时间里看见自己的节奏。**
+
+<p align="center">
+  <img src="docs/readme/stats.jpg" width="320" alt="统计页" />
+  &nbsp;
+  <img src="docs/readme/cycle-rhythm.jpg" width="320" alt="周期节律" />
+</p>
+
+- **周期节律**：当前阶段、平均周期、距下次经期、预计排卵窗口  
+- **身体洞察**：结合当前周期与历史，总结近期值得关注的变化  
+- **经期记录**：开始时间、持续时间与周期变化  
+- **小实验回顾**：进行中与已完成的生活方式观察  
+- **个人身体线索**：多个周期中反复出现、并由自己确认过的经验  
+- **数据导入**：让已有周期记录继续被使用  
+
+这些不是医学诊断，而是进一步了解自己的线索。
+
+---
+
+### 探索｜海岛探秘
+
+> **认识自己的身体，是一场寻找宝藏的旅程。**
+
+<p align="center">
+  <img src="docs/readme/explore.jpg" width="640" alt="探索海岛" />
+</p>
+
+疼痛、缓解、疾病、睡眠、情绪、运动、营养等内容，变成可逐步打开的海岛与知识路径：
+
+**发现 → 阅读 → 收藏 → 继续探索**
+
+科普由团队整理创作，并与最近记录产生连接——不是贴标签，而是给你一张找到答案的地图。
+
+---
+
+### 我的｜我的潮汐
+
+长期记录沉淀为周期线索、小实验、睡眠/情绪/精力趋势与个人经验，最终形成持续更新的 **身体航海日志**。若需要就医，也可通过 **Health Brief** 整理一段时间的记录，帮助更准确地描述自己的状态。
+
+---
+
+## Crab：一直在海边的那个伙伴
+
+<p align="center">
+  <img src="docs/readme/crab.jpg" width="520" alt="Crab" />
+</p>
+
+Crab 不是第六个 Tab。它以浮窗出现在首页，也可在「我的」里深入交流。它连接今天的记录、最近的变化、身体观察、健康知识与正念内容——
+
+> **记得最近发生了什么，也知道下一步可以去哪里的伙伴。**
+
+负责的是：**记得、连接、提醒和陪伴。**
+
+---
+
+## 贝壳：让每一次照顾自己都留下回响
+
+统一的 **贝壳积分体系**：
+
+**获得**：每日记录 / 连续打卡 / 完成身体小实验 / 完成正念 / 探索健康知识 / 充值 VIP  
+
+**使用**：解锁进阶健康内容、静谧海湾主题、Crab 与主页装扮、合作品牌礼品或权益  
+
+积分不是为了机械签到，而是奖励：**关注自己、记录自己、理解自己、照顾自己。**
+
+---
+
+## AI 在背后做了什么？
+
+<p align="center">
+  <img src="docs/readme/arch-journal-ai.png" width="640" alt="潮汐日刊流水线" />
+</p>
+
+1. **整理每天的记录** → 结构化状态  
+2. **找到历史规律** → 跨日、跨周期的个人模式  
+3. **匹配医学参考** → 从审核过的知识库取证，而不是凭空生成健康结论  
+4. **生成此刻相关的建议** → 限制在情绪支持、饮食与生活方式、温和运动、睡眠、工作节奏、正念、继续观察或就医提示  
+
+> **AI 不替用户定义身体，而是帮助她看见、理解，学会照顾自己。**
+
+---
+
+## 技术架构与当前完成度
+
+### 本地优先，AI 增强
+
+周期设置、每日记录、潮汐计算与主要页面交互在设备侧完成；服务端主要承担「潮汐日刊」智能生成。AI 暂不可用时，核心记录与潮汐可视化仍可用。
 
 | | |
 | :--- | :--- |
-| **给谁用** | 希望用更柔软方式理解周期的人；偏爱隐喻与日常觉察，而不是临床表格 |
-| **核心体验** | 潮汐日志 · 潮汐日历 · 身体统计 · 海岛探索 · 正念海湾 · 身体小实验 |
-| **视觉语言** | 高调浅蓝纸浮雕 / 折纸海岸 · 中文优先 · 手机框移动 Web |
+| 前端 | React + TypeScript + Vite |
+| 数据 | 浏览器本地存储为主 |
+| 智能 | Vercel Serverless + 文献索引增强 |
+| Demo | https://moon-wave.vercel.app/ |
 
 <p align="center">
-  <a href="https://moon-wave.vercel.app/">🌐 在线体验 https://moon-wave.vercel.app/</a>
-  ·
-  <a href="https://moon-wave.vercel.app/share/">▶ 介绍视频 Share 页</a>
+  <img src="docs/readme/arch-navigation.png" width="480" alt="导航结构" />
+  <img src="docs/readme/arch-data.png" width="480" alt="本地数据流" />
+  <img src="docs/readme/arch-deploy.png" width="480" alt="部署拓扑" />
 </p>
 
----
-
-## 产品一览
-
-### 四潮节律
-
-周期阶段被映射成海岸潮位，方便用身体感受记忆：
-
-| 潮位 | 周期阶段 | 感觉 |
-| :--- | :--- | :--- |
-| 退潮 | 月经期 | 释放与修复 |
-| 涨潮 | 卵泡期 | 能量回升 |
-| 满潮 | 排卵期 | 峰值与表达 |
-| 平潮 | 黄体期 | 回落与整合 |
-
-### 主要模块
-
-```mermaid
-flowchart LR
-  A[首页 潮汐日志] --> B[日历 潮汐日历]
-  B --> C[统计 身体健康]
-  C --> D[探索 海岛探秘]
-  A --> E[正念海湾]
-  A --> F[身体小实验]
-  D --> G[贝壳积分]
-```
-
-| 模块 | 做什么 |
-| :--- | :--- |
-| **首页** | 潮汐表盘、今日状态、推荐科普、正念入口、身体小实验 |
-| **日历** | 月/年/日视图、经期记录、激素曲线与科普 |
-| **统计** | 连续记录、周期长度、线索与实验进度 |
-| **探索** | 七座主题岛纸船航行、岛上物件解锁科普 |
-| **我的** | 档案、导入、贝壳与装扮入口 |
-
----
-
-## 界面速览
-
-### 探索 · 七岛航线
-
-点选岛屿，小纸船会绕岛驶去；登岛后可点物件阅读科普。右上角是 **贝壳积分**（不是星星）。
-
-<p align="center">
-  <img src="docs/readme/screen-explore-map.jpg" width="320" alt="探索地图" />
-  &nbsp;
-  <img src="docs/readme/screen-explore-mood.png" width="320" alt="心理健康岛" />
-</p>
-
-**七座岛**
-
-| 岛 | 主题 |
-| :--- | :--- |
-| 经期疼痛与应对 | 疼痛识别与应对 |
-| 不适缓解与自护 | 呼吸、休息与轻量调整 |
-| 营养与健康 | 饮食与能量补给 |
-| 锻炼建议与技巧 | 不同阶段的活动强度 |
-| 常见妇科问题 | 健康边界与求医时机 |
-| 睡眠质量与休息 | 睡眠节律与入睡 |
-| 心理健康 | 情绪如天气，可被温柔观察 |
-
-<p align="center">
-  <img src="docs/readme/island-nutrition.png" width="180" alt="营养岛" />
-  <img src="docs/readme/island-move.png" width="180" alt="运动岛" />
-  <img src="docs/readme/island-mood.png" width="180" alt="情绪岛" />
-</p>
-
-### 日历 · 激素曲线
-
-典型周期激素走势（纸浪叠层曲线）+ 周期天数轴，下方可横滑浏览四激素科普。
-
-<p align="center">
-  <img src="docs/readme/screen-hormone-chart.png" width="360" alt="激素曲线" />
-</p>
-
-### 统计 · 潮记档案
-
-连续记录、周期洞察与实验进度，纸艺蓝调界面。
-
-<p align="center">
-  <img src="docs/readme/screen-stats-header.png" width="360" alt="统计页" />
-</p>
-
-### 贝壳积分体系 🐚
-
-> 让每一次照顾自己都留下回响。
-
-**获得**：每日记录 · 连续打卡 · 完成身体小实验 · 完成正念 · 探索健康知识 · 充值 VIP  
-
-**使用**：解锁进阶健康内容 · 静谧海湾主题 · Crab 与主页装扮 · 合作品牌礼品/权益  
-
-贝壳不是机械打卡分，而是对自己关注、记录、理解与照顾的回响。
-
----
-
-## 技术栈
-
-| 层 | 选型 |
-| :--- | :--- |
-| UI | React 19 + TypeScript |
-| 构建 | Vite 8 |
-| 样式 | CSS Modules + Tailwind v4（局部） |
-| 图标 | Phosphor Icons |
-| 部署 | Vercel（生产：`moon-wave.vercel.app`） |
-| 数据 | 本地优先（`localStorage` 等），强调隐私 |
-
-```
-src/
-  screens/          # 首页 / 日历 / 统计 / 探索 / 我的 / 正念 …
-  components/coast/ # 潮汐表盘、日历、激素曲线、小实验 Sheet …
-  data/             # 岛世界、推荐、激素曲线、日志文案 …
-  domain/           # 周期算法、日志、实验进度 …
-  state/            # App 状态
-  theme/            # 设计 token
-```
+已形成：**周期数据 → 每日记录 → 潮汐呈现 → AI 日刊 → 探索与正念** 的完整 Demo 框架。当前以「单设备、本地优先」为主；观察实验与部分线索仍有运行时边界，账号与云端库尚未引入——下一阶段是把可完整体验的本地原型，推进到可长期积累个人身体数据的基础设施。
 
 ---
 
 ## 本地开发
-
-需要 Node.js 20+（建议与 Vercel 构建环境接近）。
 
 ```bash
 git clone https://github.com/chx0506/Wave.git
@@ -168,42 +223,37 @@ npm install
 npm run dev
 ```
 
-常用命令：
-
 ```bash
-npm run dev      # http://127.0.0.1:5173
-npm run build    # tsc -b && vite build
-npm run preview  # 预览生产构建
-npm run lint     # oxlint
+npm run build    # 生产构建
+npm run preview  # 预览构建结果
+npm run lint
 ```
 
-浏览器打开本地地址即可；产品以手机竖屏框体验为主。
-
 ---
 
-## 设计原则（摘要）
+## 下一次涨潮
 
-- **潮汐隐喻优先**：文案与交互围绕退/涨/满/平，而不是冷冰冰的医疗报表口吻  
-- **纸艺海岸**：浅蓝纸浮雕、折纸浪、岛屿与纸船  
-- **中文优先**：界面与科普以中文为主  
-- **一次一个变量**：身体小实验强调可坚持的小改变  
-- **本地优先**：记录默认留在设备侧，用户决定分享什么  
-
-更多产品说明见 [`PRODUCT.md`](./PRODUCT.md)。
+- 完善医学知识库、建议规则、身体线索、Health Brief 与个性化  
+- 探索 Apple Health / Health Connect / 可穿戴接入  
+- 让 Crab 走向持续学习与自然陪伴  
+- 让贝壳连接真实女性健康与生活方式权益  
+- **最重要的：找到真实用户，验证 MoonWave 是否真的让她更了解、更关心自己的身体**
 
 ---
-
-## 路线与状态
-
-当前已上线可体验 Demo（Vercel）。持续打磨中的方向包括：导入体验、贝壳兑换闭环、探索岛深读、以及更多个性化洞察。
-
----
-
-## 许可与署名
-
-私有/研究中的产品原型，版权归项目作者。若需引用或合作，请通过 GitHub Issues 联系。
 
 <p align="center">
-  <img src="docs/readme/paper-sea-map.jpg" width="420" alt="纸质海图" /><br/>
-  <sub>月潮 · 读懂身体的潮汐</sub>
+  <img src="docs/readme/closing.jpg" width="420" alt="Feel Your Wave" /><br/>
+  <img src="docs/readme/poster.jpg" width="420" alt="MoonWave" />
+</p>
+
+<p align="center">
+  <strong>Feel Your Wave. Be Your Wave.</strong><br/>
+  向内，让 AI 唤醒人与自己的连接；<br/>
+  向外，让每一次真实的女性体验，成为下一次创新的起点。<br/><br/>
+  <em>「原来，这就是我的节奏。」🌊</em>
+</p>
+
+<p align="center">
+  <sub>Meet The WaveMakers</sub><br/>
+  <img src="docs/readme/wavemakers.jpg" width="520" alt="WaveMakers" />
 </p>
