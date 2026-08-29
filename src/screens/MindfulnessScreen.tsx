@@ -1,10 +1,20 @@
 import type { MindfulnessSession } from '@/data/mindfulness'
 import { BayScreen } from '@/screens/BayScreen'
 import { MindfulnessLibrary } from '@/screens/MindfulnessLibrary'
-import { useState } from 'react'
+import { mindfulnessSessionById } from '@/data/mindfulness'
+import { useAppState } from '@/state/useAppState'
+import { useEffect, useState } from 'react'
 
 export function MindfulnessScreen() {
+  const { consumePendingMindfulness } = useAppState()
   const [activeSession, setActiveSession] = useState<MindfulnessSession | null>(null)
+
+  useEffect(() => {
+    const pendingId = consumePendingMindfulness()
+    if (!pendingId) return
+    const session = mindfulnessSessionById(pendingId)
+    if (session) setActiveSession(session)
+  }, [consumePendingMindfulness])
 
   if (activeSession) {
     return (

@@ -1,4 +1,8 @@
 import type { Phase } from '@/domain/types'
+import { phaseForCycleDay } from '@/domain/cycle'
+import type { CycleConfig } from '@/domain/types'
+import { SAMPLE_CYCLE } from '@/data/sample'
+import { CYCLE_DAY_JOURNAL } from '@/data/tideJournalDays'
 
 export type AdviceCategory = 'diet' | 'exercise' | 'sleep' | 'work' | 'emotion'
 
@@ -132,4 +136,26 @@ export const PHASE_ORDER: Phase[] = [
 
 export function journalForPhase(phase: Phase): PhaseJournal {
   return PHASE_JOURNAL[phase]
+}
+
+export function journalForCycleDay(
+  cycleDay: number,
+  config: CycleConfig = SAMPLE_CYCLE,
+): PhaseJournal {
+  const day =
+    ((Math.round(cycleDay) - 1 + config.cycleLength) % config.cycleLength) + 1
+  const phase = phaseForCycleDay(day, config)
+  const base = PHASE_JOURNAL[phase]
+  const daily = CYCLE_DAY_JOURNAL[day]
+
+  if (!daily) {
+    return { ...base, dayRange: `第 ${day} 天` }
+  }
+
+  // Per-day copy only varies the headline and intro; knowledge + advice stay phase-level.
+  return {
+    ...base,
+    todayHeadline: daily.todayHeadline,
+    todayIntro: daily.todayIntro,
+  }
 }

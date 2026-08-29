@@ -45,11 +45,11 @@
   top: 0;
   z-index: 3;
   flex-shrink: 0;
-  padding: calc(var(--statusbar-h) + 6px) 22px 10px;
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 12px;
+  padding: calc(var(--statusbar-h) + 4px) 18px 6px;
+  display: grid;
+  grid-template-columns: 40px 1fr 40px;
+  align-items: center;
+  gap: 10px;
   background: linear-gradient(
     180deg,
     rgba(248, 251, 254, 0.94) 0%,
@@ -60,10 +60,55 @@
   -webkit-backdrop-filter: blur(6px);
 }
 
+.headerEpigraph {
+  margin: 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  font-family: var(--font-display);
+  font-size: clamp(10.5px, 2.9vw, 12px);
+  font-weight: 600;
+  line-height: 1.42;
+  letter-spacing: 0.1em;
+  color: #5a7890;
+}
+
+.headerEpigraph span {
+  display: block;
+  white-space: nowrap;
+}
+
+.meEntry {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border-radius: 50%;
+  color: var(--ink-strong);
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid rgba(145, 186, 220, 0.22);
+  box-shadow: 0 4px 14px -8px rgba(90, 140, 180, 0.35);
+  overflow: hidden;
+}
+
+.meEntry:active {
+  transform: scale(0.96);
+}
+
+.meAvatar {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+
 .brandBlock {
   display: flex;
   flex-direction: column;
-  gap: 8px;
   min-width: 0;
 }
 
@@ -97,14 +142,6 @@
   background: var(--seal);
 }
 
-.greeting {
-  margin: 0;
-  font-size: 14px;
-  font-weight: 500;
-  color: var(--ink-soft);
-  letter-spacing: 0.04em;
-}
-
 .iconBtn {
   width: 40px;
   height: 40px;
@@ -136,7 +173,7 @@
   flex-direction: column;
   align-items: center;
   gap: 8px;
-  padding: 8px 18px 20px;
+  padding: 0 18px calc(20px + 72px);
 }
 
 .scrollTail {
@@ -155,7 +192,8 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 6px;
+  gap: 0;
+  margin-top: -2px;
 }
 
 .journalLead {
@@ -167,7 +205,7 @@
 
 .body[data-other-day='1'] {
   gap: 4px;
-  padding-bottom: 12px;
+  padding-bottom: calc(20px + 72px);
 }
 
 .body[data-other-day='1'] .journalLead {
@@ -190,35 +228,31 @@
   color: var(--ink-soft);
 }
 
-.epigraph {
-  margin: 0;
-  padding: 0 8px;
-  max-width: min(86vw, 320px);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-  font-family: var(--font-display);
-  font-size: clamp(13px, 3.6vw, 15px);
-  font-weight: 600;
-  line-height: 1.55;
-  letter-spacing: 0.12em;
-  color: #5a7890;
-}
-
-.epigraph span {
-  display: block;
-  white-space: nowrap;
+.ctaDock {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 4;
+  padding: 10px 18px 12px;
+  pointer-events: none;
+  background: linear-gradient(
+    180deg,
+    rgba(248, 251, 254, 0) 0%,
+    rgba(248, 251, 254, 0.72) 38%,
+    rgba(242, 248, 252, 0.94) 100%
+  );
 }
 
 .cta {
+  pointer-events: auto;
   width: 100%;
-  margin-top: auto;
   display: grid;
   grid-template-columns: 18px 1fr 16px;
   align-items: center;
   gap: 10px;
   padding: 16px 20px;
+  border: none;
   border-radius: var(--radius-pill);
   background: linear-gradient(135deg, #b7d7ee 0%, #9fc8e8 48%, #7eb4dc 100%);
   color: #fff;

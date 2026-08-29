@@ -1,7 +1,14 @@
 import { PHASE_TIDE_LABEL } from '@/domain/copy'
 import { tideHeightForCycleDay } from '@/domain/cycle'
 import type { CycleConfig, DaySnapshot } from '@/domain/types'
-import { useEffect, useRef, useState, type PointerEvent, type ReactNode } from 'react'
+import { CaretRight } from '@phosphor-icons/react'
+import {
+  useEffect,
+  useRef,
+  useState,
+  type PointerEvent,
+  type ReactNode,
+} from 'react'
 import { PaperWaveRelief } from './PaperWaveRelief'
 import styles from './TideDial.module.css'
 
@@ -130,6 +137,7 @@ export function TideDial({
   dayFloat: dayFloatProp,
   onScrubDay,
   onPreviewDay,
+  onPhaseKnowledgeOpen,
 }: {
   snapshot: DaySnapshot
   cycleLength: number
@@ -140,6 +148,7 @@ export function TideDial({
   lowTideDay?: number
   highTideDay?: number
   onPreviewDay: (cycleDay: number) => void
+  onPhaseKnowledgeOpen?: () => void
 }) {
   const dialRef = useRef<HTMLDivElement>(null)
   const dragging = useRef(false)
@@ -458,7 +467,24 @@ export function TideDial({
       </svg>
 
       <div className={styles.label}>
-        <p className={styles.phase}>{PHASE_TIDE_LABEL[snapshot.phase]}</p>
+        <button
+          type="button"
+          className={styles.phaseBtn}
+          aria-label={`查看${PHASE_TIDE_LABEL[snapshot.phase]}科普知识`}
+          onPointerDown={(event) => event.stopPropagation()}
+          onClick={(event) => {
+            event.stopPropagation()
+            onPhaseKnowledgeOpen?.()
+          }}
+        >
+          <span className={styles.phase}>
+            {PHASE_TIDE_LABEL[snapshot.phase]}
+          </span>
+          <span className={styles.phaseCue}>
+            了解生理知识
+            <CaretRight size={11} weight="bold" aria-hidden="true" />
+          </span>
+        </button>
         <p className={styles.day}>· 第 {snapshot.cycleDay} 天 ·</p>
       </div>
     </div>

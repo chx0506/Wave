@@ -4,26 +4,57 @@ import iconPhase from '@/assets/me/icon-phase.png'
 import iconTide from '@/assets/me/icon-tide.png'
 import grainSrc from '@/assets/me/paper-grain.png'
 import wavesSrc from '@/assets/me/waves-clear.png'
+import { DataImportSheet } from '@/components/me/DataImportSheet'
 import { SAMPLE_STREAK_DAYS } from '@/data/sample'
 import {
   APP_NAME,
   PHASE_TIDE_LABEL,
   USER_DISPLAY_NAME,
 } from '@/domain/copy'
+import { Tabs } from '@/domain/types'
+import { clearImportIntent, hasImportIntent } from '@/lib/importLink'
 import { useAppState } from '@/state/useAppState'
 import { CaretRight, GearSix } from '@phosphor-icons/react'
+import { useEffect, useState } from 'react'
+import { createPortal } from 'react-dom'
 import styles from './MeScreen.module.css'
 
 const ROWS = [
   { id: 'cycle', title: '周期设置', glyph: 'moon' },
   { id: 'remind', title: '提醒', glyph: 'bell' },
-  { id: 'export', title: '数据导出', glyph: 'export' },
+  { id: 'import', title: '数据导入', glyph: 'import' },
   { id: 'about', title: '关于 MoonWave', glyph: 'info' },
 ] as const
 
 export function MeScreen() {
-  const { today, snapshotFor } = useAppState()
+  const {
+    today,
+    snapshotFor,
+    importCycleData,
+    importedFrom,
+    setTab,
+  } = useAppState()
   const snap = snapshotFor(today)
+  const [importOpen, setImportOpen] = useState(false)
+  const [importFromLink, setImportFromLink] = useState(false)
+
+  useEffect(() => {
+    if (!hasImportIntent()) return
+    setImportFromLink(true)
+    setImportOpen(true)
+    clearImportIntent()
+  }, [])
+
+  const handleRowClick = (id: (typeof ROWS)[number]['id']) => {
+    if (id === 'import') {
+      setImportFromLink(false)
+      setImportOpen(true)
+      return
+    }
+    if (id === 'about') {
+      setTab(Tabs.home)
+    }
+  }
 
   return (
     <div
@@ -76,7 +107,12 @@ export function MeScreen() {
 
         <div className={styles.list}>
           {ROWS.map(({ id, title, glyph }) => (
-            <button key={id} type="button" className={styles.row}>
+            <button
+              key={id}
+              type="button"
+              className={styles.row}
+              onClick={() => handleRowClick(id)}
+            >
               <span className={styles.rowIcon} aria-hidden="true">
                 <RowGlyph kind={glyph} />
               </span>
@@ -90,8 +126,27 @@ export function MeScreen() {
       <div className={styles.waveFoot} aria-hidden="true">
         <img className={styles.waveImg} src={wavesSrc} alt="" />
       </div>
+
+      {importOpen
+        ? shellPortal(
+            <DataImportSheet
+              importedFrom={importedFrom}
+              requireConsent={importFromLink}
+              onClose={() => {
+                setImportOpen(false)
+                setImportFromLink(false)
+              }}
+              onImport={importCycleData}
+            />,
+          )
+        : null}
     </div>
   )
+}
+
+function shellPortal(node: React.ReactNode) {
+  const host = document.querySelector('[data-phone-shell]')
+  return host ? createPortal(node, host) : node
 }
 
 function RowGlyph({ kind }: { kind: (typeof ROWS)[number]['glyph'] }) {
@@ -119,13 +174,13 @@ function RowGlyph({ kind }: { kind: (typeof ROWS)[number]['glyph'] }) {
       </svg>
     )
   }
-  if (kind === 'export') {
+  if (kind === 'import') {
     return (
       <svg viewBox="0 0 24 24" width="20" height="20">
         <rect x="6" y="3.5" width="12" height="15" rx="2" fill="#d7ebf7" stroke="#9fc8e8" strokeWidth="1.2" />
         <path d="M9 8h6M9 11h6M9 14h3.5" stroke="#7eb4dc" strokeWidth="1.3" strokeLinecap="round" />
-        <path d="M12 12.5v7.2" stroke="#6fa8d4" strokeWidth="1.6" strokeLinecap="round" />
-        <path d="M9.6 17.2 12 19.8l2.4-2.6" fill="none" stroke="#6fa8d4" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+        <path d="M12 19.7V12.5" stroke="#6fa8d4" strokeWidth="1.6" strokeLinecap="round" />
+        <path d="M9.6 14.9 12 12.3l2.4 2.6" fill="none" stroke="#6fa8d4" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
       </svg>
     )
   }

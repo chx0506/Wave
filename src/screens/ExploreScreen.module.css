@@ -27,10 +27,10 @@
 .islandGroup { position: absolute; z-index: 2; width: 76px; height: 64px; transform: translate(-50%, -50%); }
 .islandGroup[data-focused='true'] { z-index: 5; }
 .node { position: absolute; inset: 0; width: 76px; height: 64px; padding: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; background: transparent; border: 0; }
-.land { display: grid; place-items: center; transition: transform .22s var(--ease), filter .22s var(--ease); }
+.land { display: grid; place-items: center; visibility: hidden; transition: transform .22s var(--ease), filter .22s var(--ease); }
 .node[data-active='true'] .land { transform: scale(1.06); filter: drop-shadow(0 7px 10px rgba(45,91,126,.25)); }
 .node[data-current='true'] .land { animation: pulse 2.5s ease-in-out infinite; }
-.nodeLabel { max-width: 62px; margin-top: -7px; padding: 2px 6px; border-radius: 999px; font-size: 8px; font-weight: 800; color: var(--ink-strong); background: rgba(255,255,255,.88); border: 1px solid rgba(255,255,255,.94); box-shadow: 0 3px 8px rgba(49,91,121,.12); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.nodeLabel { position: absolute; top: calc(100% + 4px); left: 50%; max-width: 62px; margin: 0; padding: 2px 6px; border-radius: 999px; font-size: 8px; font-weight: 800; color: var(--ink-strong); background: rgba(255,255,255,.88); border: 1px solid rgba(255,255,255,.94); box-shadow: 0 3px 8px rgba(49,91,121,.12); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; transform: translateX(-50%); }
 .node[data-locked='true'] .nodeLabel { color: var(--ink-faint); }
 .lockBadge, .starBadge { position: absolute; top: 5px; right: 4px; min-width: 15px; height: 15px; padding: 0 3px; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center; gap: 1px; font-size: 7px; font-weight: 800; color: #fff; background: rgba(73,112,143,.78); }
 .starBadge { background: linear-gradient(135deg, #9fd0f0, var(--tide-deep)); }

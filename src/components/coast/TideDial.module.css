@@ -68,6 +68,20 @@
   text-align: center;
 }
 
+.phaseBtn {
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: transparent;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  pointer-events: auto;
+  transition: transform 0.2s var(--ease);
+}
+
 .phase {
   margin: 0;
   font-family: var(--font-display);
@@ -78,6 +92,53 @@
   text-shadow:
     0 1px 0 rgba(255, 255, 255, 0.95),
     0 10px 24px rgba(247, 251, 254, 0.95);
+  transition: color 0.2s ease;
+}
+
+.phaseCue {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  color: var(--ink-faint);
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.9);
+  transition: color 0.2s ease, gap 0.2s var(--ease);
+}
+
+.phaseCue svg {
+  flex: 0 0 auto;
+  opacity: 0.72;
+  transition: transform 0.2s var(--ease), opacity 0.2s ease;
+}
+
+.phaseBtn:active {
+  transform: scale(0.985);
+}
+
+.phaseBtn:active .phase {
+  color: #2f4a60;
+}
+
+.phaseBtn:active .phaseCue {
+  color: var(--ink-soft);
+  gap: 5px;
+}
+
+.phaseBtn:active .phaseCue svg {
+  opacity: 1;
+  transform: translateX(1px);
+}
+
+.day {
+  margin: 8px 0 0;
+  pointer-events: none;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  color: #7a96ab;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.9);
 }
 
 .tide {
@@ -87,4 +148,21 @@
   letter-spacing: 0.12em;
   color: #7a96ab;
   text-shadow: 0 1px 0 rgba(255, 255, 255, 0.9);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .phaseBtn,
+  .phase,
+  .phaseCue,
+  .phaseCue svg {
+    transition: none;
+  }
+
+  .phaseBtn:active {
+    transform: none;
+  }
+
+  .phaseBtn:active .phaseCue svg {
+    transform: none;
+  }
 }

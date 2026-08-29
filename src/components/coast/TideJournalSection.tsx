@@ -1,15 +1,14 @@
+import { CoastSceneGap } from '@/components/coast/CoastSceneGap'
+import { CoastRecommendations } from '@/components/coast/CoastRecommendations'
 import {
   ADVICE_CATEGORY_LABEL,
-  journalForPhase,
-  TIDE_JOURNAL_INTRO,
+  journalForCycleDay,
   type AdviceCategory,
 } from '@/data/tideJournal'
 import { DECODE_ART } from '@/data/decodeArt'
-import { PHASE_LABEL, TIDE_METAPHOR_SHORT } from '@/domain/copy'
-import { PHASE_HINT, PHASE_ICON } from '@/domain/phaseTheme'
-import type { Phase } from '@/domain/types'
-import { CoastSceneGap } from '@/components/coast/CoastSceneGap'
-import { CaretDown, Leaf } from '@phosphor-icons/react'
+import type { DaySnapshot } from '@/domain/types'
+import { useAppState } from '@/state/useAppState'
+import { Leaf } from '@phosphor-icons/react'
 import { useState } from 'react'
 import styles from './TideJournalSection.module.css'
 
@@ -22,19 +21,19 @@ const CATEGORIES: AdviceCategory[] = [
 ]
 
 type Props = {
-  phase: Phase
   cycleDay: number
   cycleLength?: number
+  snapshot: DaySnapshot
 }
 
 export function TideJournalSection({
-  phase,
   cycleDay,
   cycleLength = 28,
+  snapshot,
 }: Props) {
-  const journal = journalForPhase(phase)
+  const { openMindfulnessSession } = useAppState()
+  const journal = journalForCycleDay(cycleDay)
   const [category, setCategory] = useState<AdviceCategory>('emotion')
-  const [knowledgeOpen, setKnowledgeOpen] = useState(true)
   const categoryIndex = CATEGORIES.indexOf(category)
 
   return (
@@ -95,65 +94,10 @@ export function TideJournalSection({
 
       <CoastSceneGap variant="crab" size="spacious" revealThreshold={0.25} />
 
-      <article className={styles.knowledgeBlock} data-phase={phase}>
-        <div className={styles.knowledgeHero}>
-          <span className={styles.knowledgeIcon} aria-hidden="true">
-            <img src={PHASE_ICON[phase]} alt="" draggable={false} />
-          </span>
-          <div className={styles.knowledgeHeroText}>
-            <h3 className={styles.knowledgePhase}>{PHASE_LABEL[phase]}</h3>
-            <p className={styles.knowledgeTide}>
-              {TIDE_METAPHOR_SHORT[phase]}
-            </p>
-            <p className={styles.knowledgeHint}>{PHASE_HINT[phase]}</p>
-          </div>
-        </div>
-
-        <button
-          type="button"
-          className={styles.knowledgeToggle}
-          aria-expanded={knowledgeOpen}
-          onClick={() => setKnowledgeOpen((v) => !v)}
-        >
-          <div className={styles.knowledgeHeadText}>
-            <p className={styles.knowledgeTitle}>
-              {journal.dayRange} · 第 {cycleDay} 天
-            </p>
-            <p className={styles.knowledgeMeta}>
-              {knowledgeOpen ? '收起生理知识' : '展开生理知识'}
-            </p>
-          </div>
-          <span
-            className={styles.knowledgeChevron}
-            data-open={knowledgeOpen ? '1' : '0'}
-            aria-hidden="true"
-          >
-            <CaretDown size={16} weight="bold" />
-          </span>
-        </button>
-
-        {knowledgeOpen && (
-          <div className={styles.knowledgeBody}>
-            <div className={styles.knowledgeBlocks}>
-              <div className={styles.knowledgeItem}>
-                <h4>生理变化</h4>
-                <p>{journal.physiology}</p>
-              </div>
-              <div className={styles.knowledgeItem}>
-                <h4>主要症状</h4>
-                <p>{journal.symptoms}</p>
-              </div>
-              {journal.otherNotes ? (
-                <div className={styles.knowledgeItem}>
-                  <h4>其它表现</h4>
-                  <p>{journal.otherNotes}</p>
-                </div>
-              ) : null}
-            </div>
-            <p className={styles.knowledgeNote}>{TIDE_JOURNAL_INTRO.cycle}</p>
-          </div>
-        )}
-      </article>
+      <CoastRecommendations
+        snapshot={snapshot}
+        onMindfulnessSelect={(session) => openMindfulnessSession(session.id)}
+      />
 
       <blockquote className={styles.blessing}>
         <Leaf size={16} weight="regular" aria-hidden="true" />

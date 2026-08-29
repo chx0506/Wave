@@ -4,7 +4,6 @@ import { DaySummaryBar } from '@/components/calendar/DaySummaryBar'
 import { LayeredWaves } from '@/components/calendar/LayeredWaves'
 import { MonthPager } from '@/components/calendar/MonthPager'
 import { monthCells } from '@/domain/calendar'
-import { SAMPLE_CYCLE } from '@/data/sample'
 import { Tabs } from '@/domain/types'
 import { useAppState } from '@/state/useAppState'
 import { useMemo } from 'react'
@@ -19,11 +18,12 @@ export function CalendarScreen() {
     setSelectedDate,
     snapshotFor,
     setTab,
+    cycleConfig,
   } = useAppState()
 
   const cells = useMemo(
-    () => monthCells(viewedYear, viewedMonth, SAMPLE_CYCLE),
-    [viewedYear, viewedMonth],
+    () => monthCells(viewedYear, viewedMonth, cycleConfig),
+    [viewedYear, viewedMonth, cycleConfig],
   )
 
   return (
@@ -33,8 +33,8 @@ export function CalendarScreen() {
       </div>
       <div className={styles.body}>
         <CalendarHeader
-          lastLowTide={SAMPLE_CYCLE.lastLowTide}
-          cycleLength={SAMPLE_CYCLE.cycleLength}
+          lastLowTide={cycleConfig.lastLowTide}
+          cycleLength={cycleConfig.cycleLength}
         />
         <section className={styles.card}>
           <MonthPager year={viewedYear} month={viewedMonth} onChange={setViewedMonth} />

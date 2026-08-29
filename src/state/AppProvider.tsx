@@ -1,6 +1,7 @@
-import { SAMPLE_CYCLE, TODAY } from '@/data/sample'
+import { TODAY } from '@/data/sample'
 import { OBSERVE_ACTIVE, OBSERVE_CLUES } from '@/data/content'
 import { snapshotForDate } from '@/domain/cycle'
+import type { ImportResult } from '@/domain/importCycle'
 import {
   buildExperimentClue,
   getExperimentProgress,
@@ -10,20 +11,44 @@ import {
   DayModes,
   Tabs,
   type BodyClue,
+  type CycleConfig,
   type DayMode,
   type Experiment,
   type ExperimentCategory,
   type TabId,
 } from '@/domain/types'
+import {
+  getDefaultCycleConfig,
+  loadCycleData,
+  saveCycleData,
+} from '@/lib/cycleStorage'
+import { hasImportIntent } from '@/lib/importLink'
 import { AppContext } from '@/state/useAppState'
-import { useCallback, useMemo, useState, type ReactNode } from 'react'
+import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react'
 
 export function AppProvider({ children }: { children: ReactNode }) {
+  const storedCycle = loadCycleData()
   const [tab, setTab] = useState<TabId>(Tabs.home)
+  const [pendingMindfulnessId, setPendingMindfulnessId] = useState<string | null>(
+    null,
+  )
   const [mode, setMode] = useState<DayMode>(DayModes.day)
   const [selectedDate, setSelectedDate] = useState<Date>(TODAY)
   const [viewedYear, setViewedYear] = useState(TODAY.getFullYear())
   const [viewedMonthNum, setViewedMonthNum] = useState(TODAY.getMonth() + 1)
+  const [cycleConfig, setCycleConfig] = useState<CycleConfig>(
+    storedCycle?.cycleConfig ?? getDefaultCycleConfig(),
+  )
+  const [periodStarts, setPeriodStarts] = useState<Date[]>(
+    storedCycle?.periodStarts ?? [],
+  )
+  const [importedFrom, setImportedFrom] = useState<string | undefined>(
+    storedCycle?.importedFrom,
+  )
+
+  useEffect(() => {
+    if (hasImportIntent()) setTab(Tabs.me)
+  }, [])
   const [experiments, setExperiments] = useState<Experiment[]>([
     normalizeExperiment({
       id: 'exp-sleep',
@@ -61,7 +86,21 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }, [])
 
   const snapshotFor = useCallback(
-    (date: Date) => snapshotForDate(date, SAMPLE_CYCLE),
+    (date: Date) => snapshotForDate(date, cycleConfig),
+    [cycleConfig],
+  )
+
+  const importCycleData = useCallback(
+    (result: Extract<ImportResult, { ok: true }>) => {
+      setCycleConfig(result.cycleConfig)
+      setPeriodStarts(result.data.periodStarts)
+      setImportedFrom(result.data.sourceLabel)
+      saveCycleData(
+        result.cycleConfig,
+        result.data.periodStarts,
+        result.data.sourceLabel,
+      )
+    },
     [],
   )
 
@@ -157,6 +196,17 @@ export function AppProvider({ children }: { children: ReactNode }) {
     )
   }, [])
 
+  const openMindfulnessSession = useCallback((sessionId: string) => {
+    setPendingMindfulnessId(sessionId)
+    setTab(Tabs.bay)
+  }, [])
+
+  const consumePendingMindfulness = useCallback(() => {
+    const id = pendingMindfulnessId
+    setPendingMindfulnessId(null)
+    return id
+  }, [pendingMindfulnessId])
+
   const value = useMemo(
     () => ({
       tab,
@@ -171,12 +221,18 @@ export function AppProvider({ children }: { children: ReactNode }) {
       today: TODAY,
       snapshot,
       snapshotFor,
+      cycleConfig,
+      periodStarts,
+      importedFrom,
+      importCycleData,
       experiments,
       clues,
       createExperiment,
       recordObservation,
       archiveExperimentClue,
       confirmClue,
+      openMindfulnessSession,
+      consumePendingMindfulness,
     }),
     [
       tab,
@@ -187,12 +243,18 @@ export function AppProvider({ children }: { children: ReactNode }) {
       setViewedMonth,
       snapshot,
       snapshotFor,
+      cycleConfig,
+      periodStarts,
+      importedFrom,
+      importCycleData,
       experiments,
       clues,
       createExperiment,
       recordObservation,
       archiveExperimentClue,
       confirmClue,
+      openMindfulnessSession,
+      consumePendingMindfulness,
     ],
   )
 

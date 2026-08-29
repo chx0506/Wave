@@ -1,5 +1,7 @@
+import type { ImportResult } from '@/domain/importCycle'
 import type {
   BodyClue,
+  CycleConfig,
   DayMode,
   DaySnapshot,
   Experiment,
@@ -21,6 +23,10 @@ export type AppState = {
   today: Date
   snapshot: DaySnapshot
   snapshotFor: (date: Date) => DaySnapshot
+  cycleConfig: CycleConfig
+  periodStarts: Date[]
+  importedFrom?: string
+  importCycleData: (result: Extract<ImportResult, { ok: true }>) => void
   experiments: Experiment[]
   clues: BodyClue[]
   createExperiment: (input: {
@@ -38,6 +44,8 @@ export type AppState = {
   ) => void
   archiveExperimentClue: (experimentId: string) => void
   confirmClue: (id: string) => void
+  openMindfulnessSession: (sessionId: string) => void
+  consumePendingMindfulness: () => string | null
 }
 
 export const AppContext = createContext<AppState | null>(null)

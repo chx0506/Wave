@@ -1,14 +1,13 @@
 import {
   MINDFULNESS_CATEGORY_LABEL,
   MINDFULNESS_THUMB_SRC,
-  recommendMindfulness,
-  recommendHint,
-  recommendPhaseLine,
+  mindfulnessSessionById,
   sessionsForCategory,
   type MindfulnessCategory,
   type MindfulnessSession,
   type MindfulnessThumb,
 } from '@/data/mindfulness'
+import { MindfulnessRecommendHero } from '@/components/coast/MindfulnessRecommendHero'
 import { useAppState } from '@/state/useAppState'
 import { CaretRight, Leaf } from '@phosphor-icons/react'
 import shell from './shared/pageShell.module.css'
@@ -22,7 +21,6 @@ type Props = {
 
 export function MindfulnessLibrary({ onSelect }: Props) {
   const { snapshot } = useAppState()
-  const recommended = recommendMindfulness(snapshot)
 
   return (
     <div className={`${shell.screen} ${styles.screen}`}>
@@ -35,24 +33,11 @@ export function MindfulnessLibrary({ onSelect }: Props) {
       </header>
 
       <div className={`${shell.body} ${styles.body}`}>
-        <button
-          type="button"
-          className={styles.hero}
-          onClick={() => onSelect(recommended)}
-        >
-          <div className={styles.heroSurface} aria-hidden="true" />
-          <span className={styles.heroTag}>为你定制</span>
-          <div className={styles.heroCopy}>
-            <div className={styles.heroTop}>
-              <p className={styles.heroKicker}>今日推荐</p>
-              <p className={styles.heroPhase}>{recommendPhaseLine(snapshot)}</p>
-            </div>
-            <div className={styles.heroTitleWrap}>
-              <h2 className={styles.heroTitle}>{recommended.title}</h2>
-              <p className={styles.heroHint}>{recommendHint(snapshot)}</p>
-            </div>
-          </div>
-        </button>
+        <MindfulnessRecommendHero
+          snapshot={snapshot}
+          onSelect={onSelect}
+          className={styles.heroSpacing}
+        />
 
         {CATEGORIES.map((category) => {
           const items = sessionsForCategory(category)

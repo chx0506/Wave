@@ -1,27 +1,41 @@
+import avatarSrc from '@/assets/me/avatar.png'
 import { WaveFlowBackdrop } from '@/components/coast/WaveFlowBackdrop'
 import { CoastSceneGap } from '@/components/coast/CoastSceneGap'
 import { CoastScrollSection } from '@/components/coast/CoastScrollSection'
 import { TIDE_JOURNAL_INTRO } from '@/data/tideJournal'
-import { SAMPLE_CYCLE } from '@/data/sample'
 import { CycleDateStrip } from '@/components/coast/CycleDateStrip'
 import { TideJournalSection } from '@/components/coast/TideJournalSection'
+import { PhaseKnowledgeSheet } from '@/components/coast/PhaseKnowledgeSheet'
 import { RecordSheet } from '@/components/coast/RecordSheet'
 import { TideCalendar } from '@/components/coast/TideCalendar'
 import { TideDial } from '@/components/coast/TideDial'
-import {
-  APP_NAME,
-  RECORD_PROMPT,
-  USER_DISPLAY_NAME,
-  greetingForHour,
-} from '@/domain/copy'
+import { RECORD_PROMPT } from '@/domain/copy'
 import { snapshotForCycleDay } from '@/domain/cycle'
 import { formatMonthDay } from '@/domain/dates'
 import { useScrollScrubWave, type WaveMotion } from '@/lib/scrollScrubWave'
+import { Tabs } from '@/domain/types'
 import { useAppState } from '@/state/useAppState'
 import { CaretRight, Leaf } from '@phosphor-icons/react'
 import { useMemo, useRef, useState, type CSSProperties, type ReactNode, type UIEvent } from 'react'
 import { createPortal } from 'react-dom'
 import styles from './CoastScreen.module.css'
+
+function CalendarGlyph() {
+  return (
+    <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+      <rect x="4" y="5.5" width="16" height="14.5" rx="2.2" fill="#d7ebf7" stroke="#9fc8e8" strokeWidth="1.2" />
+      <path d="M4 10h16" stroke="#9fc8e8" strokeWidth="1.2" />
+      <rect x="7.5" y="3.2" width="2" height="4.2" rx="1" fill="#7eb4dc" />
+      <rect x="14.5" y="3.2" width="2" height="4.2" rx="1" fill="#7eb4dc" />
+      <circle cx="8.5" cy="13.5" r="1.1" fill="#7eb4dc" />
+      <circle cx="12" cy="13.5" r="1.1" fill="#7eb4dc" />
+      <circle cx="15.5" cy="13.5" r="1.1" fill="#7eb4dc" />
+      <circle cx="8.5" cy="16.8" r="1.1" fill="#9fc8e8" />
+      <circle cx="12" cy="16.8" r="1.1" fill="#6fa8d4" />
+      <circle cx="15.5" cy="16.8" r="1.1" fill="#9fc8e8" />
+    </svg>
+  )
+}
 
 function shellPortal(node: ReactNode) {
   const host = document.querySelector('[data-phone-shell]')
@@ -29,7 +43,7 @@ function shellPortal(node: ReactNode) {
 }
 
 export function CoastScreen() {
-  const { today, snapshotFor, mode } = useAppState()
+  const { today, snapshotFor, mode, cycleConfig, setTab } = useAppState()
   const todaySnap = snapshotFor(today)
   const scrollRef = useRef<HTMLDivElement>(null)
   const screenRef = useRef<HTMLDivElement>(null)
@@ -40,15 +54,16 @@ export function CoastScreen() {
   const [dayFloat, setDayFloat] = useState(todaySnap.cycleDay)
   const [recordOpen, setRecordOpen] = useState(false)
   const [calendarOpen, setCalendarOpen] = useState(false)
+  const [phaseKnowledgeOpen, setPhaseKnowledgeOpen] = useState(false)
 
   const previewDay = Math.min(
-    SAMPLE_CYCLE.cycleLength,
+    cycleConfig.cycleLength,
     Math.max(1, Math.round(dayFloat)),
   )
 
   const snapshot = useMemo(
-    () => snapshotForCycleDay(previewDay, SAMPLE_CYCLE),
-    [previewDay],
+    () => snapshotForCycleDay(previewDay, cycleConfig),
+    [previewDay, cycleConfig],
   )
 
   const isFutureDay = previewDay > todaySnap.cycleDay
@@ -57,7 +72,6 @@ export function CoastScreen() {
     setDayFloat(todaySnap.cycleDay)
   }
 
-  const greeting = `${greetingForHour(15)}，${USER_DISPLAY_NAME}`
   const [epigraphLead, epigraphTail] = TIDE_JOURNAL_INTRO.epigraph.split('，', 2)
 
   const syncWaveMotion = useScrollScrubWave({
@@ -93,47 +107,47 @@ export function CoastScreen() {
         aria-label="首页内容"
       >
         <header className={styles.header}>
-          <div className={styles.brandBlock}>
-            <div className={styles.brandRow}>
-              <h1 className={styles.brand}>{APP_NAME}</h1>
-              <span className={styles.seal} aria-hidden="true">
-                潮
-              </span>
-            </div>
-            <p className={styles.greeting}>{greeting}</p>
-          </div>
+          <button
+            type="button"
+            className={styles.meEntry}
+            aria-label="我的"
+            onClick={() => setTab(Tabs.me)}
+          >
+            <img className={styles.meAvatar} src={`${avatarSrc}?v=15`} alt="" />
+          </button>
+          <p className={styles.headerEpigraph}>
+            <span>{epigraphLead}，</span>
+            <span>{epigraphTail}</span>
+          </p>
           <button
             type="button"
             className={styles.iconBtn}
             aria-label="潮汐日历"
             onClick={() => setCalendarOpen(true)}
           >
-            <Leaf size={18} weight="regular" />
+            <CalendarGlyph />
           </button>
         </header>
 
         <div className={styles.body} data-other-day={isFutureDay ? '1' : '0'}>
           <CoastScrollSection className={styles.dialStack} label="潮汐表盘">
-            <p className={styles.epigraph}>
-              <span>{epigraphLead}，</span>
-              <span>{epigraphTail}</span>
-            </p>
             <TideDial
               snapshot={snapshot}
-              cycleLength={SAMPLE_CYCLE.cycleLength}
-              cycleConfig={SAMPLE_CYCLE}
+              cycleLength={cycleConfig.cycleLength}
+              cycleConfig={cycleConfig}
               dayFloat={dayFloat}
               onScrubDay={setDayFloat}
-              lowTideDay={SAMPLE_CYCLE.phaseWindows.menstrual}
-              highTideDay={SAMPLE_CYCLE.cycleLength}
+              lowTideDay={cycleConfig.phaseWindows.menstrual}
+              highTideDay={cycleConfig.cycleLength}
               onPreviewDay={(day) => setDayFloat(day)}
+              onPhaseKnowledgeOpen={() => setPhaseKnowledgeOpen(true)}
             />
           </CoastScrollSection>
 
           <div className={styles.journalLead}>
             <CycleDateStrip
-              cycleStart={SAMPLE_CYCLE.currentCycleStart}
-              cycleLength={SAMPLE_CYCLE.cycleLength}
+              cycleStart={cycleConfig.currentCycleStart}
+              cycleLength={cycleConfig.cycleLength}
               dayFloat={dayFloat}
               todayCycleDay={todaySnap.cycleDay}
               onScrubDay={setDayFloat}
@@ -143,9 +157,9 @@ export function CoastScreen() {
 
             {!isFutureDay ? (
               <TideJournalSection
-                phase={snapshot.phase}
                 cycleDay={snapshot.cycleDay}
-                cycleLength={SAMPLE_CYCLE.cycleLength}
+                cycleLength={cycleConfig.cycleLength}
+                snapshot={snapshot}
               />
             ) : (
               <div className={styles.otherDayPanel}>
@@ -157,20 +171,29 @@ export function CoastScreen() {
           </div>
 
           {!isFutureDay ? <CoastSceneGap variant="surge" /> : null}
-
-          <CoastScrollSection>
-            <button
-              type="button"
-              className={styles.cta}
-              onClick={() => setRecordOpen(true)}
-            >
-              <Leaf size={17} weight="regular" />
-              <span>{RECORD_PROMPT}</span>
-              <CaretRight size={15} weight="bold" />
-            </button>
-          </CoastScrollSection>
         </div>
       </div>
+
+      <div className={styles.ctaDock}>
+        <button
+          type="button"
+          className={styles.cta}
+          onClick={() => setRecordOpen(true)}
+        >
+          <Leaf size={17} weight="regular" />
+          <span>{RECORD_PROMPT}</span>
+          <CaretRight size={15} weight="bold" />
+        </button>
+      </div>
+
+      {phaseKnowledgeOpen &&
+        shellPortal(
+          <PhaseKnowledgeSheet
+            phase={snapshot.phase}
+            cycleDay={snapshot.cycleDay}
+            onClose={() => setPhaseKnowledgeOpen(false)}
+          />,
+        )}
 
       {recordOpen &&
         shellPortal(

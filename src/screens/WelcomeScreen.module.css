@@ -48,7 +48,7 @@
   z-index: 2;
   display: flex;
   flex-direction: column;
-  gap: 3px;
+  gap: 10px;
 }
 
 .brand {
@@ -64,9 +64,11 @@
 
 .brandZh {
   margin: 0;
+  padding-top: 2px;
   font-size: 12px;
   font-weight: 600;
   letter-spacing: 0.32em;
+  line-height: 1;
   color: rgba(255, 255, 255, 0.9);
   text-shadow: 0 1px 8px rgba(36, 82, 120, 0.22);
 }
@@ -101,11 +103,13 @@
   align-items: center;
   justify-content: center;
   gap: 10px;
-  max-width: 28ch;
-  font-size: 13px;
-  line-height: 1.65;
-  letter-spacing: 0.03em;
+  width: 100%;
+  max-width: none;
+  font-size: 12.5px;
+  line-height: 1.5;
+  letter-spacing: 0.02em;
   color: var(--ink-soft);
+  white-space: nowrap;
 }
 
 .subDot {
@@ -148,6 +152,33 @@
 }
 
 .cta:active {
+  transform: scale(0.985);
+}
+
+.importHint {
+  width: 100%;
+  max-width: 300px;
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.5;
+  text-align: center;
+  color: var(--ink-soft);
+}
+
+.secondary {
+  width: 100%;
+  max-width: 300px;
+  padding: 14px 24px;
+  border-radius: var(--radius-pill);
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  color: var(--ink-soft);
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid rgba(145, 186, 220, 0.28);
+}
+
+.secondary:active {
   transform: scale(0.985);
 }
 
