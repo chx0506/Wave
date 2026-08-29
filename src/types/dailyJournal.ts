@@ -18,6 +18,11 @@ export type DailyJournalRequest = {
     tide: TideState
     currentCycleStart: string
     periodStarts: string[]
+    periodRecords: {
+      startDate: string
+      endDate: string
+      durationDays: number
+    }[]
   }
 }
 

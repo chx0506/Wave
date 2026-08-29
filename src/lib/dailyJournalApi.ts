@@ -13,15 +13,18 @@ export function dailyJournalRequestKey(request: DailyJournalRequest): string {
 
 export async function fetchDailyJournal(
   request: DailyJournalRequest,
+  options: { force?: boolean } = {},
 ): Promise<DailyJournalResponse> {
   const key = dailyJournalRequestKey(request)
-  const memory = MEMORY_CACHE.get(key)
-  if (memory) return memory
+  if (!options.force) {
+    const memory = MEMORY_CACHE.get(key)
+    if (memory) return memory
 
-  const stored = readStoredResponse(key)
-  if (stored) {
-    MEMORY_CACHE.set(key, stored)
-    return stored
+    const stored = readStoredResponse(key)
+    if (stored) {
+      MEMORY_CACHE.set(key, stored)
+      return stored
+    }
   }
 
   const pending = IN_FLIGHT.get(key)
@@ -35,7 +38,7 @@ export async function fetchDailyJournal(
     .then(async (response) => {
       const body = (await response.json()) as DailyJournalResponse
       if (!response.ok && body.ok === false) return body
-      if (body.ok && body.source !== 'fast') {
+      if (body.ok) {
         MEMORY_CACHE.set(key, body)
         writeStoredResponse(key, body)
       }

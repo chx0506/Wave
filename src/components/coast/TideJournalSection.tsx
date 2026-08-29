@@ -15,6 +15,7 @@ import { useAppState } from '@/state/useAppState'
 import type { DailyJournalAiResult } from '@/types/dailyJournal'
 import { Leaf } from '@phosphor-icons/react'
 import { useEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
+import { diffDays } from '@/domain/dates'
 import styles from './TideJournalSection.module.css'
 
 const CATEGORIES: AdviceCategory[] = [
@@ -41,9 +42,16 @@ export function TideJournalSection({
     cycleConfig,
     openMindfulnessSession,
     periodStarts,
-    today,
+    periodRecords,
   } = useAppState()
   const fallbackJournal = journalForCycleDay(cycleDay)
+  const historyBeforeDate = useMemo(
+    () =>
+      periodRecords.filter(
+        (record) => diffDays(snapshot.date, record.endDate) > 0,
+      ),
+    [periodRecords, snapshot.date],
+  )
   const [category, setCategory] = useState<AdviceCategory>('emotion')
   const wheelLockRef = useRef(0)
   const dragStartXRef = useRef<number | null>(null)
@@ -119,24 +127,34 @@ export function TideJournalSection({
   }
   const dailyJournalRequest = useMemo(
     () => ({
-      date: today.toISOString(),
+      date: snapshot.date.toISOString(),
       cycle: {
         cycleDay: snapshot.cycleDay,
         cycleLength,
         phase: snapshot.phase,
         tide: snapshot.tide,
         currentCycleStart: cycleConfig.currentCycleStart.toISOString(),
-        periodStarts: periodStarts.map((date) => date.toISOString()),
+        periodStarts: periodStarts
+          .filter((date) => diffDays(snapshot.date, date) > 0)
+          .map((date) => date.toISOString()),
+        periodRecords: historyBeforeDate.map((record) => ({
+          startDate: record.startDate.toISOString(),
+          endDate: record.endDate.toISOString(),
+          durationDays:
+            Math.round((record.endDate.getTime() - record.startDate.getTime()) / 86400000) + 1,
+        })),
       },
     }),
     [
       cycleConfig.currentCycleStart,
       cycleLength,
       periodStarts,
+      periodRecords,
+      historyBeforeDate,
       snapshot.cycleDay,
       snapshot.phase,
       snapshot.tide,
-      today,
+      snapshot.date,
     ],
   )
   const requestKey = useMemo(
@@ -146,7 +164,7 @@ export function TideJournalSection({
   const legacyRequestKey = useMemo(
     () =>
       JSON.stringify({
-        date: today.toISOString(),
+        date: snapshot.date.toISOString(),
         cycleDay: snapshot.cycleDay,
         cycleLength,
         phase: snapshot.phase,
@@ -161,7 +179,7 @@ export function TideJournalSection({
       snapshot.cycleDay,
       snapshot.phase,
       snapshot.tide,
-      today,
+      snapshot.date,
     ],
   )
   const activeAiJournal =
@@ -190,7 +208,7 @@ export function TideJournalSection({
       }
     }
 
-    void fetchDailyJournal(dailyJournalRequest)
+    void fetchDailyJournal(dailyJournalRequest, { force: true })
       .then((response) => {
         if (!alive) return
         if (response.ok) setAiJournal({ key: requestKey, result: response.result })

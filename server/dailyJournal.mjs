@@ -11,7 +11,6 @@ const ADVICE_LABEL_PREFIXES = ['情绪：', '饮食：', '运动：', '睡眠：
 const MAX_RESEARCH_ITEMS = 7
 const MAX_HISTORY_ITEMS = 8
 const CACHE_TTL_MS = 1000 * 60 * 60 * 6
-const FAST_RESPONSE_TIMEOUT_MS = 900
 const FIELD_LIMITS = {
   todayHeadline: { min: 4, max: 24 },
   todayIntro: { min: 20, max: 110 },
@@ -97,7 +96,20 @@ function readJson(req) {
   })
 }
 
-function compactHistoryForCycleDay(cycleDay) {
+function compactHistoryForCycleDay(cycleDay, periodRecords = []) {
+  if (periodRecords.length > 0) {
+    return periodRecords
+      .slice()
+      .sort((a, b) => b.startDate.localeCompare(a.startDate))
+      .slice(0, MAX_HISTORY_ITEMS)
+      .map((record) => ({
+        date: record.startDate,
+        periodStart: record.startDate,
+        periodEnd: record.endDate,
+        durationDays: record.durationDays,
+      }))
+  }
+
   const records = MOCK_CYCLE_HISTORY.records
     .map((record) => ({
       ...record,
@@ -215,7 +227,10 @@ function scoreReferenceBrief(brief, phase, historyTerms) {
 }
 
 async function buildPromptInput(request) {
-  const history = compactHistoryForCycleDay(request.cycle.cycleDay)
+  const history = compactHistoryForCycleDay(
+    request.cycle.cycleDay,
+    request.cycle.periodRecords,
+  )
   const research = selectResearchBriefs(request, history)
 
   return {
@@ -225,8 +240,13 @@ async function buildPromptInput(request) {
       tone: '中文、温柔、具体、非诊断、保留潮汐隐喻但不要堆砌修辞',
     },
     task:
-      '基于今日周期位置、mock 往期记录和参考摘要，生成首页 todayHeadline、todayIntro 和五类 advice。',
+      '基于今日周期位置、用户真实往期经期记录和参考摘要，生成首页 todayHeadline、todayIntro 和五类 advice。',
     copy_style_reference: COPY_STYLE_BRIEF,
+    copy_style_examples: {
+      phase: request.cycle.phase,
+      note: '以下是工程内置静态文案的句式参考。请学习结构、信息密度和语气，不要照抄原句；输出要结合用户历史数据改写。',
+      example: FAST_COPY_BY_PHASE[request.cycle.phase],
+    },
     output_contract: {
       type: 'json_object_only',
       shape: {
@@ -248,13 +268,16 @@ async function buildPromptInput(request) {
       '优先使用用户重复出现的模式；数据不足时使用“从目前记录看/可以先观察”。',
       '每条建议必须具体可执行，适合手机首页短文案展示。',
       '每条 advice 必须包含动作对象或例子，不能只写感受、态度或抽象原则。',
+      'todayHeadline 使用“潮汐状态 + 一个具体提醒”的短句结构；todayIntro 用两句完成“阶段状态/可能感受 + 今天可以做什么”。',
+      '每条 advice 尽量用“如果/当……，可以/优先……；如果……，就……”的自然句式，先解释状态，再给动作，最后给身体反馈边界。',
       '不要使用 copy_style_reference.bannedPatterns 中的空泛表达；如果必须表达相近意思，改写成具体动作。',
       '参考文献只作为 evidence_briefs 使用；不要复制长句，不要输出英文引用，不要声称确定因果。',
+      '静态示例只用于学习表达风格，禁止逐字或近似复述示例中的标题、引导语和建议；必须根据 today、用户历史记录和 evidence_briefs 重新组织内容。',
     ],
     today: request,
     user_history_summary: {
-      source: MOCK_CYCLE_HISTORY.sourceLabel,
-      cycleCount: MOCK_CYCLE_HISTORY.cycleCount,
+      source: request.cycle.periodRecords.length > 0 ? '用户导入的经期数据' : MOCK_CYCLE_HISTORY.sourceLabel,
+      cycleCount: request.cycle.periodRecords.length || MOCK_CYCLE_HISTORY.cycleCount,
       selectedRecentAndSimilarRecords: history,
     },
     evidence_workflow: {
@@ -296,15 +319,6 @@ function fastResultForRequest(request) {
   return FAST_COPY_BY_PHASE[request.cycle.phase] ?? FAST_COPY_BY_PHASE.follicular
 }
 
-function withTimeout(promise, timeoutMs) {
-  return Promise.race([
-    promise.then((result) => ({ kind: 'result', result })),
-    new Promise((resolve) => {
-      setTimeout(() => resolve({ kind: 'timeout' }), timeoutMs)
-    }),
-  ])
-}
-
 function fillCacheInBackground(cacheKey, promptInput) {
   const existing = IN_FLIGHT_CACHE_WRITES.get(cacheKey)
   if (existing) return existing
@@ -334,6 +348,14 @@ function validateRequest(value) {
   if (typeof cycle.tide !== 'string') return null
   if (typeof cycle.currentCycleStart !== 'string') return null
   if (!Array.isArray(cycle.periodStarts)) return null
+  if (cycle.periodRecords === undefined) cycle.periodRecords = []
+  if (!Array.isArray(cycle.periodRecords)) return null
+  if (cycle.periodRecords.some((record) =>
+    !record ||
+    typeof record.startDate !== 'string' ||
+    typeof record.endDate !== 'string' ||
+    typeof record.durationDays !== 'number'
+  )) return null
   return value
 }
 
@@ -503,20 +525,16 @@ export async function handleDailyJournalRequest(req, res) {
       return
     }
 
-    const aiResult = await withTimeout(
-      fillCacheInBackground(cacheKey, promptInput),
-      FAST_RESPONSE_TIMEOUT_MS,
-    )
-    if (aiResult.kind === 'result' && aiResult.result) {
-      jsonResponse(res, 200, { ok: true, source: 'ai', result: aiResult.result })
+    const result = await fillCacheInBackground(cacheKey, promptInput)
+    if (!result) {
+      jsonResponse(res, 502, {
+        ok: false,
+        error: 'Daily journal AI response unavailable',
+      })
       return
     }
 
-    jsonResponse(res, 200, {
-      ok: true,
-      source: 'fast',
-      result: fastResultForRequest(request),
-    })
+    jsonResponse(res, 200, { ok: true, source: 'ai', result })
   } catch (error) {
     jsonResponse(res, 500, {
       ok: false,
