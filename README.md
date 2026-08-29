@@ -10,6 +10,14 @@
 </p>
 
 <p align="center">
+  <a href="https://github.com/chx0506/Wave"><img src="https://img.shields.io/badge/GitHub-chx0506%2FWave-24292f?style=flat-square&logo=github&logoColor=white" alt="GitHub" /></a>
+  <img src="https://img.shields.io/badge/React-19-61DAFB?style=flat-square&logo=react&logoColor=black" alt="React 19" />
+  <img src="https://img.shields.io/badge/TypeScript-6-3178C6?style=flat-square&logo=typescript&logoColor=white" alt="TypeScript 6" />
+  <img src="https://img.shields.io/badge/Vite-8-646CFF?style=flat-square&logo=vite&logoColor=white" alt="Vite 8" />
+  <img src="https://img.shields.io/badge/Runtime-Local%20first-F97316?style=flat-square" alt="Local first" />
+</p>
+
+<p align="center">
   <a href="https://moon-wave.vercel.app/">在线体验</a>
   ·
   <a href="#本地开发">本地运行</a>
@@ -42,30 +50,12 @@ MoonWave（月潮）是一款面向 menstrual cycle 的 Web 应用。它不追�
 | **Crab · 陪伴** | 纸艺小蟹标记记录点，贝壳积分探索奖励 |
 | **AI 日记** | 基于当日记录的轻量反思与整理（可选） |
 
-### 首页
+---
+
+## 在 MoonWave，身体变化可以被看见
 
 <p align="center">
-  <img src="docs/readme/home.jpg" width="360" alt="首页纸海岸" />
-</p>
-
-### 统计与激素曲线
-
-<p align="center">
-  <img src="docs/readme/stats.jpg" width="360" alt="统计页" />
-  &nbsp;
-  <img src="docs/readme/cycle-rhythm.jpg" width="360" alt="周期与激素曲线" />
-</p>
-
-### 探索地图
-
-<p align="center">
-  <img src="docs/readme/explore.jpg" width="720" alt="探索七座岛" />
-</p>
-
-### Crab 与记录
-
-<p align="center">
-  <img src="docs/readme/crab.jpg" width="360" alt="Crab 标记" />
+  <img src="docs/readme/home.jpg" width="720" alt="首页与核心功能" />
 </p>
 
 ---
@@ -111,46 +101,6 @@ api/                  # Vercel Serverless（AI 日记）
 public/textures/      # 纸艺纹理与动画帧
 docs/readme/          # README 截图资源
 ```
-
----
-
-## 架构示意
-
-<details>
-<summary>导航与页面流</summary>
-
-<p align="center">
-  <img src="docs/readme/arch-navigation.png" width="640" alt="导航架构" />
-</p>
-
-</details>
-
-<details>
-<summary>数据流与本地存储</summary>
-
-<p align="center">
-  <img src="docs/readme/arch-data.png" width="640" alt="数据架构" />
-</p>
-
-</details>
-
-<details>
-<summary>日记与 AI</summary>
-
-<p align="center">
-  <img src="docs/readme/arch-journal-ai.png" width="640" alt="日记 AI 架构" />
-</p>
-
-</details>
-
-<details>
-<summary>部署</summary>
-
-<p align="center">
-  <img src="docs/readme/arch-deploy.png" width="640" alt="部署架构" />
-</p>
-
-</details>
 
 ---
 
