@@ -10,147 +10,102 @@ import {
 import {
   ISLAND_ART,
   ISLAND_WORLD,
+  MAX_TRAIL_SEGMENTS,
   PAPER_BOAT_SRC,
-  PAPER_SEA_TILE,
+  PAPER_SEA_MAP,
   WORLD_H,
   WORLD_W,
+  buildSailRoute,
+  dockOf,
+  type SailCurve,
 } from '@/data/exploreWorld'
 import { Check, LockSimple, Star, X } from '@phosphor-icons/react'
-import {
-  useEffect,
-  useRef,
-  useState,
-  type CSSProperties,
-  type PointerEvent as ReactPointerEvent,
-} from 'react'
+import { useEffect, useRef, useState, type CSSProperties } from 'react'
 import styles from './ExploreScreen.module.css'
-
-const NEAR_DIST = 260
-const LAND_DIST = 200
-const FRICTION = 0.94
-const MIN_SPEED = 0.35
-const DRAG_GAIN = 1.05
 
 type Boat = { x: number; y: number; angle: number }
 
-function clampBoat(boat: Boat): Boat {
-  return {
-    ...boat,
-    x: Math.min(WORLD_W - 120, Math.max(120, boat.x)),
-    y: Math.min(WORLD_H - 140, Math.max(140, boat.y)),
-  }
+const LAND_ZOOM = 1.42
+
+/** Shortest-path lerp for degrees, so the bow turns instead of spinning the long way. */
+function lerpAngle(from: number, to: number, t: number) {
+  let delta = ((((to - from) % 360) + 540) % 360) - 180
+  return from + delta * t
 }
 
 function islandPos(id: ExploreIsland['id']) {
   return ISLAND_WORLD[id]
 }
 
-function distToIsland(boat: Boat, id: ExploreIsland['id']) {
-  const p = islandPos(id)
-  return Math.hypot(p.x - boat.x, p.y - boat.y)
-}
+/** Fit map width to the viewport; pan vertically so the boat stays in view. */
+function cameraFor(
+  boat: Boat,
+  vw: number,
+  vh: number,
+  landedId: ExploreIsland['id'] | null,
+) {
+  const baseScale = vw > 0 ? vw / WORLD_W : 1
+  const zoom = landedId ? LAND_ZOOM : 1
+  const scale = baseScale * zoom
+  const scaledH = WORLD_H * scale
+  const scaledW = WORLD_W * scale
 
-function nearestIsland(boat: Boat, limit: number) {
-  let best: ExploreIsland | null = null
-  let bestDist = Infinity
-  for (const island of EXPLORE_ISLANDS) {
-    const dist = distToIsland(boat, island.id)
-    if (dist < bestDist) {
-      bestDist = dist
-      best = island
-    }
-  }
-  return bestDist <= limit ? best : null
-}
+  const focus = landedId
+    ? { x: ISLAND_WORLD[landedId].x, y: ISLAND_WORLD[landedId].y }
+    : { x: boat.x, y: boat.y }
 
-function cameraFor(boat: Boat, vw: number, vh: number) {
-  const x = vw / 2 - boat.x
-  const y = vh / 2 - boat.y
-  const minX = Math.min(0, vw - WORLD_W)
-  const minY = Math.min(0, vh - WORLD_H)
-  return {
-    x: Math.min(0, Math.max(minX, x)),
-    y: Math.min(0, Math.max(minY, y)),
-  }
+  const topPad = landedId ? Math.min(88, vh * 0.12) : Math.min(110, vh * 0.16)
+  /** Reserve room for land bar + floating tab bar when inspecting. */
+  const bottomPad = landedId ? Math.min(178, vh * 0.3) : Math.min(96, vh * 0.14)
+  const focusY = landedId
+    ? topPad + (vh - topPad - bottomPad) * 0.5
+    : Math.min(vh * 0.55, vh / 2 + topPad * 0.28)
+  const focusX = vw / 2
+
+  let x = focusX - focus.x * scale
+  let y = focusY - focus.y * scale
+  const minX = Math.min(0, vw - scaledW)
+  const minY = Math.min(0, vh - scaledH)
+  x = Math.min(0, Math.max(minX, x))
+  y = Math.min(0, Math.max(minY, y))
+
+  return { scale, x, y }
 }
 
 export function ExploreScreen() {
   const current = EXPLORE_ISLANDS.find((island) => island.current) ?? EXPLORE_ISLANDS[0]
-  const start = islandPos(current.id)
+  const startDock = dockOf(current.id)
   const viewportRef = useRef<HTMLDivElement>(null)
-  const boatRef = useRef<Boat>({ x: start.x, y: start.y + 160, angle: -25 })
-  const velocityRef = useRef({ vx: 0, vy: 0 })
-  const dragRef = useRef<{
-    pointerId: number
-    startX: number
-    startY: number
-    lastX: number
-    lastY: number
-    lastT: number
-    captured: boolean
-  } | null>(null)
-  const draggedRef = useRef(false)
+  const boatRef = useRef<Boat>({ x: startDock.x, y: startDock.y, angle: 90 })
+  const homeRef = useRef<ExploreIsland['id']>(current.id)
   const sailingRef = useRef(false)
   const rafRef = useRef(0)
-  const wakeIdRef = useRef(0)
 
   const [boat, setBoat] = useState<Boat>(boatRef.current)
   const [sailing, setSailing] = useState(false)
-  const [nearId, setNearId] = useState<string | null>(null)
-  const [landedId, setLandedId] = useState<string | null>(null)
+  const [homeId, setHomeId] = useState<ExploreIsland['id']>(current.id)
+  const [landedId, setLandedId] = useState<ExploreIsland['id'] | null>(null)
   const [visited, setVisited] = useState<string[]>([current.id])
   const [hintVisible, setHintVisible] = useState(true)
   const [article, setArticle] = useState<ExploreArticle | null>(null)
   const [completed, setCompleted] = useState<string[]>([])
   const [unlockedArticles, setUnlockedArticles] = useState<string[]>([])
-  const [wakes, setWakes] = useState<{ id: number; x: number; y: number }[]>([])
   const [size, setSize] = useState({ w: 320, h: 640 })
+  const [trailDone, setTrailDone] = useState<string[]>([])
+  const [activeTrail, setActiveTrail] = useState<{ d: string; length: number; progress: number } | null>(
+    null,
+  )
 
-  const applyBoat = (next: Boat, opts?: { wake?: boolean }) => {
-    const clamped = clampBoat(next)
-    boatRef.current = clamped
-    setBoat(clamped)
-    const near = nearestIsland(clamped, NEAR_DIST)
-    setNearId(near?.id ?? null)
-    if (opts?.wake && sailingRef.current) {
-      wakeIdRef.current += 1
-      const id = wakeIdRef.current
-      setWakes((items) => [...items.slice(-12), { id, x: clamped.x, y: clamped.y }])
-      window.setTimeout(() => {
-        setWakes((items) => items.filter((item) => item.id !== id))
-      }, 1000)
-    }
+  const applyBoat = (next: Boat) => {
+    boatRef.current = next
+    setBoat(next)
   }
 
-  const stopInertia = () => {
+  const cancelSail = () => {
     if (rafRef.current) cancelAnimationFrame(rafRef.current)
     rafRef.current = 0
-    velocityRef.current = { vx: 0, vy: 0 }
     sailingRef.current = false
     setSailing(false)
-  }
-
-  const runInertia = () => {
-    const tick = () => {
-      let { vx, vy } = velocityRef.current
-      vx *= FRICTION
-      vy *= FRICTION
-      if (Math.hypot(vx, vy) < MIN_SPEED) {
-        stopInertia()
-        return
-      }
-      velocityRef.current = { vx, vy }
-      applyBoat(
-        {
-          x: boatRef.current.x + vx,
-          y: boatRef.current.y + vy,
-          angle: (Math.atan2(vy, vx) * 180) / Math.PI,
-        },
-        { wake: true },
-      )
-      rafRef.current = requestAnimationFrame(tick)
-    }
-    rafRef.current = requestAnimationFrame(tick)
   }
 
   useEffect(() => {
@@ -160,10 +115,9 @@ export function ExploreScreen() {
     measure()
     const observer = new ResizeObserver(measure)
     observer.observe(viewport)
-    setNearId(nearestIsland(boatRef.current, NEAR_DIST)?.id ?? null)
     return () => {
       observer.disconnect()
-      if (rafRef.current) cancelAnimationFrame(rafRef.current)
+      cancelSail()
     }
   }, [])
 
@@ -173,167 +127,104 @@ export function ExploreScreen() {
     return () => window.clearTimeout(timer)
   }, [hintVisible])
 
+  const arrive = (island: ExploreIsland) => {
+    homeRef.current = island.id
+    setHomeId(island.id)
+    setLandedId(island.id)
+    setVisited((items) => (items.includes(island.id) ? items : [...items, island.id]))
+    // Stay on the zoomed island for interaction — articles open via map objects.
+  }
+
   const sailToward = (island: ExploreIsland) => {
-    if (draggedRef.current || landedId) return
-    stopInertia()
+    if (island.locked || sailingRef.current) return
+    if (island.id === homeRef.current && landedId === island.id) return
+
     setHintVisible(false)
-    const target = islandPos(island.id)
-    const startBoat = { ...boatRef.current }
-    const goal = { x: target.x, y: target.y + 130 }
-    const dx = goal.x - startBoat.x
-    const dy = goal.y - startBoat.y
-    const angle = (Math.atan2(dy, dx) * 180) / Math.PI
-    const duration = Math.min(1100, 320 + Math.hypot(dx, dy) * 0.35)
+    setArticle(null)
+    setLandedId(null)
+
+    if (island.id === homeRef.current) {
+      arrive(island)
+      return
+    }
+
+    const from = { x: boatRef.current.x, y: boatRef.current.y }
+    const to = dockOf(island.id)
+    const curve: SailCurve = buildSailRoute(from, to, homeRef.current, island.id)
+    const duration = Math.min(3400, Math.max(1100, curve.length * 2.35))
     const t0 = performance.now()
+
     sailingRef.current = true
     setSailing(true)
+    setActiveTrail({ d: curve.d, length: curve.length, progress: 0 })
 
     const step = (now: number) => {
       const t = Math.min(1, (now - t0) / duration)
       const ease = 1 - (1 - t) ** 3
-      applyBoat(
-        {
-          x: startBoat.x + dx * ease,
-          y: startBoat.y + dy * ease,
-          angle,
-        },
-        { wake: t < 0.9 && t * 20 - Math.floor(t * 20) < 0.35 },
-      )
+      const point = curve.pointAt(ease)
+      // Look slightly ahead so the bow leads into bends.
+      const look = curve.pointAt(Math.min(1, ease + 0.02))
+      const heading = (Math.atan2(look.y - point.y, look.x - point.x) * 180) / Math.PI
+      const angle = Number.isFinite(heading)
+        ? lerpAngle(boatRef.current.angle, heading, 0.35)
+        : point.angle
+      applyBoat({ x: point.x, y: point.y, angle })
+      setActiveTrail({ d: curve.d, length: curve.length, progress: ease })
+
       if (t < 1) {
         rafRef.current = requestAnimationFrame(step)
         return
       }
+
       sailingRef.current = false
       setSailing(false)
-      setNearId(island.id)
-      setVisited((items) => (items.includes(island.id) ? items : [...items, island.id]))
+      setTrailDone((items) => [...items, curve.d].slice(-MAX_TRAIL_SEGMENTS))
+      setActiveTrail(null)
+      // Settle facing the dock approach.
+      applyBoat({ x: point.x, y: point.y, angle: point.angle })
+      arrive(island)
     }
+
     rafRef.current = requestAnimationFrame(step)
   }
 
-  const landOnIsland = (island: ExploreIsland) => {
-    if (island.locked || draggedRef.current) return
-    setVisited((items) => (items.includes(island.id) ? items : [...items, island.id]))
-    setLandedId(island.id)
-    setNearId(island.id)
+  const leaveIsland = () => {
+    setLandedId(null)
+    setArticle(null)
   }
 
-  const leaveIsland = () => setLandedId(null)
-
-  const handlePointerDown = (event: ReactPointerEvent<HTMLDivElement>) => {
-    if (event.button !== 0 || landedId) return
-    stopInertia()
-    draggedRef.current = false
-    dragRef.current = {
-      pointerId: event.pointerId,
-      startX: event.clientX,
-      startY: event.clientY,
-      lastX: event.clientX,
-      lastY: event.clientY,
-      lastT: performance.now(),
-      captured: false,
-    }
-  }
-
-  const handlePointerMove = (event: ReactPointerEvent<HTMLDivElement>) => {
-    const drag = dragRef.current
-    if (!drag || drag.pointerId !== event.pointerId || landedId) return
-    const dx = event.clientX - drag.lastX
-    const dy = event.clientY - drag.lastY
-    const now = performance.now()
-    const dt = Math.max(8, now - drag.lastT)
-
-    if (!drag.captured) {
-      if (Math.hypot(event.clientX - drag.startX, event.clientY - drag.startY) <= 6) return
-      event.currentTarget.setPointerCapture(event.pointerId)
-      drag.captured = true
-      draggedRef.current = true
-      sailingRef.current = true
-      setSailing(true)
-      setHintVisible(false)
-    }
-
-    const moveX = -dx * DRAG_GAIN
-    const moveY = -dy * DRAG_GAIN
-    velocityRef.current = {
-      vx: moveX * (16 / dt),
-      vy: moveY * (16 / dt),
-    }
-    const angle =
-      Math.hypot(moveX, moveY) > 0.2
-        ? (Math.atan2(moveY, moveX) * 180) / Math.PI
-        : boatRef.current.angle
-
-    applyBoat(
-      {
-        x: boatRef.current.x + moveX,
-        y: boatRef.current.y + moveY,
-        angle,
-      },
-      { wake: Math.hypot(moveX, moveY) > 1.2 },
-    )
-
-    drag.lastX = event.clientX
-    drag.lastY = event.clientY
-    drag.lastT = now
-  }
-
-  const handlePointerEnd = (event: ReactPointerEvent<HTMLDivElement>) => {
-    if (dragRef.current?.pointerId !== event.pointerId) return
-    if (event.currentTarget.hasPointerCapture(event.pointerId)) {
-      event.currentTarget.releasePointerCapture(event.pointerId)
-    }
-    const wasDrag = dragRef.current?.captured
-    dragRef.current = null
-    if (wasDrag) {
-      if (Math.hypot(velocityRef.current.vx, velocityRef.current.vy) > MIN_SPEED * 2) {
-        runInertia()
-      } else {
-        sailingRef.current = false
-        setSailing(false)
-      }
-    }
-    window.setTimeout(() => {
-      draggedRef.current = false
-    }, 0)
-  }
-
-  const camera = cameraFor(boat, size.w, size.h)
-  const near = EXPLORE_ISLANDS.find((island) => island.id === nearId) ?? null
+  const camera = cameraFor(boat, size.w, size.h, landedId)
   const landed = EXPLORE_ISLANDS.find((island) => island.id === landedId) ?? null
   const activeArticles = landed
     ? EXPLORE_ARTICLES.filter((item) => item.islandId === landed.id)
     : []
-  const canLand = Boolean(near && !near.locked && !landedId && !sailing && distToIsland(boat, near.id) <= LAND_DIST)
   const articleLocked = article
     ? EXPLORE_LOCKED_ARTICLE_IDS.has(article.id) && !unlockedArticles.includes(article.id)
     : false
 
-  const parallaxX = (boat.x / WORLD_W - 0.5) * 28
-  const parallaxY = (boat.y / WORLD_H - 0.5) * 22
+  const parallaxX = (boat.x / WORLD_W - 0.5) * 18
+  const parallaxY = (boat.y / WORLD_H - 0.5) * 14
 
   return (
-    <div className={styles.sea}>
+    <div className={styles.sea} data-inspecting={Boolean(landedId)}>
       <div
         ref={viewportRef}
         className={styles.viewport}
         data-sailing={sailing}
         data-landed={Boolean(landedId)}
-        onPointerDown={handlePointerDown}
-        onPointerMove={handlePointerMove}
-        onPointerUp={handlePointerEnd}
-        onPointerCancel={handlePointerEnd}
-        aria-label="纸浮雕海面，滑动开船探索小岛"
+        aria-label="纸浮雕海图，点选岛屿让小纸船驶去"
       >
         <div
           className={styles.world}
+          data-zoomed={Boolean(landedId)}
           style={{
             width: WORLD_W,
             height: WORLD_H,
-            transform: `translate3d(${camera.x}px, ${camera.y}px, 0)`,
+            transform: `translate3d(${camera.x}px, ${camera.y}px, 0) scale(${camera.scale})`,
+            transformOrigin: '0 0',
           }}
         >
-          <div className={styles.seaBase} style={{ backgroundImage: `url(${PAPER_SEA_TILE})` }} />
+          <div className={styles.seaBase} style={{ backgroundImage: `url(${PAPER_SEA_MAP})` }} />
           <div
             className={styles.seaLayer}
             data-depth="far"
@@ -352,40 +243,61 @@ export function ExploreScreen() {
           </div>
           <div className={styles.seaFoam} aria-hidden="true" />
 
-          {wakes.map((wake) => (
-            <span
-              key={wake.id}
-              className={styles.wake}
-              style={{ left: wake.x, top: wake.y }}
-              aria-hidden="true"
-            />
-          ))}
+          <svg
+            className={styles.trailSvg}
+            viewBox={`0 0 ${WORLD_W} ${WORLD_H}`}
+            width={WORLD_W}
+            height={WORLD_H}
+            aria-hidden="true"
+          >
+            <defs>
+              {activeTrail ? (
+                <mask id="sail-trail-mask">
+                  <path
+                    d={activeTrail.d}
+                    fill="none"
+                    stroke="#fff"
+                    strokeWidth="8"
+                    strokeLinecap="round"
+                    strokeDasharray={activeTrail.length}
+                    strokeDashoffset={activeTrail.length * (1 - activeTrail.progress)}
+                  />
+                </mask>
+              ) : null}
+            </defs>
+            {trailDone.map((d, index) => (
+              <path key={`${index}-${d.slice(0, 24)}`} className={styles.trailPath} d={d} />
+            ))}
+            {activeTrail ? (
+              <path className={styles.trailPath} d={activeTrail.d} mask="url(#sail-trail-mask)" />
+            ) : null}
+          </svg>
 
           {EXPLORE_ISLANDS.map((island) => {
             const pos = islandPos(island.id)
             const articles = EXPLORE_ARTICLES.filter((item) => item.islandId === island.id)
             const isLanded = island.id === landedId
-            const isNear = island.id === nearId && !sailing
+            const isHome = island.id === homeId && !sailing
             const done = articles.filter((item) => completed.includes(item.id)).length
             const stars = Math.min(island.stars + done, island.starsMax)
+            const displayScale = isLanded ? pos.scale * 1.12 : pos.scale
             return (
               <IslandSprite
                 key={island.id}
                 island={island}
                 x={pos.x}
                 y={pos.y}
-                scale={pos.scale}
+                scale={displayScale}
                 landed={isLanded}
-                active={isLanded || isNear}
+                active={isLanded || isHome}
                 visited={visited.includes(island.id)}
+                dimmed={Boolean(landedId) && !isLanded}
                 articles={articles}
                 completed={completed}
                 stars={stars}
+                sailing={sailing}
                 onSelect={() => sailToward(island)}
-                onOpenArticle={(item) => {
-                  if (draggedRef.current) return
-                  setArticle(item)
-                }}
+                onOpenArticle={(item) => setArticle(item)}
               />
             )
           })}
@@ -398,14 +310,16 @@ export function ExploreScreen() {
           >
             <PaperWaveStrip variant="near" />
           </div>
-        </div>
 
-        <div className={styles.playerLayer}>
           <div
-            className={styles.boat}
+            className={styles.boatWorld}
             data-sailing={sailing}
             data-hidden={Boolean(landedId)}
-            style={{ transform: `translate(-50%, -50%) rotate(${boat.angle + 90}deg)` }}
+            style={{
+              left: boat.x,
+              top: boat.y,
+              transform: `translate(-50%, -50%) rotate(${boat.angle - 90}deg)`,
+            }}
           >
             <span className={styles.boatRipple} />
             <img className={styles.boatImg} src={PAPER_BOAT_SRC} alt="" draggable={false} />
@@ -418,7 +332,7 @@ export function ExploreScreen() {
 
       {hintVisible && !landedId ? (
         <p className={styles.hint} aria-live="polite">
-          滑动开船 · 驶向纸浮雕小岛
+          点选一座岛 · 小纸船会绕岛驶去
         </p>
       ) : null}
 
@@ -435,28 +349,19 @@ export function ExploreScreen() {
         </div>
       </div>
 
-      <MiniMap boat={boat} visited={visited} landedId={landedId} nearId={nearId} />
-
-      {canLand && near ? (
-        <button type="button" className={styles.landPrompt} onClick={() => landOnIsland(near)}>
-          <span className={styles.landKey}>A</span>
-          <span>上岸 · {near.title}</span>
-        </button>
-      ) : null}
-
       {landed ? (
         <div className={styles.landBar}>
           <div className={styles.landCopy}>
             <strong>{landed.title}</strong>
             <p>{landed.blurb}</p>
             <span>
-              点岛上的物件学习 ·{' '}
+              点岛上的物件探索 ·{' '}
               {activeArticles.filter((item) => completed.includes(item.id)).length}/
               {activeArticles.length}
             </span>
           </div>
           <button type="button" className={styles.sailOff} onClick={leaveIsland}>
-            继续航行
+            离开岛屿
           </button>
         </div>
       ) : null}
@@ -487,70 +392,28 @@ export function ExploreScreen() {
 
 function PaperWaveStrip({ variant = 'far' }: { variant?: 'far' | 'mid' | 'near' }) {
   return (
-    <svg className={styles.waveSvg} viewBox="0 0 2400 3000" preserveAspectRatio="none" aria-hidden="true">
+    <svg className={styles.waveSvg} viewBox={`0 0 ${WORLD_W} ${WORLD_H}`} preserveAspectRatio="none" aria-hidden="true">
       {variant === 'far' ? (
         <>
-          <path d="M0 420 Q300 380 600 430 T1200 410 T1800 440 T2400 400 V0 H0Z" fill="rgba(255,255,255,.22)" />
-          <path d="M0 980 Q400 930 800 990 T1600 960 T2400 1000 V780 Q1800 820 1200 790 T0 820Z" fill="rgba(190,220,240,.28)" />
-          <path d="M0 1680 Q350 1620 700 1690 T1400 1660 T2400 1710 V1480 Q1700 1520 900 1490 T0 1510Z" fill="rgba(255,255,255,.18)" />
+          <path d="M0 180 Q120 150 260 190 T520 170 T780 200 V0 H0Z" fill="rgba(255,255,255,.22)" />
+          <path d="M0 520 Q160 480 320 530 T640 500 T780 540 V420 Q560 450 300 430 T0 450Z" fill="rgba(190,220,240,.28)" />
+          <path d="M0 900 Q140 860 300 920 T600 890 T780 930 V780 Q520 810 260 790 T0 800Z" fill="rgba(255,255,255,.18)" />
         </>
       ) : null}
       {variant === 'mid' ? (
         <>
-          <path d="M0 620 Q280 580 560 640 T1120 610 T1680 650 T2400 600 V520 Q1800 560 1200 530 T0 550Z" fill="rgba(255,252,245,.35)" />
-          <path d="M0 1320 Q420 1260 840 1340 T1680 1300 T2400 1360 V1180 Q1700 1220 900 1190 T0 1210Z" fill="rgba(170,208,232,.26)" />
-          <path d="M0 2200 Q360 2140 720 2220 T1440 2180 T2400 2240 V2040 Q1600 2080 800 2050 T0 2070Z" fill="rgba(255,255,255,.2)" />
+          <path d="M0 300 Q110 270 240 310 T480 290 T780 320 V250 Q520 270 260 255 T0 270Z" fill="rgba(255,252,245,.35)" />
+          <path d="M0 700 Q160 660 320 720 T640 690 T780 730 V620 Q520 650 260 630 T0 640Z" fill="rgba(170,208,232,.26)" />
+          <path d="M0 1100 Q140 1060 300 1120 T600 1090 T780 1130 V1020 Q520 1050 260 1030 T0 1040Z" fill="rgba(255,255,255,.2)" />
         </>
       ) : null}
       {variant === 'near' ? (
         <>
-          <path d="M0 260 Q220 230 440 270 T880 250 T1320 280 T1760 255 T2400 275 V180 Q1800 210 1200 190 T0 200Z" fill="rgba(255,255,255,.16)" />
-          <path d="M0 2520 Q300 2470 600 2540 T1200 2500 T1800 2550 T2400 2510 V2380 Q1700 2420 900 2390 T0 2410Z" fill="rgba(186,216,236,.22)" />
+          <path d="M0 120 Q90 95 180 125 T360 110 T540 130 T720 115 T780 128 V80 Q520 95 260 85 T0 90Z" fill="rgba(255,255,255,.16)" />
+          <path d="M0 1760 Q120 1720 260 1780 T520 1750 T780 1790 V1680 Q520 1710 260 1690 T0 1700Z" fill="rgba(186,216,236,.22)" />
         </>
       ) : null}
     </svg>
-  )
-}
-
-function MiniMap({
-  boat,
-  visited,
-  landedId,
-  nearId,
-}: {
-  boat: Boat
-  visited: string[]
-  landedId: string | null
-  nearId: string | null
-}) {
-  return (
-    <div className={styles.minimap} aria-hidden="true">
-      <div className={styles.minimapSea}>
-        {EXPLORE_ISLANDS.map((island) => {
-          const pos = islandPos(island.id)
-          return (
-            <span
-              key={island.id}
-              className={styles.minimapIsland}
-              data-visited={visited.includes(island.id)}
-              data-hot={island.id === landedId || island.id === nearId}
-              style={{
-                left: `${(pos.x / WORLD_W) * 100}%`,
-                top: `${(pos.y / WORLD_H) * 100}%`,
-              }}
-            />
-          )
-        })}
-        <span
-          className={styles.minimapBoat}
-          style={{
-            left: `${(boat.x / WORLD_W) * 100}%`,
-            top: `${(boat.y / WORLD_H) * 100}%`,
-            transform: `translate(-50%, -50%) rotate(${boat.angle + 90}deg)`,
-          }}
-        />
-      </div>
-    </div>
   )
 }
 
@@ -562,9 +425,11 @@ function IslandSprite({
   landed,
   active,
   visited,
+  dimmed,
   articles,
   completed,
   stars,
+  sailing,
   onSelect,
   onOpenArticle,
 }: {
@@ -575,9 +440,11 @@ function IslandSprite({
   landed: boolean
   active: boolean
   visited: boolean
+  dimmed: boolean
   articles: ExploreArticle[]
   completed: string[]
   stars: number
+  sailing: boolean
   onSelect: () => void
   onOpenArticle: (article: ExploreArticle) => void
 }) {
@@ -592,6 +459,7 @@ function IslandSprite({
       data-landed={landed}
       data-active={active}
       data-visited={visited}
+      data-dimmed={dimmed}
     >
       {!visited && !island.locked ? <span className={styles.questMark}>!</span> : null}
       {active ? <span className={styles.islandGlow} aria-hidden="true" /> : null}
@@ -601,12 +469,16 @@ function IslandSprite({
         className={styles.islandBtn}
         data-locked={island.locked}
         data-visited={visited}
+        disabled={sailing || island.locked}
         onClick={onSelect}
         aria-label={`${island.title}，${island.locked ? '尚未解锁' : visited ? '已发现' : '未探索'}`}
         aria-pressed={landed}
       >
         <img className={styles.islandArt} src={art} alt="" draggable={false} />
-        <span className={styles.nodeLabel}>{island.short}</span>
+        <span className={styles.nodeLabel}>
+          <em className={styles.nodeLabelMark} aria-hidden="true" />
+          {island.short}
+        </span>
         {island.locked ? (
           <span className={styles.lockBadge}>
             <LockSimple size={10} weight="bold" />
@@ -643,7 +515,7 @@ function IslandSprite({
       {landed && !island.locked
         ? articles.map((item, index) => {
             const angle = (-40 + index * 40) * (Math.PI / 180)
-            const radius = 118
+            const radius = 128
             return (
               <button
                 type="button"
@@ -653,7 +525,7 @@ function IslandSprite({
                 data-completed={completed.includes(item.id)}
                 style={{
                   left: `calc(50% + ${Math.cos(angle) * radius}px)`,
-                  top: `calc(50% + ${Math.sin(angle) * radius + 36}px)`,
+                  top: `calc(50% + ${Math.sin(angle) * radius + 28}px)`,
                 }}
                 onClick={(event) => {
                   event.stopPropagation()
