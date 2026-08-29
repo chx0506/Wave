@@ -23,6 +23,34 @@
   gap: 12px;
 }
 
+.headerLead {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.backBtn {
+  flex: 0 0 auto;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  color: var(--tide-deep);
+  background:
+    linear-gradient(180deg, #ffffff 0%, #f4f8fb 100%),
+    var(--texture-paper);
+  background-blend-mode: multiply, normal;
+  background-size: auto, 180px 180px;
+  border: 1px solid rgba(145, 186, 220, 0.28);
+  box-shadow: var(--shadow-emboss);
+}
+
+.backBtn:active {
+  transform: scale(0.94);
+}
+
 .iconBtn {
   width: 40px;
   height: 40px;

@@ -1,6 +1,7 @@
 import {
   recommendHint,
   recommendMindfulness,
+  recommendMindfulnessPlaySession,
   recommendPhaseLine,
   type MindfulnessSession,
 } from '@/data/mindfulness'
@@ -19,12 +20,13 @@ export function MindfulnessRecommendHero({
   className,
 }: Props) {
   const recommended = recommendMindfulness(snapshot)
+  const playSession = recommendMindfulnessPlaySession()
 
   return (
     <button
       type="button"
       className={[styles.hero, className].filter(Boolean).join(' ')}
-      onClick={() => onSelect(recommended)}
+      onClick={() => onSelect(playSession)}
     >
       <div className={styles.heroSurface} aria-hidden="true" />
       <span className={styles.heroTag}>为你定制</span>

@@ -10,18 +10,16 @@ export const CRAB_NAME = 'Crab'
 
 export const TAB_LABEL: Record<TabId, string> = {
   home: '首页',
-  observe: '观察',
-  bay: '正念',
+  calendar: '日历',
+  stats: '统计',
   explore: '探索',
-  me: '我的',
 }
 
 export const TAB_SECTION: Record<TabId, string> = {
   home: '潮汐日志',
-  observe: '潮池观察',
-  bay: '静谧海湾',
+  calendar: '潮汐日历',
+  stats: '身体健康',
   explore: '海岛探秘',
-  me: '我的潮汐',
 }
 
 export const PHASE_LABEL: Record<Phase, string> = {

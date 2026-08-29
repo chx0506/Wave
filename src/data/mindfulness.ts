@@ -166,9 +166,15 @@ export function sessionsForCategory(category: MindfulnessCategory): MindfulnessS
   )
 }
 
+/** 推荐卡展示用标题（按周期阶段）。 */
 export function recommendMindfulness(snapshot: DaySnapshot): MindfulnessSession {
   const id = RECOMMEND_BY_PHASE[snapshot.phase]
   return mindfulnessSessionById(id) ?? MINDFULNESS_SESSIONS[0]
+}
+
+/** 点击推荐卡实际进入的冥想内容（再次入睡）。 */
+export function recommendMindfulnessPlaySession(): MindfulnessSession {
+  return mindfulnessSessionById('sleep-again') ?? MINDFULNESS_SESSIONS[0]
 }
 
 export function recommendHint(snapshot: DaySnapshot): string {

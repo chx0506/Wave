@@ -6,6 +6,7 @@ import {
 } from '@/domain/experiment'
 import { useAppState } from '@/state/useAppState'
 import {
+  ArrowLeft,
   ArrowRight,
   CalendarBlank,
   CaretDown,
@@ -31,7 +32,7 @@ const STEPS = [
   { key: '比', label: '对比反馈' },
 ]
 
-export function ObserveScreen() {
+export function ObserveScreen({ onClose }: { onClose?: () => void }) {
   const {
     setTab,
     experiments,
@@ -65,6 +66,16 @@ export function ObserveScreen() {
     <div className={shell.screen}>
       <div className={shell.glow} aria-hidden="true" />
       <header className={shell.header}>
+        {onClose ? (
+          <button
+            type="button"
+            className={styles.backBtn}
+            aria-label="返回首页"
+            onClick={onClose}
+          >
+            <ArrowLeft size={18} weight="bold" />
+          </button>
+        ) : null}
         <p className={shell.kicker}>Observe</p>
         <h1 className={shell.title}>潮池观察</h1>
         <p className={shell.subtitle}>
@@ -244,7 +255,7 @@ export function ObserveScreen() {
         <button
           type="button"
           className={styles.linkCal}
-          onClick={() => setTab(Tabs.home)}
+          onClick={() => (onClose ? onClose() : setTab(Tabs.home))}
         >
           回到潮汐日志查看今日状态
         </button>

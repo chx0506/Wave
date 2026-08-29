@@ -5,7 +5,7 @@ import { mindfulnessSessionById } from '@/data/mindfulness'
 import { useAppState } from '@/state/useAppState'
 import { useEffect, useState } from 'react'
 
-export function MindfulnessScreen() {
+export function MindfulnessScreen({ onClose }: { onClose?: () => void }) {
   const { consumePendingMindfulness } = useAppState()
   const [activeSession, setActiveSession] = useState<MindfulnessSession | null>(null)
 
@@ -25,5 +25,5 @@ export function MindfulnessScreen() {
     )
   }
 
-  return <MindfulnessLibrary onSelect={setActiveSession} />
+  return <MindfulnessLibrary onSelect={setActiveSession} onClose={onClose} />
 }

@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>海浪背景选择 · MoonWave</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, sans-serif;
+      background: #e8eef3;
+      color: #2a4054;
+      padding: 24px 16px 40px;
+    }
+    h1 { font-size: 18px; font-weight: 700; margin: 0 0 6px; }
+    p.lead { margin: 0 0 20px; font-size: 13px; color: #5a7890; line-height: 1.5; }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(168px, 1fr));
+      gap: 16px;
+      max-width: 760px;
+    }
+    .card {
+      background: #fff;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 8px 24px -12px rgba(60, 100, 140, 0.25);
+    }
+    .phone {
+      aspect-ratio: 9 / 16;
+      background-size: cover;
+      background-position: center bottom;
+      position: relative;
+    }
+    .phone::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, rgba(244,248,251,0.15) 0%, transparent 40%);
+    }
+    .mock {
+      position: absolute;
+      inset: 18% 12% auto;
+      text-align: center;
+      font-size: 11px;
+      color: #3a5368;
+      text-shadow: 0 1px 0 rgba(255,255,255,0.8);
+      line-height: 1.5;
+      z-index: 1;
+    }
+    .meta { padding: 12px 14px 14px; }
+    .meta h2 { margin: 0; font-size: 14px; }
+    .meta p { margin: 6px 0 0; font-size: 12px; color: #5a7890; line-height: 1.45; }
+    code { font-size: 11px; background: #f0f5f9; padding: 2px 6px; border-radius: 4px; }
+  </style>
+</head>
+<body>
+  <h1>纸浮雕海浪背景 · 4 款候选</h1>
+  <p class="lead">奶油色 + 淡金黄。选定后在代码里把 <code>ACTIVE_WAVE_BG</code> 改成 a / b / c / d。</p>
+  <div class="grid" id="grid"></div>
+  <script>
+    const options = [
+      { id: 'a', label: 'A · 暖金渐变', path: '/textures/waves/wave-bg-cream-gold-a.png', note: '奶油底 + 淡蓝，浪层带金黄渐变' },
+      { id: 'b', label: 'B · 极简奶油', path: '/textures/waves/wave-bg-cream-gold-b.png', note: '大面积留白，奶油纸雕，最安静' },
+      { id: 'c', label: 'C · 奶油金边', path: '/textures/waves/wave-bg-cream-gold-c.png', note: '奶油浪顶 + 淡金高光 + 灰蓝' },
+      { id: 'd', label: 'D · 金线描边', path: '/textures/waves/wave-bg-cream-gold-d.png', note: '蓝浪 + 奶油金 crest 细金线（当前默认）' },
+    ];
+    document.getElementById('grid').innerHTML = options.map(o => `
+      <article class="card">
+        <div class="phone" style="background-image:url('${o.path}')">
+          <div class="mock">卵泡期<br/>涨潮 · 状态上升</div>
+        </div>
+        <div class="meta">
+          <h2>${o.label}</h2>
+          <p>${o.note}</p>
+          <p><code>ACTIVE_WAVE_BG = '${o.id}'</code></p>
+        </div>
+      </article>
+    `).join('');
+  </script>
+</body>
+</html>

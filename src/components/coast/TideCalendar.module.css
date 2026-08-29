@@ -10,6 +10,23 @@
   animation: fadeIn 0.22s ease;
 }
 
+.overlay[data-mode='page'] {
+  position: relative;
+  inset: auto;
+  z-index: 0;
+  flex: 1;
+  min-height: 0;
+  animation: none;
+}
+
+.overlay[data-mode='page'] .scroll {
+  padding-bottom: calc(20px + var(--tabbar-float-space) + env(safe-area-inset-bottom, 0px));
+}
+
+.overlay[data-mode='page'] .scroll[data-scale='day'] {
+  padding-bottom: calc(10px + var(--tabbar-float-space) + env(safe-area-inset-bottom, 0px));
+}
+
 .header {
   flex: 0 0 auto;
   padding: calc(var(--statusbar-h) + 2px) 16px 8px;
@@ -28,6 +45,11 @@
   color: var(--tide-deep);
   background: rgba(255, 255, 255, 0.72);
   border: 1px solid rgba(126, 184, 232, 0.28);
+}
+
+.headerSpacer {
+  width: 36px;
+  height: 36px;
 }
 
 .titleBlock {

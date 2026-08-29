@@ -1,20 +1,18 @@
 import { TAB_LABEL } from '@/domain/copy'
 import { Tabs, type TabId } from '@/domain/types'
 import {
+  CalendarBlank,
+  ChartBar,
   Compass,
-  Eye,
-  FlowerLotus,
   House,
-  User,
 } from '@phosphor-icons/react'
 import styles from './TabBar.module.css'
 
 const ITEMS = [
   { id: Tabs.home, Icon: House },
-  { id: Tabs.observe, Icon: Eye },
-  { id: Tabs.bay, Icon: FlowerLotus },
+  { id: Tabs.calendar, Icon: CalendarBlank },
+  { id: Tabs.stats, Icon: ChartBar },
   { id: Tabs.explore, Icon: Compass },
-  { id: Tabs.me, Icon: User },
 ] as const
 
 export function TabBar({

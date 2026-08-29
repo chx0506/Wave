@@ -6,6 +6,7 @@ import type {
   DaySnapshot,
   Experiment,
   ExperimentCategory,
+  StackScreenId,
   TabId,
 } from '@/domain/types'
 import { createContext, useContext } from 'react'
@@ -13,6 +14,9 @@ import { createContext, useContext } from 'react'
 export type AppState = {
   tab: TabId
   setTab: (tab: TabId) => void
+  stackScreen: StackScreenId | null
+  openStackScreen: (screen: StackScreenId) => void
+  closeStackScreen: () => void
   mode: DayMode
   setMode: (mode: DayMode) => void
   selectedDate: Date

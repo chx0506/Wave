@@ -48,8 +48,8 @@
   gap: 12px;
   overflow-x: auto;
   overflow-y: hidden;
-  margin: 0 -18px;
-  padding: 2px 18px 4px;
+  margin: 0 -18px 0 0;
+  padding: 2px 18px 4px 0;
   scroll-snap-type: x mandatory;
   -webkit-overflow-scrolling: touch;
   scrollbar-width: none;

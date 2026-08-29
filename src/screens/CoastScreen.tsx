@@ -1,41 +1,22 @@
 import avatarSrc from '@/assets/me/avatar.png'
 import { WaveFlowBackdrop } from '@/components/coast/WaveFlowBackdrop'
-import { CoastSceneGap } from '@/components/coast/CoastSceneGap'
 import { CoastScrollSection } from '@/components/coast/CoastScrollSection'
 import { TIDE_JOURNAL_INTRO } from '@/data/tideJournal'
 import { CycleDateStrip } from '@/components/coast/CycleDateStrip'
 import { TideJournalSection } from '@/components/coast/TideJournalSection'
 import { PhaseKnowledgeSheet } from '@/components/coast/PhaseKnowledgeSheet'
 import { RecordSheet } from '@/components/coast/RecordSheet'
-import { TideCalendar } from '@/components/coast/TideCalendar'
 import { TideDial } from '@/components/coast/TideDial'
-import { RECORD_PROMPT } from '@/domain/copy'
+import { APP_NAME, RECORD_PROMPT } from '@/domain/copy'
 import { snapshotForCycleDay } from '@/domain/cycle'
 import { formatMonthDay } from '@/domain/dates'
 import { useScrollScrubWave, type WaveMotion } from '@/lib/scrollScrubWave'
-import { Tabs } from '@/domain/types'
+import { StackScreens } from '@/domain/types'
 import { useAppState } from '@/state/useAppState'
 import { CaretRight, Leaf } from '@phosphor-icons/react'
 import { useMemo, useRef, useState, type CSSProperties, type ReactNode, type UIEvent } from 'react'
 import { createPortal } from 'react-dom'
 import styles from './CoastScreen.module.css'
-
-function CalendarGlyph() {
-  return (
-    <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
-      <rect x="4" y="5.5" width="16" height="14.5" rx="2.2" fill="#d7ebf7" stroke="#9fc8e8" strokeWidth="1.2" />
-      <path d="M4 10h16" stroke="#9fc8e8" strokeWidth="1.2" />
-      <rect x="7.5" y="3.2" width="2" height="4.2" rx="1" fill="#7eb4dc" />
-      <rect x="14.5" y="3.2" width="2" height="4.2" rx="1" fill="#7eb4dc" />
-      <circle cx="8.5" cy="13.5" r="1.1" fill="#7eb4dc" />
-      <circle cx="12" cy="13.5" r="1.1" fill="#7eb4dc" />
-      <circle cx="15.5" cy="13.5" r="1.1" fill="#7eb4dc" />
-      <circle cx="8.5" cy="16.8" r="1.1" fill="#9fc8e8" />
-      <circle cx="12" cy="16.8" r="1.1" fill="#6fa8d4" />
-      <circle cx="15.5" cy="16.8" r="1.1" fill="#9fc8e8" />
-    </svg>
-  )
-}
 
 function shellPortal(node: ReactNode) {
   const host = document.querySelector('[data-phone-shell]')
@@ -43,7 +24,7 @@ function shellPortal(node: ReactNode) {
 }
 
 export function CoastScreen() {
-  const { today, snapshotFor, mode, cycleConfig, setTab } = useAppState()
+  const { today, snapshotFor, mode, cycleConfig, openStackScreen } = useAppState()
   const todaySnap = snapshotFor(today)
   const scrollRef = useRef<HTMLDivElement>(null)
   const screenRef = useRef<HTMLDivElement>(null)
@@ -53,7 +34,6 @@ export function CoastScreen() {
   })
   const [dayFloat, setDayFloat] = useState(todaySnap.cycleDay)
   const [recordOpen, setRecordOpen] = useState(false)
-  const [calendarOpen, setCalendarOpen] = useState(false)
   const [phaseKnowledgeOpen, setPhaseKnowledgeOpen] = useState(false)
 
   const previewDay = Math.min(
@@ -107,30 +87,30 @@ export function CoastScreen() {
         aria-label="首页内容"
       >
         <header className={styles.header}>
+          <div className={styles.brandBlock}>
+            <div className={styles.brandRow}>
+              <h1 className={styles.brand}>{APP_NAME}</h1>
+              <span className={styles.seal} aria-hidden="true">
+                潮
+              </span>
+            </div>
+          </div>
           <button
             type="button"
             className={styles.meEntry}
             aria-label="我的"
-            onClick={() => setTab(Tabs.me)}
+            onClick={() => openStackScreen(StackScreens.me)}
           >
             <img className={styles.meAvatar} src={`${avatarSrc}?v=15`} alt="" />
-          </button>
-          <p className={styles.headerEpigraph}>
-            <span>{epigraphLead}，</span>
-            <span>{epigraphTail}</span>
-          </p>
-          <button
-            type="button"
-            className={styles.iconBtn}
-            aria-label="潮汐日历"
-            onClick={() => setCalendarOpen(true)}
-          >
-            <CalendarGlyph />
           </button>
         </header>
 
         <div className={styles.body} data-other-day={isFutureDay ? '1' : '0'}>
           <CoastScrollSection className={styles.dialStack} label="潮汐表盘">
+            <p className={styles.epigraph}>
+              <span>{epigraphLead}，</span>
+              <span>{epigraphTail}</span>
+            </p>
             <TideDial
               snapshot={snapshot}
               cycleLength={cycleConfig.cycleLength}
@@ -169,8 +149,6 @@ export function CoastScreen() {
               </div>
             )}
           </div>
-
-          {!isFutureDay ? <CoastSceneGap variant="surge" /> : null}
         </div>
       </div>
 
@@ -203,9 +181,6 @@ export function CoastScreen() {
             onSave={() => setRecordOpen(false)}
           />,
         )}
-
-      {calendarOpen &&
-        shellPortal(<TideCalendar onClose={() => setCalendarOpen(false)} />)}
     </div>
   )
 }

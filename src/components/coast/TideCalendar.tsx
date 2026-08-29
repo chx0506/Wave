@@ -22,7 +22,7 @@ import type { CalendarCell, CycleConfig, DaySnapshot, Phase } from '@/domain/typ
 import { HormoneCurveChart } from '@/components/coast/HormoneCurveChart'
 import { RecordSheet } from '@/components/coast/RecordSheet'
 import { useAppState } from '@/state/useAppState'
-import { CalendarBlank, CalendarCheck, CaretLeft, CaretRight, Drop, MoonStars, X } from '@phosphor-icons/react'
+import { CalendarBlank, CalendarCheck, CaretLeft, CaretRight, MoonStars, X } from '@phosphor-icons/react'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import styles from './TideCalendar.module.css'
 
@@ -62,7 +62,7 @@ function isFutureDate(date: Date) {
   return date > TODAY
 }
 
-export function TideCalendar({ onClose }: { onClose: () => void }) {
+export function TideCalendar({ onClose }: { onClose?: () => void }) {
   const { cycleConfig } = useAppState()
   const [year, setYear] = useState(TODAY.getFullYear())
   const [month, setMonth] = useState(TODAY.getMonth() + 1)
@@ -102,20 +102,29 @@ export function TideCalendar({ onClose }: { onClose: () => void }) {
     ? predictionSnapshotForDate(selected, prediction)
     : undefined
   const selectedCycleDay = selectedSnapshot?.cycleDay ?? cycleDayNumber(selected, activeConfig)
+  const asPage = !onClose
 
   return (
-    <div className={styles.overlay} role="dialog" aria-modal="true" aria-label="潮汐日历">
+    <div
+      className={styles.overlay}
+      data-mode={asPage ? 'page' : 'sheet'}
+      role={asPage ? undefined : 'dialog'}
+      aria-modal={asPage ? undefined : true}
+      aria-label="潮汐日历"
+    >
       <header className={styles.header}>
-        <button type="button" className={styles.iconBtn} onClick={onClose} aria-label="关闭">
-          <X size={18} weight="bold" />
-        </button>
+        {onClose ? (
+          <button type="button" className={styles.iconBtn} onClick={onClose} aria-label="关闭">
+            <X size={18} weight="bold" />
+          </button>
+        ) : (
+          <span className={styles.headerSpacer} aria-hidden="true" />
+        )}
         <div className={styles.titleBlock}>
           <h2 className={styles.title}>{APP_NAME}</h2>
           <p className={styles.subtitle}>潮汐日历</p>
         </div>
-        <span className={styles.iconBtn} aria-hidden="true">
-          <Drop size={18} weight="duotone" />
-        </span>
+        <span className={styles.headerSpacer} aria-hidden="true" />
       </header>
 
       <div className={styles.scroll} data-scale={scale}>

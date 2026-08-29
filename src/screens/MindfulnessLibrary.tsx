@@ -1,3 +1,4 @@
+import { MindfulnessRecommendHero } from '@/components/coast/MindfulnessRecommendHero'
 import {
   MINDFULNESS_CATEGORY_LABEL,
   MINDFULNESS_THUMB_SRC,
@@ -6,9 +7,8 @@ import {
   type MindfulnessSession,
   type MindfulnessThumb,
 } from '@/data/mindfulness'
-import { MindfulnessRecommendHero } from '@/components/coast/MindfulnessRecommendHero'
 import { useAppState } from '@/state/useAppState'
-import { CaretRight, Leaf } from '@phosphor-icons/react'
+import { ArrowLeft, CaretRight, Leaf } from '@phosphor-icons/react'
 import shell from './shared/pageShell.module.css'
 import styles from './MindfulnessLibrary.module.css'
 
@@ -16,16 +16,29 @@ const CATEGORIES: MindfulnessCategory[] = ['sleep', 'stress', 'mood', 'fatigue']
 
 type Props = {
   onSelect: (session: MindfulnessSession) => void
+  onClose?: () => void
 }
 
-export function MindfulnessLibrary({ onSelect }: Props) {
+export function MindfulnessLibrary({ onSelect, onClose }: Props) {
   const { snapshot } = useAppState()
 
   return (
     <div className={`${shell.screen} ${styles.screen}`}>
       <div className={shell.glow} aria-hidden="true" />
       <header className={`${shell.header} ${styles.header}`}>
-        <h1 className={shell.title}>正念</h1>
+        <div className={styles.headerLead}>
+          {onClose ? (
+            <button
+              type="button"
+              className={styles.backBtn}
+              aria-label="返回"
+              onClick={onClose}
+            >
+              <ArrowLeft size={18} weight="bold" />
+            </button>
+          ) : null}
+          <h1 className={shell.title}>正念</h1>
+        </div>
         <button type="button" className={styles.iconBtn} aria-label="主题">
           <Leaf size={18} weight="regular" />
         </button>

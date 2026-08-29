@@ -1,12 +1,19 @@
 export const Tabs = {
   home: 'home',
-  observe: 'observe',
-  bay: 'bay',
+  calendar: 'calendar',
+  stats: 'stats',
   explore: 'explore',
-  me: 'me',
 } as const
 
 export type TabId = (typeof Tabs)[keyof typeof Tabs]
+
+export const StackScreens = {
+  observe: 'observe',
+  bay: 'bay',
+  me: 'me',
+} as const
+
+export type StackScreenId = (typeof StackScreens)[keyof typeof StackScreens]
 
 export const Phases = {
   menstrual: 'menstrual',

@@ -6,13 +6,14 @@
   z-index: 12;
   pointer-events: none;
   padding-bottom: max(8px, env(safe-area-inset-bottom, 0px));
-  background: linear-gradient(180deg, transparent 0%, rgba(248, 251, 254, 0.92) 35%, var(--foam) 100%);
+  background: #fff;
+  border-top: 1px solid rgba(145, 186, 220, 0.14);
 }
 
 .bar {
   pointer-events: auto;
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   align-items: center;
   gap: 0;
   margin: 0 8px;

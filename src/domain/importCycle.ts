@@ -2,6 +2,7 @@ import { addDays, diffDays, startOfDay } from './dates'
 import type { CycleConfig, PhaseWindows } from './types'
 
 export type ImportSource =
+  | 'apple-health'
   | 'clue'
   | 'flo'
   | 'generic-csv'
@@ -45,6 +46,86 @@ function parseDate(value: unknown): Date | null {
   }
 
   return null
+}
+
+/** Apple Health export: `2022-05-25 12:00:00 +0800` */
+function parseAppleHealthDate(value: string): Date | null {
+  const trimmed = value.trim()
+  const match = trimmed.match(/^(\d{4})-(\d{2})-(\d{2})/)
+  if (match) {
+    return startOfDay(new Date(+match[1], +match[2] - 1, +match[3]))
+  }
+  return parseDate(trimmed)
+}
+
+const BLEEDING_NONE = /BleedingNone|Unspecified/i
+
+function isMenstrualFlowRecord(record: Element): boolean {
+  const type = record.getAttribute('type') ?? ''
+  return type.includes('MenstrualFlow')
+}
+
+function isCycleStartRecord(record: Element): boolean {
+  const entries = record.querySelectorAll('MetadataEntry')
+  for (const entry of entries) {
+    if (
+      entry.getAttribute('key') === 'HKMenstrualCycleStart' &&
+      entry.getAttribute('value') === '1'
+    ) {
+      return true
+    }
+  }
+  return false
+}
+
+function hasBleeding(record: Element): boolean {
+  const value = record.getAttribute('value') ?? ''
+  return Boolean(value) && !BLEEDING_NONE.test(value)
+}
+
+function inferPeriodStartsFromFlowRecords(records: Element[]): Date[] {
+  const flowDays = records
+    .filter(hasBleeding)
+    .map((record) => parseAppleHealthDate(record.getAttribute('startDate') ?? ''))
+    .filter((date): date is Date => date !== null)
+
+  const sorted = uniqueSortedDates(flowDays).sort((a, b) => a.getTime() - b.getTime())
+  if (sorted.length === 0) return []
+
+  const starts: Date[] = [sorted[0]]
+  for (let index = 1; index < sorted.length; index += 1) {
+    const gap = diffDays(sorted[index], sorted[index - 1])
+    if (gap >= 7) starts.push(sorted[index])
+  }
+  return starts
+}
+
+function parseAppleHealthXml(text: string): ParsedImport | null {
+  if (typeof DOMParser === 'undefined') return null
+
+  const doc = new DOMParser().parseFromString(text, 'text/xml')
+  if (doc.querySelector('parsererror')) return null
+
+  const records = [...doc.querySelectorAll('Record')].filter(isMenstrualFlowRecord)
+  if (records.length === 0) return null
+
+  const cycleStartDates = records
+    .filter(isCycleStartRecord)
+    .map((record) => parseAppleHealthDate(record.getAttribute('startDate') ?? ''))
+    .filter((date): date is Date => date !== null)
+
+  const periodStarts =
+    cycleStartDates.length > 0
+      ? uniqueSortedDates(cycleStartDates)
+      : uniqueSortedDates(inferPeriodStartsFromFlowRecords(records))
+
+  if (periodStarts.length === 0) return null
+
+  return {
+    periodStarts,
+    source: 'apple-health',
+    sourceLabel: 'Apple 健康',
+  }
 }
 
 function uniqueSortedDates(dates: Date[]): Date[] {
@@ -192,8 +273,32 @@ function parseCSV(text: string): ParsedImport | null {
 export function parseImportFile(text: string, filename: string): ImportResult {
   const ext = filename.split('.').pop()?.toLowerCase() ?? ''
   const trimmed = text.trim()
+  const head = trimmed.slice(0, 512)
 
   try {
+    if (
+      ext === 'xml' ||
+      head.includes('HealthData') ||
+      head.includes('HKCategoryTypeIdentifierMenstrualFlow')
+    ) {
+      const appleHealth = parseAppleHealthXml(text)
+      if (appleHealth) {
+        const cycleConfig = buildCycleConfig(appleHealth.periodStarts)
+        return {
+          ok: true,
+          data: appleHealth,
+          cycleConfig,
+          avgCycleLength: cycleConfig.cycleLength,
+        }
+      }
+      if (ext === 'xml' || head.includes('HealthData')) {
+        return {
+          ok: false,
+          error: 'Apple 健康导出里没有找到经期记录。请确认已在「健康」App 中记录过月经数据。',
+        }
+      }
+    }
+
     if (ext === 'json' || trimmed.startsWith('{') || trimmed.startsWith('[')) {
       const parsedJson = JSON.parse(text) as unknown
       const dates: Date[] = []
@@ -230,7 +335,7 @@ export function parseImportFile(text: string, filename: string): ImportResult {
 
     return {
       ok: false,
-      error: '无法识别文件格式。请上传其他 App 导出的 CSV 或 JSON 文件。',
+      error: '无法识别文件格式。请上传 Apple 健康导出（ZIP/XML）、或其他 App 的 CSV / JSON 文件。',
     }
   } catch {
     return { ok: false, error: '文件解析失败，请检查格式是否正确。' }
@@ -238,7 +343,7 @@ export function parseImportFile(text: string, filename: string): ImportResult {
 }
 
 export const IMPORT_FORMAT_HINTS = [
+  'Apple 健康导出（ZIP 或 export.xml）',
   'Clue / Flo / 美柚等 App 的数据导出（CSV 或 JSON）',
-  '文件需包含经期开始日期，例如 2026-01-15',
   '导入后会在本设备本地保存，不会上传到服务器',
 ] as const
