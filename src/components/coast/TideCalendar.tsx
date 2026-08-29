@@ -2,29 +2,46 @@ import { SAMPLE_PERIOD_RECORDS, TODAY } from '@/data/sample'
 import { monthCells, WEEKDAYS } from '@/domain/calendar'
 import { APP_NAME, PHASE_LABEL, TIDE_METAPHOR_SHORT } from '@/domain/copy'
 import {
-  PHASE_HINT,
   PHASE_ICON,
   PHASE_ORDER,
-  PHASE_RGB,
 } from '@/domain/phaseTheme'
 import {
   cycleDayNumber,
-  phaseForCycleDay,
-  tideHeightForCycleDay,
 } from '@/domain/cycle'
-import { hasDailyLog } from '@/domain/dailyLog'
+import {
+  flowLabel,
+  hasDailyLog,
+  moodLabel,
+} from '@/domain/dailyLog'
 import { addDays, daysInMonth, formatMonthDay, formatYearMonth, sameDay, toKey } from '@/domain/dates'
 import {
   buildCyclePrediction,
   predictionSnapshotForDate,
   type CyclePrediction,
 } from '@/domain/periodPrediction'
-import type { CalendarCell, CycleConfig, DayLogsMap, DaySnapshot, Phase } from '@/domain/types'
+import type {
+  CalendarCell,
+  DailyLog,
+  DayLogsMap,
+  DaySnapshot,
+} from '@/domain/types'
+import {
+  DISCHARGE_OPTIONS,
+  EXERCISE_OPTIONS,
+  INTIMACY_OPTIONS,
+  SYMPTOM_OPTIONS,
+  type RecordChip,
+} from '@/data/recordStatusArt'
 import { HormoneCurveChart } from '@/components/coast/HormoneCurveChart'
+import { MoodGlyph, moodDiscStyle } from '@/components/coast/MoodGlyph'
 import { RecordSheet } from '@/components/coast/RecordSheet'
 import { useAppState } from '@/state/useAppState'
-import { CalendarBlank, CalendarCheck, CaretLeft, CaretRight, MoonStars, X } from '@phosphor-icons/react'
+import { CalendarBlank, CalendarCheck, CaretLeft, CaretRight, Leaf, MoonStars, PencilSimple, X } from '@phosphor-icons/react'
 import { useEffect, useMemo, useRef, useState } from 'react'
+import flowDry from '@/assets/flow/flow-dry.png'
+import flowFull from '@/assets/flow/flow-full.png'
+import flowLight from '@/assets/flow/flow-light.png'
+import flowMedium from '@/assets/flow/flow-medium.png'
 import styles from './TideCalendar.module.css'
 
 type CalendarScale = 'month' | 'year' | 'day'
@@ -40,15 +57,11 @@ const CALENDAR_SCALES: { id: CalendarScale; label: string }[] = [
 
 const MONTH_LABELS = Array.from({ length: 12 }, (_, index) => `${index + 1}月`)
 
-const RHYTHM = {
-  period: '#D97868',
-  menstrual: `rgb(${PHASE_RGB.menstrual})`,
-  follicular: `rgb(${PHASE_RGB.follicular})`,
-  ovulatory: `rgb(${PHASE_RGB.ovulatory})`,
-  luteal: `rgb(${PHASE_RGB.luteal})`,
-  today: '#6FA8D4',
-  ink: '#3A5368',
-  soft: '#A8BFCF',
+const FLOW_ART: Record<string, string> = {
+  none: flowDry,
+  light: flowLight,
+  medium: flowMedium,
+  heavy: flowFull,
 }
 
 function dayMark(cell: Extract<CalendarCell, { kind: 'day' }>) {
@@ -61,6 +74,12 @@ function dayMark(cell: Extract<CalendarCell, { kind: 'day' }>) {
 
 function isFutureDate(date: Date) {
   return date > TODAY
+}
+
+function chipsFor(options: readonly RecordChip[], ids: string[]) {
+  return ids
+    .map((id) => options.find((item) => item.id === id))
+    .filter((item): item is RecordChip => Boolean(item))
 }
 
 export function TideCalendar({ onClose }: { onClose?: () => void }) {
@@ -109,7 +128,9 @@ export function TideCalendar({ onClose }: { onClose?: () => void }) {
     ? predictionSnapshotForDate(selected, prediction)
     : undefined
   const selectedCycleDay = selectedSnapshot?.cycleDay ?? cycleDayNumber(selected, activeConfig)
+  const selectedLog = getDailyLog(selected)
   const asPage = !onClose
+  const showDayDetail = scale === 'month' || scale === 'day'
 
   return (
     <div
@@ -165,10 +186,7 @@ export function TideCalendar({ onClose }: { onClose?: () => void }) {
                   cells={cells}
                   selected={selected}
                   dayLogs={dayLogs}
-                  onSelect={(date) => {
-                    setSelected(date)
-                    setRecordDate(date)
-                  }}
+                  onSelect={(date) => setSelected(date)}
                 />
               </>
             ) : null}
@@ -192,11 +210,11 @@ export function TideCalendar({ onClose }: { onClose?: () => void }) {
               <DayCalendar
                 prediction={prediction}
                 dayLogs={dayLogs}
+                selected={selected}
                 onSelectDate={(date) => {
                   setSelected(date)
                   setYear(date.getFullYear())
                   setMonth(date.getMonth() + 1)
-                  setRecordDate(date)
                 }}
               />
             ) : null}
@@ -205,48 +223,26 @@ export function TideCalendar({ onClose }: { onClose?: () => void }) {
           <CalendarEmptyState />
         )}
 
+        {showDayDetail ? (
+          <SelectedDayLogPanel
+            date={selected}
+            snapshot={selectedSnapshot}
+            log={selectedLog}
+            onEdit={() => {
+              if (!isFutureDate(selected)) setRecordDate(selected)
+            }}
+          />
+        ) : null}
+
         {scale === 'month' ? (
-          <>
-            <section className={styles.phaseRow}>
-              {PHASE_ORDER.map((phase) => (
-                <article key={phase} className={styles.phaseCard} data-phase={phase}>
-                  <span className={styles.phaseIcon} aria-hidden="true">
-                    <img className={styles.phaseImg} src={PHASE_ICON[phase]} alt="" />
-                  </span>
-                  <strong>{PHASE_LABEL[phase]}</strong>
-                  <span className={styles.phaseSub}>{TIDE_METAPHOR_SHORT[phase]}</span>
-                  <p>{PHASE_HINT[phase]}</p>
-                </article>
-              ))}
-            </section>
-
-            <section className={styles.rhythm}>
-              <div className={styles.rhythmHead}>
-                <h3>潮汐节律 · {activeConfig.cycleLength}天</h3>
-                <div className={styles.legend}>
-                  <span>
-                    <i className={styles.legToday} /> 今日
-                  </span>
-                  {PHASE_ORDER.map((phase) => (
-                    <span key={phase}>
-                      <PhaseMark mini phase={phase} />
-                      {PHASE_LABEL[phase]}
-                    </span>
-                  ))}
-                </div>
-              </div>
-              <RhythmChart todayCycleDay={todayCycleDay} cycleConfig={activeConfig} />
-            </section>
-
-            <section className={styles.hormoneSection} aria-label="激素曲线">
-              <HormoneCurveChart
-                cycleLength={activeConfig.cycleLength}
-                selectedDay={selectedCycleDay}
-                todayDay={todayCycleDay}
-                cycleConfig={activeConfig}
-              />
-            </section>
-          </>
+          <section className={styles.hormoneSection} aria-label="激素曲线">
+            <HormoneCurveChart
+              cycleLength={activeConfig.cycleLength}
+              selectedDay={selectedCycleDay}
+              todayDay={todayCycleDay}
+              cycleConfig={activeConfig}
+            />
+          </section>
         ) : null}
       </div>
       {recordDate ? (
@@ -258,6 +254,155 @@ export function TideCalendar({ onClose }: { onClose?: () => void }) {
           onSave={(input) => saveDailyLog(recordDate, input)}
         />
       ) : null}
+    </div>
+  )
+}
+
+function SelectedDayLogPanel({
+  date,
+  snapshot,
+  log,
+  onEdit,
+}: {
+  date: Date
+  snapshot?: DaySnapshot
+  log?: DailyLog
+  onEdit: () => void
+}) {
+  const future = isFutureDate(date)
+  const isToday = sameDay(date, TODAY)
+  const phase = snapshot?.phase
+  const symptoms = log ? chipsFor(SYMPTOM_OPTIONS, log.symptoms) : []
+  const discharge = log ? chipsFor(DISCHARGE_OPTIONS, log.discharge) : []
+  const exercise = log ? chipsFor(EXERCISE_OPTIONS, log.exercise) : []
+  const intimacy = log ? chipsFor(INTIMACY_OPTIONS, log.intimacy) : []
+  const moodTone = (log?.mood ?? 'calm') as
+    | 'calm'
+    | 'low'
+    | 'irritable'
+    | 'happy'
+    | 'sensitive'
+
+  return (
+    <section
+      className={styles.dayLogPanel}
+      aria-label={`${formatMonthDay(date)}状态记录`}
+      data-phase={phase}
+    >
+      <header className={styles.dayLogHead}>
+        <div className={styles.dayLogHeadText}>
+          <p className={styles.dayLogEyebrow}>
+            {isToday ? '今日状态' : '当日状态'}
+          </p>
+          <h3 className={styles.dayLogTitle}>
+            {formatMonthDay(date)}
+            {phase ? (
+              <span>
+                · {PHASE_LABEL[phase]}
+                {snapshot ? ` · 第 ${snapshot.cycleDay} 天` : ''}
+              </span>
+            ) : null}
+          </h3>
+        </div>
+        {!future ? (
+          <button type="button" className={styles.dayLogEdit} onClick={onEdit}>
+            <PencilSimple size={14} weight="bold" />
+            {log ? '编辑' : '记录'}
+          </button>
+        ) : null}
+      </header>
+
+      {future ? (
+        <p className={styles.dayLogEmpty}>未来的日子，还没有浪花。</p>
+      ) : log ? (
+        <div className={styles.dayLogBody}>
+          {(log.flow || log.mood) && (
+            <div className={styles.dayLogHero}>
+              {log.flow ? (
+                <div className={styles.dayLogFlow}>
+                  <img
+                    src={FLOW_ART[log.flow] ?? flowLight}
+                    alt=""
+                    draggable={false}
+                  />
+                  <span>
+                    <em>经量</em>
+                    {flowLabel(log.flow)}
+                  </span>
+                </div>
+              ) : null}
+              {log.mood ? (
+                <div className={styles.dayLogMood}>
+                  <span
+                    className={styles.dayLogMoodFace}
+                    style={moodDiscStyle(moodTone, true)}
+                    aria-hidden="true"
+                  >
+                    <MoodGlyph tone={moodTone} />
+                  </span>
+                  <span>
+                    <em>心情</em>
+                    {moodLabel(log.mood)}
+                  </span>
+                </div>
+              ) : null}
+            </div>
+          )}
+
+          <LogChipRow title="身体症状" chips={symptoms} />
+          <LogChipRow title="分泌物" chips={discharge} />
+          <LogChipRow title="运动" chips={exercise} />
+          <LogChipRow title="性活动" chips={intimacy} />
+
+          {log.note ? (
+            <div className={styles.dayLogNote}>
+              <em>备注</em>
+              <p>{log.note}</p>
+            </div>
+          ) : null}
+
+          {!log.flow &&
+          !log.mood &&
+          symptoms.length === 0 &&
+          discharge.length === 0 &&
+          exercise.length === 0 &&
+          intimacy.length === 0 &&
+          !log.note ? (
+            <p className={styles.dayLogEmpty}>这一天写过记录，但条目为空。</p>
+          ) : null}
+        </div>
+      ) : (
+        <div className={styles.dayLogEmptyWrap}>
+          <p className={styles.dayLogEmpty}>这天还没有状态记录。</p>
+          <button type="button" className={styles.dayLogCta} onClick={onEdit}>
+            <Leaf size={14} weight="fill" />
+            记录这一天
+          </button>
+        </div>
+      )}
+    </section>
+  )
+}
+
+function LogChipRow({
+  title,
+  chips,
+}: {
+  title: string
+  chips: RecordChip[]
+}) {
+  if (chips.length === 0) return null
+  return (
+    <div className={styles.dayLogSection}>
+      <em>{title}</em>
+      <div className={styles.dayLogChips}>
+        {chips.map((chip) => (
+          <span key={chip.id} className={styles.dayLogChip}>
+            <img src={chip.src} alt="" draggable={false} />
+            {chip.label}
+          </span>
+        ))}
+      </div>
     </div>
   )
 }
@@ -299,7 +444,7 @@ function MonthCalendar({
 }) {
   return (
     <section className={styles.calCard}>
-      <PhaseLegend />
+      <PhaseTideLegend className={styles.phaseLegend} />
       <div className={styles.weekdays}>
         {WEEKDAYS.map((d) => (
           <span key={d}>{d}</span>
@@ -351,13 +496,21 @@ function MonthCalendar({
   )
 }
 
-function PhaseLegend() {
+function PhaseTideLegend({ className }: { className?: string }) {
   return (
-    <div className={styles.phaseLegend}>
+    <div className={className} aria-label="潮汐阶段图例">
       {PHASE_ORDER.map((phase) => (
         <span key={phase} className={styles.phaseLegendItem} data-phase={phase}>
-          <i className={styles.phaseSwatch} aria-hidden="true" />
-          {PHASE_LABEL[phase].replace('期', '')}
+          <img
+            className={styles.phaseLegendIcon}
+            src={PHASE_ICON[phase]}
+            alt=""
+            aria-hidden="true"
+          />
+          <span className={styles.phaseLegendText}>
+            <strong>{PHASE_LABEL[phase]}</strong>
+            <em>{TIDE_METAPHOR_SHORT[phase]}</em>
+          </span>
         </span>
       ))}
     </div>
@@ -475,13 +628,15 @@ function MiniMonth({
 function DayCalendar({
   prediction,
   dayLogs,
+  selected,
   onSelectDate,
 }: {
   prediction: CyclePrediction
   dayLogs: DayLogsMap
+  selected: Date
   onSelectDate: (date: Date) => void
 }) {
-  const todayRef = useRef<HTMLButtonElement | null>(null)
+  const selectedRef = useRef<HTMLButtonElement | null>(null)
   const days = useMemo(
     () =>
       Array.from({ length: 361 }, (_, index) => {
@@ -495,8 +650,8 @@ function DayCalendar({
   )
 
   useEffect(() => {
-    todayRef.current?.scrollIntoView({ block: 'center' })
-  }, [])
+    selectedRef.current?.scrollIntoView({ block: 'center' })
+  }, [selected])
 
   return (
     <section className={styles.dayListCard} aria-label="按日期浏览记录">
@@ -504,16 +659,18 @@ function DayCalendar({
         {days.map(({ date, snapshot }) => {
           const isToday = sameDay(date, TODAY)
           const isFuture = isFutureDate(date)
+          const isSelected = sameDay(date, selected)
           const logged = hasDailyLog(dayLogs, date)
           return (
             <button
               key={date.toISOString()}
-              ref={isToday ? todayRef : undefined}
+              ref={isSelected ? selectedRef : undefined}
               type="button"
               className={styles.dayListItem}
               data-phase={snapshot.phase}
               data-today={isToday}
               data-future={isFuture}
+              data-selected={isSelected}
               data-logged={logged}
               disabled={isFuture}
               onClick={() => onSelectDate(date)}
@@ -552,195 +709,3 @@ function CalendarEmptyState() {
   )
 }
 
-function PhaseMark({ phase, mini }: { phase: Phase; mini?: boolean }) {
-  const size = mini ? 14 : 22
-  return (
-    <img
-      className={styles.phaseMarkMini}
-      src={PHASE_ICON[phase]}
-      alt=""
-      width={size}
-      height={size}
-      aria-hidden="true"
-    />
-  )
-}
-
-function rhythmPoint(
-  day: number,
-  length: number,
-  config: CycleConfig,
-  w: number,
-  padX: number,
-  midY: number,
-  amp: number,
-) {
-  const t = (day - 1) / Math.max(length - 1, 1)
-  const x = padX + t * (w - padX * 2)
-  const periodPeak = Math.exp(-(((t - 0.1) / 0.09) ** 2))
-  const lutealTrough = -0.92 * Math.exp(-(((t - 0.62) / 0.2) ** 2))
-  const lateRise = 0.42 * Math.max(0, (t - 0.72) / 0.28) ** 1.15
-  const earlyBase = 0.08 + 0.22 * Math.min(1, t / 0.08)
-  const h = Math.min(1, Math.max(0, 0.42 + earlyBase * 0.15 + periodPeak * 0.55 + lutealTrough + lateRise))
-  const tide = tideHeightForCycleDay(day, config)
-  const blended = h * 0.72 + tide * 0.28
-  const y = midY - (blended - 0.45) * amp * 2
-  return { x, y, phase: phaseForCycleDay(day, config) }
-}
-
-function phaseStroke(phase: Phase): { color: string; dashed: boolean } {
-  switch (phase) {
-    case 'menstrual':
-      return { color: RHYTHM.menstrual, dashed: false }
-    case 'follicular':
-      return { color: RHYTHM.follicular, dashed: false }
-    case 'ovulatory':
-      return { color: RHYTHM.ovulatory, dashed: false }
-    case 'luteal':
-      return { color: RHYTHM.luteal, dashed: false }
-  }
-}
-
-function rhythmPhaseIconDay(phase: Phase, config: CycleConfig): number {
-  const { menstrual, follicular, ovulatory, luteal } = config.phaseWindows
-  switch (phase) {
-    case 'menstrual':
-      return Math.max(1, Math.round(menstrual / 2))
-    case 'follicular':
-      return menstrual + Math.round(follicular / 2)
-    case 'ovulatory':
-      return menstrual + follicular + Math.round(ovulatory / 2)
-    case 'luteal':
-      return menstrual + follicular + ovulatory + Math.round(luteal / 2)
-  }
-}
-
-function RhythmPhaseIcon({
-  phase,
-  x,
-  y,
-  size = 24,
-}: {
-  phase: Phase
-  x: number
-  y: number
-  size?: number
-}) {
-  return (
-    <image
-      href={PHASE_ICON[phase]}
-      x={x - size / 2}
-      y={y - size - 6}
-      width={size}
-      height={size}
-      aria-hidden="true"
-    />
-  )
-}
-
-function RhythmChart({
-  todayCycleDay,
-  cycleConfig,
-}: {
-  todayCycleDay: number
-  cycleConfig: CycleConfig
-}) {
-  const length = cycleConfig.cycleLength
-  const day = Math.min(length, Math.max(1, todayCycleDay))
-  const w = 320
-  const h = 128
-  const padX = 14
-  const midY = 52
-  const amp = 28
-  const labelY = 112
-
-  const pts = Array.from({ length }, (_, i) =>
-    rhythmPoint(i + 1, length, cycleConfig, w, padX, midY, amp),
-  )
-
-  // Group consecutive same-stroke segments into smooth polylines
-  const polylines: { points: string; color: string; dashed: boolean }[] = []
-  let current: { points: string[]; color: string; dashed: boolean } | null = null
-  for (let i = 0; i < pts.length; i += 1) {
-    const stroke = phaseStroke(pts[i].phase)
-    const pair = `${pts[i].x.toFixed(2)},${pts[i].y.toFixed(2)}`
-    if (!current || current.color !== stroke.color || current.dashed !== stroke.dashed) {
-      if (current) {
-        // connect with previous point so segments join
-        polylines.push({ points: current.points.join(' '), color: current.color, dashed: current.dashed })
-      }
-      const startPts = i > 0 ? [`${pts[i - 1].x.toFixed(2)},${pts[i - 1].y.toFixed(2)}`, pair] : [pair]
-      current = { points: startPts, color: stroke.color, dashed: stroke.dashed }
-    } else {
-      current.points.push(pair)
-    }
-  }
-  if (current) {
-    polylines.push({ points: current.points.join(' '), color: current.color, dashed: current.dashed })
-  }
-
-  const labelDays = [1, 4, 7, 10, 13, 16, 19, 22, 25, 28].filter((d) => d <= length)
-
-  return (
-    <svg className={styles.chart} viewBox={`0 0 ${w} ${h}`} role="img" aria-label="28天潮汐节律曲线">
-      {PHASE_ORDER.map((phase) => {
-        const iconDay = rhythmPhaseIconDay(phase, cycleConfig)
-        const p = pts[iconDay - 1]
-        return <RhythmPhaseIcon key={phase} phase={phase} x={p.x} y={p.y} />
-      })}
-
-      {polylines.map((line, i) => (
-        <polyline
-          key={`line-${i}`}
-          points={line.points}
-          fill="none"
-          stroke={line.color}
-          strokeWidth="2.6"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          strokeDasharray={line.dashed ? '4.5 3.5' : undefined}
-          opacity={line.dashed ? 0.85 : 1}
-        />
-      ))}
-
-      {pts.map((p, i) => {
-        const d = i + 1
-        const stroke = phaseStroke(p.phase)
-        return (
-          <circle
-            key={`dot-${d}`}
-            cx={p.x}
-            cy={p.y}
-            r={stroke.dashed ? 2.4 : 2.8}
-            fill={stroke.dashed ? '#fff' : stroke.color}
-            stroke={stroke.color}
-            strokeWidth={stroke.dashed ? 1.4 : 0}
-          />
-        )
-      })}
-
-      {labelDays.map((d) => {
-        const p = pts[d - 1]
-        const isToday = d === day
-        return (
-          <g key={`label-${d}`}>
-            {isToday && (
-              <circle cx={p.x} cy={labelY} r="9" fill="#fff" stroke={RHYTHM.today} strokeWidth="1.8" />
-            )}
-            <text
-              x={p.x}
-              y={labelY + 3.5}
-              textAnchor="middle"
-              fill={isToday ? RHYTHM.today : RHYTHM.soft}
-              fontSize="9"
-              fontWeight={isToday ? 700 : 500}
-              fontFamily="var(--font-ui)"
-            >
-              {d}
-            </text>
-          </g>
-        )
-      })}
-    </svg>
-  )
-}

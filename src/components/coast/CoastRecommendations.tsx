@@ -44,7 +44,7 @@ export function CoastRecommendations({
             className={styles.blockLink}
             onClick={() => setTab(Tabs.explore)}
           >
-            去探索
+            更多
           </button>
         </div>
         <div className={styles.rail}>
@@ -66,7 +66,7 @@ export function CoastRecommendations({
             className={styles.blockLink}
             onClick={() => openStackScreen(StackScreens.bay)}
           >
-            去正念
+            更多
           </button>
         </div>
         <MindfulnessRecommendHero
@@ -83,7 +83,7 @@ export function CoastRecommendations({
             className={styles.blockLink}
             onClick={() => openStackScreen(StackScreens.observe)}
           >
-            去潮池观察
+            更多
           </button>
         </div>
         <div className={styles.rail}>
