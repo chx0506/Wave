@@ -29,15 +29,7 @@
 }
 
 .frame {
-  z-index: 1;
-  object-fit: cover;
-  object-position: center bottom;
-  opacity: 0;
-  transition: opacity 0.25s ease;
-}
-
-.wrap[data-frames-ready='1'] .frame {
-  opacity: 1;
+  display: none;
 }
 
 .bottomFade {
@@ -57,11 +49,15 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .frame {
-    opacity: 0 !important;
-  }
-
-  .poster {
-    opacity: 1 !important;
+  .bottomFade {
+    background:
+      linear-gradient(
+        180deg,
+        rgba(242, 248, 252, 0.28) 0%,
+        transparent 28%,
+        transparent 48%,
+        rgba(242, 248, 252, 0.12) 72%,
+        rgba(234, 243, 250, 0.48) 100%
+      );
   }
 }

@@ -49,7 +49,6 @@ function clamp(n: number, min: number, max: number) {
 export function useScrollScrubWave({ scrollRef, rootRef, onMotion }: Options) {
   const pendingScrollRef = useRef(0)
   const rafRef = useRef<number | null>(null)
-  const pollRef = useRef<number | null>(null)
   const virtualScrollRef = useRef(0)
   const lastAppliedRef = useRef(-1)
   const onMotionRef = useRef(onMotion)
@@ -132,11 +131,6 @@ export function useScrollScrubWave({ scrollRef, rootRef, onMotion }: Options) {
       scheduleWaveMotion(readEffectiveScroll(scrollEl))
     }
 
-    const poll = () => {
-      scheduleWaveMotion(readEffectiveScroll(scrollEl))
-      pollRef.current = requestAnimationFrame(poll)
-    }
-
     scrollEl.addEventListener('scroll', sync, { passive: true })
     scrollEl.addEventListener('wheel', onWheel, { passive: true })
     scrollEl.addEventListener('touchmove', onTouchMove, { passive: true })
@@ -150,7 +144,6 @@ export function useScrollScrubWave({ scrollRef, rootRef, onMotion }: Options) {
       : null
     ro?.observe(scrollEl)
 
-    pollRef.current = requestAnimationFrame(poll)
     scrollEl.focus({ preventScroll: true })
 
     return () => {
@@ -161,7 +154,6 @@ export function useScrollScrubWave({ scrollRef, rootRef, onMotion }: Options) {
       window.removeEventListener('resize', sync)
       ro?.disconnect()
       if (rafRef.current !== null) cancelAnimationFrame(rafRef.current)
-      if (pollRef.current !== null) cancelAnimationFrame(pollRef.current)
     }
   }, [readEffectiveScroll, rootRef, scrollRef, scheduleWaveMotion])
 
