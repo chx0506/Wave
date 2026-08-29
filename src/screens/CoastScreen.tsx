@@ -178,36 +178,6 @@ export function CoastScreen() {
                 </p>
               </div>
             )}
-
-            {recentPeriods.length > 0 ? (
-              <section className={styles.historyCard} aria-labelledby="home-period-history-title">
-                <div className={styles.historyHead}>
-                  <div>
-                    <h2 id="home-period-history-title" className={styles.historyTitle}>往期经期</h2>
-                    <p className={styles.historyMeta}>
-                      {periodRecords.length > 0
-                        ? `已同步 ${periodRecords.length} 次`
-                        : '示例数据 · 还未导入'}
-                      {averagePeriodLength ? ` · 平均 ${averagePeriodLength} 天` : ''}
-                    </p>
-                  </div>
-                  <span className={styles.historySource}>{importedFrom ?? '示例数据'}</span>
-                </div>
-                <ul className={styles.historyList}>
-                  {recentPeriods.map((record) => {
-                    const length = diffDays(record.endDate, record.startDate) + 1
-                    return (
-                      <li key={`${record.startDate.toISOString()}-${record.endDate.toISOString()}`}>
-                        <span>
-                          {formatMonthDay(record.startDate)} — {formatMonthDay(record.endDate)}
-                        </span>
-                        <span>{length} 天</span>
-                      </li>
-                    )
-                  })}
-                </ul>
-              </section>
-            ) : null}
           </div>
         </div>
       </div>
