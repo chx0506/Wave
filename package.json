@@ -5,12 +5,14 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "ref:index": "node scripts/build-ref-index.mjs",
     "build": "tsc -b && vite build",
     "lint": "oxlint",
     "preview": "vite preview"
   },
   "dependencies": {
     "@phosphor-icons/react": "^2.1.10",
+    "mammoth": "^1.12.2",
     "react": "^19.2.8",
     "react-dom": "^19.2.8"
   },
