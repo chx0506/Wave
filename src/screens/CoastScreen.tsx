@@ -1,4 +1,5 @@
 import avatarSrc from '@/assets/me/avatar.png'
+import { SAMPLE_PERIOD_RECORDS } from '@/data/sample'
 import { WaveFlowBackdrop } from '@/components/coast/WaveFlowBackdrop'
 import { CoastScrollSection } from '@/components/coast/CoastScrollSection'
 import { TIDE_JOURNAL_INTRO } from '@/data/tideJournal'
@@ -9,7 +10,7 @@ import { RecordSheet } from '@/components/coast/RecordSheet'
 import { TideDial } from '@/components/coast/TideDial'
 import { APP_NAME, RECORD_PROMPT } from '@/domain/copy'
 import { snapshotForCycleDay } from '@/domain/cycle'
-import { formatMonthDay } from '@/domain/dates'
+import { diffDays, formatMonthDay } from '@/domain/dates'
 import { useScrollScrubWave, type WaveMotion } from '@/lib/scrollScrubWave'
 import { StackScreens } from '@/domain/types'
 import { useAppState } from '@/state/useAppState'
@@ -24,7 +25,15 @@ function shellPortal(node: ReactNode) {
 }
 
 export function CoastScreen() {
-  const { today, snapshotFor, mode, cycleConfig, openStackScreen } = useAppState()
+  const {
+    today,
+    snapshotFor,
+    mode,
+    cycleConfig,
+    periodRecords,
+    importedFrom,
+    openStackScreen,
+  } = useAppState()
   const todaySnap = snapshotFor(today)
   const scrollRef = useRef<HTMLDivElement>(null)
   const screenRef = useRef<HTMLDivElement>(null)
@@ -47,6 +56,27 @@ export function CoastScreen() {
   )
 
   const isFutureDay = previewDay > todaySnap.cycleDay
+
+  const displayPeriods = periodRecords.length > 0 ? periodRecords : SAMPLE_PERIOD_RECORDS
+
+  const recentPeriods = useMemo(
+    () =>
+      [...displayPeriods]
+        .sort((a, b) => b.startDate.getTime() - a.startDate.getTime())
+        .slice(0, 3),
+    [displayPeriods],
+  )
+  const averagePeriodLength = useMemo(() => {
+    if (displayPeriods.length === 0) return null
+    return Math.round(
+      (displayPeriods.reduce(
+        (sum, record) => sum + diffDays(record.endDate, record.startDate) + 1,
+        0,
+      ) /
+        displayPeriods.length) *
+        10,
+    ) / 10
+  }, [displayPeriods])
 
   const goToToday = () => {
     setDayFloat(todaySnap.cycleDay)
@@ -148,6 +178,36 @@ export function CoastScreen() {
                 </p>
               </div>
             )}
+
+            {recentPeriods.length > 0 ? (
+              <section className={styles.historyCard} aria-labelledby="home-period-history-title">
+                <div className={styles.historyHead}>
+                  <div>
+                    <h2 id="home-period-history-title" className={styles.historyTitle}>往期经期</h2>
+                    <p className={styles.historyMeta}>
+                      {periodRecords.length > 0
+                        ? `已同步 ${periodRecords.length} 次`
+                        : '示例数据 · 还未导入'}
+                      {averagePeriodLength ? ` · 平均 ${averagePeriodLength} 天` : ''}
+                    </p>
+                  </div>
+                  <span className={styles.historySource}>{importedFrom ?? '示例数据'}</span>
+                </div>
+                <ul className={styles.historyList}>
+                  {recentPeriods.map((record) => {
+                    const length = diffDays(record.endDate, record.startDate) + 1
+                    return (
+                      <li key={`${record.startDate.toISOString()}-${record.endDate.toISOString()}`}>
+                        <span>
+                          {formatMonthDay(record.startDate)} — {formatMonthDay(record.endDate)}
+                        </span>
+                        <span>{length} 天</span>
+                      </li>
+                    )
+                  })}
+                </ul>
+              </section>
+            ) : null}
           </div>
         </div>
       </div>

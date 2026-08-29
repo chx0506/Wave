@@ -132,7 +132,7 @@ export function DataImportSheet({
             <dl className={styles.consentList}>
               <div>
                 <dt>将读取</dt>
-                <dd>经期开始日期，用于推算周期节奏</dd>
+                <dd>经期开始日期与出血日期区间，用于推算周期节奏</dd>
               </div>
               <div>
                 <dt>不会</dt>
@@ -253,7 +253,7 @@ export function DataImportSheet({
             <dl className={styles.previewStats}>
               <div>
                 <dt>经期记录</dt>
-                <dd>{preview.data.periodStarts.length} 次</dd>
+                <dd>{preview.data.periodRecords.length} 次</dd>
               </div>
               <div>
                 <dt>平均周期</dt>

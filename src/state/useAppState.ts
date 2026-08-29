@@ -6,6 +6,7 @@ import type {
   DaySnapshot,
   Experiment,
   ExperimentCategory,
+  PeriodRecord,
   StackScreenId,
   TabId,
 } from '@/domain/types'
@@ -29,6 +30,7 @@ export type AppState = {
   snapshotFor: (date: Date) => DaySnapshot
   cycleConfig: CycleConfig
   periodStarts: Date[]
+  periodRecords: PeriodRecord[]
   importedFrom?: string
   importCycleData: (result: Extract<ImportResult, { ok: true }>) => void
   experiments: Experiment[]

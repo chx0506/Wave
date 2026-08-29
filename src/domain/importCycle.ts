@@ -1,5 +1,6 @@
 import { addDays, diffDays, startOfDay } from './dates'
-import type { CycleConfig, PhaseWindows } from './types'
+import { buildCyclePrediction } from './periodPrediction'
+import type { CycleConfig, PeriodRecord, PhaseWindows } from './types'
 
 export type ImportSource =
   | 'apple-health'
@@ -11,6 +12,7 @@ export type ImportSource =
 
 export type ParsedImport = {
   periodStarts: Date[]
+  periodRecords: PeriodRecord[]
   source: ImportSource
   sourceLabel: string
 }
@@ -100,6 +102,34 @@ function inferPeriodStartsFromFlowRecords(records: Element[]): Date[] {
   return starts
 }
 
+function inferPeriodRecordsFromFlowRecords(records: Element[]): PeriodRecord[] {
+  const flowDays = records
+    .filter(hasBleeding)
+    .map((record) => parseAppleHealthDate(record.getAttribute('startDate') ?? ''))
+    .filter((date): date is Date => date !== null)
+
+  const sorted = uniqueSortedDates(flowDays).sort((a, b) => a.getTime() - b.getTime())
+  if (sorted.length === 0) return []
+
+  const ranges: PeriodRecord[] = []
+  let startDate = sorted[0]
+  let endDate = sorted[0]
+
+  for (let index = 1; index < sorted.length; index += 1) {
+    const gap = diffDays(sorted[index], endDate)
+    if (gap <= 6) {
+      endDate = sorted[index]
+    } else {
+      ranges.push({ startDate, endDate })
+      startDate = sorted[index]
+      endDate = sorted[index]
+    }
+  }
+
+  ranges.push({ startDate, endDate })
+  return ranges.sort((a, b) => b.startDate.getTime() - a.startDate.getTime())
+}
+
 function parseAppleHealthXml(text: string): ParsedImport | null {
   if (typeof DOMParser === 'undefined') return null
 
@@ -118,11 +148,18 @@ function parseAppleHealthXml(text: string): ParsedImport | null {
     cycleStartDates.length > 0
       ? uniqueSortedDates(cycleStartDates)
       : uniqueSortedDates(inferPeriodStartsFromFlowRecords(records))
+  const periodRecords = inferPeriodRecordsFromFlowRecords(records)
 
   if (periodStarts.length === 0) return null
 
   return {
     periodStarts,
+    periodRecords: periodRecords.length > 0
+      ? periodRecords
+      : periodStarts.map((startDate) => ({
+          startDate,
+          endDate: addDays(startDate, 4),
+        })),
     source: 'apple-health',
     sourceLabel: 'Apple 健康',
   }
@@ -150,6 +187,13 @@ function defaultPhaseWindows(cycleLength: number): PhaseWindows {
     cycleLength - menstrual - ovulatory - luteal,
   )
   return { menstrual, follicular, ovulatory, luteal }
+}
+
+function periodRecordsFromStarts(periodStarts: Date[]): PeriodRecord[] {
+  return uniqueSortedDates(periodStarts).map((startDate) => ({
+    startDate,
+    endDate: addDays(startDate, 4),
+  }))
 }
 
 export function averageCycleLength(periodStarts: Date[]): number {
@@ -182,6 +226,11 @@ export function buildCycleConfig(periodStarts: Date[]): CycleConfig {
     lastLowTide: previous,
     phaseWindows: defaultPhaseWindows(cycleLength),
   }
+}
+
+function buildImportedCycleConfig(data: ParsedImport): CycleConfig {
+  return buildCyclePrediction(data.periodRecords)?.config ??
+    buildCycleConfig(data.periodStarts)
 }
 
 function extractDatesFromJson(value: unknown, dates: Date[]) {
@@ -265,6 +314,7 @@ function parseCSV(text: string): ParsedImport | null {
 
   return {
     periodStarts: uniqueSortedDates(dates),
+    periodRecords: periodRecordsFromStarts(dates),
     source: 'generic-csv',
     sourceLabel: 'CSV 文件',
   }
@@ -283,7 +333,7 @@ export function parseImportFile(text: string, filename: string): ImportResult {
     ) {
       const appleHealth = parseAppleHealthXml(text)
       if (appleHealth) {
-        const cycleConfig = buildCycleConfig(appleHealth.periodStarts)
+        const cycleConfig = buildImportedCycleConfig(appleHealth)
         return {
           ok: true,
           data: appleHealth,
@@ -312,11 +362,17 @@ export function parseImportFile(text: string, filename: string): ImportResult {
       const sourceLabel =
         source === 'clue' ? 'Clue' : source === 'flo' ? 'Flo' : 'JSON 文件'
       const periodStarts = uniqueSortedDates(dates)
-      const cycleConfig = buildCycleConfig(periodStarts)
+      const data = {
+        periodStarts,
+        periodRecords: periodRecordsFromStarts(periodStarts),
+        source,
+        sourceLabel,
+      }
+      const cycleConfig = buildImportedCycleConfig(data)
 
       return {
         ok: true,
-        data: { periodStarts, source, sourceLabel },
+        data,
         cycleConfig,
         avgCycleLength: cycleConfig.cycleLength,
       }
@@ -324,7 +380,7 @@ export function parseImportFile(text: string, filename: string): ImportResult {
 
     const csv = parseCSV(text)
     if (csv) {
-      const cycleConfig = buildCycleConfig(csv.periodStarts)
+      const cycleConfig = buildImportedCycleConfig(csv)
       return {
         ok: true,
         data: csv,

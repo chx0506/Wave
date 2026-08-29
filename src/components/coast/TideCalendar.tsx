@@ -63,17 +63,22 @@ function isFutureDate(date: Date) {
 }
 
 export function TideCalendar({ onClose }: { onClose?: () => void }) {
-  const { cycleConfig } = useAppState()
+  const { cycleConfig, periodRecords } = useAppState()
   const [year, setYear] = useState(TODAY.getFullYear())
   const [month, setMonth] = useState(TODAY.getMonth() + 1)
   const [selected, setSelected] = useState(TODAY)
   const [scale, setScale] = useState<CalendarScale>('month')
   const [recordDate, setRecordDate] = useState<Date | null>(null)
 
-  const prediction = useMemo(
+  const samplePrediction = useMemo(
     () => buildCyclePrediction(SAMPLE_PERIOD_RECORDS),
     [],
   )
+  const importedPrediction = useMemo(
+    () => buildCyclePrediction(periodRecords),
+    [periodRecords],
+  )
+  const prediction = importedPrediction ?? samplePrediction
 
   const cells = useMemo(
     () =>
