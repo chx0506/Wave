@@ -336,8 +336,8 @@ function IslandNode({
           data-locked={EXPLORE_LOCKED_ARTICLE_IDS.has(article.id)}
           data-completed={completed.includes(article.id)}
           style={{
-            left: `calc(50% + ${article.objectX * 5}px)`,
-            top: `calc(50% + ${article.objectY * 5}px)`,
+            left: `calc(50% + ${article.objectX * 7}px)`,
+            top: `calc(50% + ${article.objectY * 7}px)`,
           }}
           onClick={(event) => { event.stopPropagation(); onOpenArticle(article) }}
           aria-label={`${article.objectLabel}：${article.title}`}
