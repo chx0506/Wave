@@ -23,6 +23,10 @@ dist-ssr
 *.sln
 *.sw?
 .tmp/
+.tmp-video-frames/
+.wave-flow-frames/
+.impeccable/
+_stardust_ref/
 
 .vercel-home/
 .vercel

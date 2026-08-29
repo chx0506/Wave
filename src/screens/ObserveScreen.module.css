@@ -1,3 +1,18 @@
+.backBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  margin: 0 0 8px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  color: var(--tide-deep);
+  background: rgba(255, 255, 255, 0.72);
+  box-shadow: var(--shadow-emboss);
+}
+
 .paperWaveBand {
   position: relative;
   z-index: 1;

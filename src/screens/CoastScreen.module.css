@@ -45,11 +45,11 @@
   top: 0;
   z-index: 3;
   flex-shrink: 0;
-  padding: calc(var(--statusbar-h) + 4px) 18px 6px;
-  display: grid;
-  grid-template-columns: 40px 1fr 40px;
-  align-items: center;
-  gap: 10px;
+  padding: calc(var(--statusbar-h) + 6px) 22px 10px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
   background: linear-gradient(
     180deg,
     rgba(248, 251, 254, 0.94) 0%,
@@ -58,26 +58,6 @@
   );
   backdrop-filter: blur(6px);
   -webkit-backdrop-filter: blur(6px);
-}
-
-.headerEpigraph {
-  margin: 0;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-  font-family: var(--font-display);
-  font-size: clamp(10.5px, 2.9vw, 12px);
-  font-weight: 600;
-  line-height: 1.42;
-  letter-spacing: 0.1em;
-  color: #5a7890;
-}
-
-.headerEpigraph span {
-  display: block;
-  white-space: nowrap;
 }
 
 .meEntry {
@@ -109,6 +89,7 @@
 .brandBlock {
   display: flex;
   flex-direction: column;
+  gap: 8px;
   min-width: 0;
 }
 
@@ -173,7 +154,7 @@
   flex-direction: column;
   align-items: center;
   gap: 8px;
-  padding: 0 18px calc(20px + 72px);
+  padding: 0 18px calc(8px + var(--tabbar-float-space) + 56px + env(safe-area-inset-bottom, 0px));
 }
 
 .scrollTail {
@@ -192,8 +173,28 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0;
-  margin-top: -2px;
+  gap: 6px;
+}
+
+.epigraph {
+  margin: 0;
+  padding: 0 8px;
+  max-width: min(86vw, 320px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  font-family: var(--font-display);
+  font-size: clamp(13px, 3.6vw, 15px);
+  font-weight: 600;
+  line-height: 1.55;
+  letter-spacing: 0.12em;
+  color: #5a7890;
+}
+
+.epigraph span {
+  display: block;
+  white-space: nowrap;
 }
 
 .journalLead {
@@ -232,15 +233,15 @@
   position: absolute;
   left: 0;
   right: 0;
-  bottom: 0;
+  bottom: calc(var(--tabbar-float-space) + env(safe-area-inset-bottom, 0px));
   z-index: 4;
   padding: 10px 18px 12px;
   pointer-events: none;
   background: linear-gradient(
     180deg,
-    rgba(248, 251, 254, 0) 0%,
-    rgba(248, 251, 254, 0.72) 38%,
-    rgba(242, 248, 252, 0.94) 100%
+    transparent 0%,
+    rgba(248, 251, 254, 0.28) 45%,
+    rgba(248, 251, 254, 0.52) 100%
   );
 }
 

@@ -8,7 +8,7 @@ import {
 } from '@/data/coastRecommendations'
 import type { ExploreArticle } from '@/data/content'
 import type { MindfulnessSession } from '@/data/mindfulness'
-import { Tabs, type DaySnapshot } from '@/domain/types'
+import { StackScreens, Tabs, type DaySnapshot } from '@/domain/types'
 import { useAppState } from '@/state/useAppState'
 import { LockSimple } from '@phosphor-icons/react'
 import { useState, type ReactNode } from 'react'
@@ -29,32 +29,46 @@ export function CoastRecommendations({
   snapshot,
   onMindfulnessSelect,
 }: Props) {
-  const { setTab } = useAppState()
+  const { setTab, openStackScreen } = useAppState()
   const articles = recommendArticles(snapshot)
   const experiments = recommendExperiments(snapshot)
   const [articleSheet, setArticleSheet] = useState<CoastArticlePick | null>(null)
 
-  const openArticle = (article: CoastArticlePick) => {
-    setArticleSheet(article)
-  }
-
   return (
     <div className={styles.wrap}>
       <section className={styles.block} aria-label="为你推荐">
-        <h3 className={styles.blockTitle}>为你推荐</h3>
+        <div className={styles.blockHead}>
+          <h3 className={styles.blockTitle}>为你推荐</h3>
+          <button
+            type="button"
+            className={styles.blockLink}
+            onClick={() => setTab(Tabs.explore)}
+          >
+            去探索
+          </button>
+        </div>
         <div className={styles.rail}>
           {articles.map((article) => (
             <ArticleCard
               key={article.id}
               article={article}
-              onOpen={() => openArticle(article)}
+              onOpen={() => setArticleSheet(article)}
             />
           ))}
         </div>
       </section>
 
       <section className={styles.block} aria-label="今日正念">
-        <h3 className={styles.blockTitle}>今日正念</h3>
+        <div className={styles.blockHead}>
+          <h3 className={styles.blockTitle}>今日正念</h3>
+          <button
+            type="button"
+            className={styles.blockLink}
+            onClick={() => openStackScreen(StackScreens.bay)}
+          >
+            去正念
+          </button>
+        </div>
         <MindfulnessRecommendHero
           snapshot={snapshot}
           onSelect={onMindfulnessSelect}
@@ -67,7 +81,7 @@ export function CoastRecommendations({
           <button
             type="button"
             className={styles.blockLink}
-            onClick={() => setTab(Tabs.observe)}
+            onClick={() => openStackScreen(StackScreens.observe)}
           >
             去潮池观察
           </button>
@@ -77,7 +91,7 @@ export function CoastRecommendations({
             <ExperimentCard
               key={experiment.id}
               experiment={experiment}
-              onOpen={() => setTab(Tabs.observe)}
+              onOpen={() => openStackScreen(StackScreens.observe)}
             />
           ))}
         </div>

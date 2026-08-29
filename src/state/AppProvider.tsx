@@ -9,12 +9,14 @@ import {
 } from '@/domain/experiment'
 import {
   DayModes,
+  StackScreens,
   Tabs,
   type BodyClue,
   type CycleConfig,
   type DayMode,
   type Experiment,
   type ExperimentCategory,
+  type StackScreenId,
   type TabId,
 } from '@/domain/types'
 import {
@@ -28,7 +30,8 @@ import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react
 
 export function AppProvider({ children }: { children: ReactNode }) {
   const storedCycle = loadCycleData()
-  const [tab, setTab] = useState<TabId>(Tabs.home)
+  const [tab, setTabState] = useState<TabId>(Tabs.home)
+  const [stackScreen, setStackScreen] = useState<StackScreenId | null>(null)
   const [pendingMindfulnessId, setPendingMindfulnessId] = useState<string | null>(
     null,
   )
@@ -46,9 +49,22 @@ export function AppProvider({ children }: { children: ReactNode }) {
     storedCycle?.importedFrom,
   )
 
-  useEffect(() => {
-    if (hasImportIntent()) setTab(Tabs.me)
+  const setTab = useCallback((next: TabId) => {
+    setStackScreen(null)
+    setTabState(next)
   }, [])
+
+  const openStackScreen = useCallback((screen: StackScreenId) => {
+    setStackScreen(screen)
+  }, [])
+
+  const closeStackScreen = useCallback(() => {
+    setStackScreen(null)
+  }, [])
+
+  useEffect(() => {
+    if (hasImportIntent()) openStackScreen(StackScreens.me)
+  }, [openStackScreen])
   const [experiments, setExperiments] = useState<Experiment[]>([
     normalizeExperiment({
       id: 'exp-sleep',
@@ -198,7 +214,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const openMindfulnessSession = useCallback((sessionId: string) => {
     setPendingMindfulnessId(sessionId)
-    setTab(Tabs.bay)
+    setStackScreen(StackScreens.bay)
   }, [])
 
   const consumePendingMindfulness = useCallback(() => {
@@ -211,6 +227,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
     () => ({
       tab,
       setTab,
+      stackScreen,
+      openStackScreen,
+      closeStackScreen,
       mode,
       setMode,
       selectedDate,
@@ -236,6 +255,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
     }),
     [
       tab,
+      setTab,
+      stackScreen,
+      openStackScreen,
+      closeStackScreen,
       mode,
       selectedDate,
       viewedYear,

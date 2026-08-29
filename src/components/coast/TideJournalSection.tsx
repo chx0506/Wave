@@ -202,6 +202,7 @@ export function TideJournalSection({
 
       <CoastSceneGap variant="crab" size="spacious" revealThreshold={0.25} />
 
+      {/* 螃蟹交互之后：科普 / 正念 / 小实验推荐 */}
       <CoastRecommendations
         snapshot={snapshot}
         onMindfulnessSelect={(session) => openMindfulnessSession(session.id)}

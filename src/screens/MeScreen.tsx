@@ -11,7 +11,6 @@ import {
   PHASE_TIDE_LABEL,
   USER_DISPLAY_NAME,
 } from '@/domain/copy'
-import { Tabs } from '@/domain/types'
 import { clearImportIntent, hasImportIntent } from '@/lib/importLink'
 import { useAppState } from '@/state/useAppState'
 import { CaretRight, GearSix } from '@phosphor-icons/react'
@@ -26,13 +25,13 @@ const ROWS = [
   { id: 'about', title: '关于 MoonWave', glyph: 'info' },
 ] as const
 
-export function MeScreen() {
+export function MeScreen({ onClose }: { onClose?: () => void }) {
   const {
     today,
     snapshotFor,
     importCycleData,
     importedFrom,
-    setTab,
+    closeStackScreen,
   } = useAppState()
   const snap = snapshotFor(today)
   const [importOpen, setImportOpen] = useState(false)
@@ -45,6 +44,8 @@ export function MeScreen() {
     clearImportIntent()
   }, [])
 
+  const handleClose = onClose ?? closeStackScreen
+
   const handleRowClick = (id: (typeof ROWS)[number]['id']) => {
     if (id === 'import') {
       setImportFromLink(false)
@@ -52,7 +53,7 @@ export function MeScreen() {
       return
     }
     if (id === 'about') {
-      setTab(Tabs.home)
+      handleClose()
     }
   }
 
@@ -66,6 +67,20 @@ export function MeScreen() {
 
       <header className={styles.header}>
         <div className={styles.brandRow}>
+          {handleClose ? (
+            <button
+              type="button"
+              className={styles.backBtn}
+              aria-label="返回"
+              onClick={handleClose}
+            >
+              <CaretRight
+                size={16}
+                weight="bold"
+                style={{ transform: 'rotate(180deg)' }}
+              />
+            </button>
+          ) : null}
           <h1 className={styles.brand}>{APP_NAME}</h1>
           <span className={styles.seal} aria-hidden="true">
             潮记

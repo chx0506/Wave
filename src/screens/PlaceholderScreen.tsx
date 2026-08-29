@@ -4,10 +4,9 @@ import styles from './PlaceholderScreen.module.css'
 
 const BODY: Record<TabId, string> = {
   home: '',
-  observe: '围绕一个真实困扰，做简单可持续的身体小实验：提出问题 → 尝试改变 → 持续观察 → 对比反馈。',
-  bay: '呼吸、身体扫描、冥想与睡前放松。当你需要的时候，给自己几分钟从外界回到身体。',
+  calendar: '在日历上查看周期阶段、潮汐高度与每日摘要，补记过往状态。',
+  stats: '汇总经期历史、身体线索与小实验，生成温和的身体洞察。',
   explore: '周期、PMS、睡眠与情绪……健康知识变成可逐渐探索的岛屿与图鉴。',
-  me: '周期特点、身体线索、小实验与个人经验，会慢慢汇成一份身体航海日志。',
 }
 
 export function PlaceholderScreen({ tab }: { tab: TabId }) {

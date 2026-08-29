@@ -6,6 +6,7 @@ import {
   parseImportFile,
 } from '@/domain/importCycle'
 import { formatMonthDay } from '@/domain/dates'
+import { readImportFile } from '@/lib/importFileReader'
 import { buildImportShareUrl, copyImportShareLink } from '@/lib/importLink'
 import styles from './DataImportSheet.module.css'
 
@@ -66,16 +67,18 @@ export function DataImportSheet({
     setPreview(null)
 
     try {
-      const text = await file.text()
-      const result = parseImportFile(text, file.name)
+      const { text, filename } = await readImportFile(file)
+      const result = parseImportFile(text, filename)
       if (!result.ok) {
         setError(result.error)
         return
       }
       setPreview(result)
       setStep('preview')
-    } catch {
-      setError('读取文件失败，请重试。')
+    } catch (cause) {
+      setError(
+        cause instanceof Error ? cause.message : '读取文件失败，请重试。',
+      )
     } finally {
       setBusy(false)
     }
@@ -123,7 +126,7 @@ export function DataImportSheet({
 
           <section className={styles.consentBlock} aria-label="授权说明">
             <p className={styles.consentNote}>
-              浏览器<strong>无法直接读取</strong>手机里的 Clue、Flo、美柚等 App。
+              浏览器<strong>无法直接读取</strong>手机里的 Clue、Flo、美柚或 Apple 健康 App。
               需要你先从原 App 导出数据文件，再<strong>授权 MoonWave 读取该文件</strong>。
             </p>
             <dl className={styles.consentList}>
@@ -190,7 +193,7 @@ export function DataImportSheet({
         <input
           ref={inputRef}
           type="file"
-          accept=".csv,.json,text/csv,application/json"
+          accept=".csv,.json,.xml,.zip,text/csv,application/json,text/xml,application/zip,application/x-zip-compressed"
           className={styles.fileInput}
           onChange={(event) => {
             const file = event.target.files?.[0]

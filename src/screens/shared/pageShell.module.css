@@ -52,7 +52,7 @@
   flex: 1;
   min-height: 0;
   overflow: auto;
-  padding: 16px 16px 20px;
+  padding: 16px 16px calc(20px + var(--tabbar-float-space) + env(safe-area-inset-bottom, 0px));
   display: flex;
   flex-direction: column;
   gap: 12px;
