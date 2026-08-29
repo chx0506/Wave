@@ -3,6 +3,8 @@ import type { LogKey, Phase, TabId, TideState } from './types'
 export const APP_NAME = 'MoonWave'
 export const APP_NAME_EN = 'MoonWave'
 export const APP_NAME_ZH = '月潮'
+/** Red brand seal next to titles */
+export const APP_SEAL = '月潮'
 export const APP_TAGLINE = 'Feel Your Wave. Be Your Wave.'
 export const APP_TAGLINE_ZH = '读懂身体的潮汐，找到自己的节奏。'
 export const USER_DISPLAY_NAME = '阿纯'

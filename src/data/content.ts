@@ -177,13 +177,13 @@ export const BAY_THEMES = [
   { name: '灿烂花田', locked: true },
 ]
 
-export const EXPLORE_STARS = 14
+export const EXPLORE_SHELLS = 128
 
 export const EXPLORE_ISLANDS = [
   {
     id: 'nutrition',
-    title: '营养',
-    short: '营养',
+    title: '营养与健康',
+    short: '营养与健康',
     blurb: '轻量调整饮食，观察身体反馈',
     stars: 3,
     starsMax: 3,
@@ -195,8 +195,8 @@ export const EXPLORE_ISLANDS = [
   },
   {
     id: 'pain',
-    title: '疼痛',
-    short: '疼痛',
+    title: '经期疼痛与应对',
+    short: '经期疼痛与应对',
     blurb: '识别疼痛的表现、强度与生活背景',
     stars: 1,
     starsMax: 3,
@@ -208,8 +208,8 @@ export const EXPLORE_ISLANDS = [
   },
   {
     id: 'sleep',
-    title: '睡眠',
-    short: '睡眠',
+    title: '睡眠质量与休息',
+    short: '睡眠质量与休息',
     blurb: '为什么有些夜晚更容易醒',
     stars: 1,
     starsMax: 3,
@@ -221,8 +221,8 @@ export const EXPLORE_ISLANDS = [
   },
   {
     id: 'mood',
-    title: '情绪',
-    short: '情绪',
+    title: '心理健康',
+    short: '心理健康',
     blurb: '情绪像天气一样变化，也可以被温柔观察',
     stars: 0,
     starsMax: 3,
@@ -234,8 +234,8 @@ export const EXPLORE_ISLANDS = [
   },
   {
     id: 'disease',
-    title: '疾病',
-    short: '疾病',
+    title: '常见妇科问题',
+    short: '常见妇科问题',
     blurb: '理解健康边界，知道何时寻求专业帮助',
     stars: 0,
     starsMax: 3,
@@ -247,8 +247,8 @@ export const EXPLORE_ISLANDS = [
   },
   {
     id: 'move',
-    title: '运动',
-    short: '运动',
+    title: '锻炼建议与技巧',
+    short: '锻炼建议与技巧',
     blurb: '不同阶段适合怎样的活动强度',
     stars: 0,
     starsMax: 3,
@@ -260,8 +260,8 @@ export const EXPLORE_ISLANDS = [
   },
   {
     id: 'relief',
-    title: '缓解',
-    short: '缓解',
+    title: '不适缓解与自护',
+    short: '不适缓解与自护',
     blurb: '从呼吸、休息和轻量调整开始照顾自己',
     stars: 1,
     starsMax: 3,

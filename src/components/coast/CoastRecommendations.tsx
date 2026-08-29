@@ -1,4 +1,5 @@
 import { CoastArticleSheet } from '@/components/coast/CoastArticleSheet'
+import { CoastExperimentSheet } from '@/components/coast/CoastExperimentSheet'
 import { MindfulnessRecommendHero } from '@/components/coast/MindfulnessRecommendHero'
 import {
   recommendArticles,
@@ -33,6 +34,8 @@ export function CoastRecommendations({
   const articles = recommendArticles(snapshot)
   const experiments = recommendExperiments(snapshot)
   const [articleSheet, setArticleSheet] = useState<CoastArticlePick | null>(null)
+  const [experimentSheet, setExperimentSheet] =
+    useState<CoastExperimentPick | null>(null)
 
   return (
     <div className={styles.wrap}>
@@ -91,7 +94,7 @@ export function CoastRecommendations({
             <ExperimentCard
               key={experiment.id}
               experiment={experiment}
-              onOpen={() => openStackScreen(StackScreens.observe)}
+              onOpen={() => setExperimentSheet(experiment)}
             />
           ))}
         </div>
@@ -103,6 +106,14 @@ export function CoastRecommendations({
             article={articleSheet as ExploreArticle}
             locked={articleSheet.locked}
             onClose={() => setArticleSheet(null)}
+          />,
+        )}
+
+      {experimentSheet &&
+        shellPortal(
+          <CoastExperimentSheet
+            experiment={experimentSheet}
+            onClose={() => setExperimentSheet(null)}
           />,
         )}
     </div>

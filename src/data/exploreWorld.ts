@@ -1,8 +1,9 @@
 import type { ExploreIsland } from '@/data/content'
 
-/** Portrait map sized for mobile: full width, gentle vertical camera follow. */
+/** Portrait map sized for mobile: full width, gentle vertical camera follow.
+ * Extra bottom pad so the last island can still center when zoomed in. */
 export const WORLD_W = 780
-export const WORLD_H = 1920
+export const WORLD_H = 2100
 
 export const ISLAND_ART: Record<ExploreIsland['id'], string> = {
   pain: '/textures/explore/islands/pain.png',
@@ -22,13 +23,13 @@ export const ISLAND_WORLD: Record<
   ExploreIsland['id'],
   { x: number; y: number; scale: number }
 > = {
-  pain: { x: 235, y: 360, scale: 1.02 },
-  relief: { x: 545, y: 460, scale: 1.0 },
-  nutrition: { x: 238, y: 780, scale: 1.02 },
-  move: { x: 542, y: 910, scale: 1.0 },
-  disease: { x: 240, y: 1180, scale: 1.02 },
-  sleep: { x: 540, y: 1320, scale: 1.0 },
-  mood: { x: 390, y: 1600, scale: 1.02 },
+  pain: { x: 235, y: 340, scale: 1.02 },
+  relief: { x: 545, y: 450, scale: 1.0 },
+  nutrition: { x: 230, y: 720, scale: 1.02 },
+  move: { x: 550, y: 920, scale: 1.0 },
+  disease: { x: 235, y: 1100, scale: 1.02 },
+  sleep: { x: 550, y: 1380, scale: 1.0 },
+  mood: { x: 390, y: 1680, scale: 1.04 },
 }
 
 /** Keep at most this many completed dashed trails on the map. */

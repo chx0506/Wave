@@ -7,7 +7,7 @@ import { TideJournalSection } from '@/components/coast/TideJournalSection'
 import { PhaseKnowledgeSheet } from '@/components/coast/PhaseKnowledgeSheet'
 import { RecordSheet } from '@/components/coast/RecordSheet'
 import { TideDial } from '@/components/coast/TideDial'
-import { APP_NAME, RECORD_PROMPT } from '@/domain/copy'
+import { APP_NAME, APP_SEAL, RECORD_PROMPT } from '@/domain/copy'
 import { snapshotForDate } from '@/domain/cycle'
 import { addDays, formatMonthDay } from '@/domain/dates'
 import { useScrollScrubWave, type WaveMotion } from '@/lib/scrollScrubWave'
@@ -99,7 +99,7 @@ export function CoastScreen() {
             <div className={styles.brandRow}>
               <h1 className={styles.brand}>{APP_NAME}</h1>
               <span className={styles.seal} aria-hidden="true">
-                潮
+                {APP_SEAL}
               </span>
             </div>
           </div>

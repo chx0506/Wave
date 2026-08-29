@@ -46,6 +46,7 @@ export type CoastExperimentPick = {
   question: string
   try: string
   watch: readonly string[]
+  why: string
   coverSrc: string
   coverBg: string
 }
@@ -217,6 +218,59 @@ const EXPERIMENT_INDEX_BY_PHASE: Record<Phase, number[]> = {
   luteal: [0, 1, 9, 11, 3, 6],
 }
 
+/** Phase-aware “why now” copy for home experiment detail sheets. */
+const EXPERIMENT_WHY_BY_PHASE: Record<
+  Phase,
+  Partial<Record<ExperimentCategory, string>>
+> = {
+  menstrual: {
+    sleep: '退潮期睡眠常被打断。用一个温和小改变，看看身体会不会更容易靠岸。',
+    pain: '退潮期不适更常见。一次只试一件事，观察疼痛是否更可忍受。',
+    energy: '能量偏低是正常的潮汐信号。用轻量安排观察精力如何回升。',
+    exercise: '经期适合轻量活动。用散步或拉伸，感受身体是否更舒展。',
+    mood: '退潮期情绪波动并不少见。留一点安静空间，看看感受是否更稳。',
+    stress: '身体在释放与修复时，压力更容易放大不适。试一个小放松动作。',
+    diet: '经期对补给更敏感。用简单、可坚持的饮食调整观察上午状态。',
+  },
+  follicular: {
+    sleep: '涨潮期节律在回升。巩固一个睡前习惯，观察入睡是否更顺。',
+    pain: '不适减轻的阶段，也适合记录压力与疼痛的关联。',
+    energy: '涨潮期精力常在上行。把重要事放到更清醒的时段，看看完成感。',
+    exercise: '体能回升时，适合观察轻量运动带来的舒展感。',
+    mood: '状态上升期，独处或书写能帮你接住情绪的细微变化。',
+    stress: '事情变多时，用短呼吸或拆任务，看看压力是否更可控。',
+    diet: '精力上行期，早餐与加餐往往更能稳住上午的节奏。',
+  },
+  ovulatory: {
+    sleep: '满潮期兴奋性偏高，入睡可能变慢。用一个睡前约束观察差异。',
+    pain: '满潮附近也可能有轻微不适。记下压力与疼痛是否同向变化。',
+    energy: '能量高峰适合观察「什么安排最省力」——一次只改一个变量。',
+    exercise: '高峰后也需恢复。用轻量活动观察身体是否更平衡。',
+    mood: '表达欲与社交欲常升高。留一点安静时间，看看情绪是否更稳。',
+    stress: '日程容易排满。用短呼吸或任务拆解，观察下午压力曲线。',
+    diet: '节奏加快时，规律进食更能避免晚间饥饿反弹。',
+  },
+  luteal: {
+    sleep: '平潮期睡眠更容易变浅。用减少刺激或固定睡前仪式做一次观察。',
+    pain: '经前不适可能回升。用热敷或放松，观察疼痛是否更温和。',
+    energy: '精力从高峰回落是正常的。用小休息观察疲惫是否减轻。',
+    exercise: '经前减少高强度，往往更舒服。改成轻量活动试试。',
+    mood: '平潮期情绪更敏感。独处或写三句话，看看是否更放松。',
+    stress: '经前压力常被放大。用三分钟呼吸或拆任务做对照观察。',
+    diet: '平潮后期食欲与精力波动更大。用简单加餐稳住节奏。',
+  },
+}
+
+const EXPERIMENT_WHY_FALLBACK =
+  '一次只改变一个变量，给身体几天时间回应，再看自己的曲线。'
+
+export function experimentWhyForPhase(
+  category: ExperimentCategory,
+  phase: Phase,
+): string {
+  return EXPERIMENT_WHY_BY_PHASE[phase][category] ?? EXPERIMENT_WHY_FALLBACK
+}
+
 function articleById(id: string): ExploreArticle | undefined {
   return EXPLORE_ARTICLES.find((item) => item.id === id)
 }
@@ -259,6 +313,7 @@ export function recommendExperiments(snapshot: DaySnapshot): CoastExperimentPick
       question: preset.question,
       try: preset.try,
       watch: preset.watch,
+      why: experimentWhyForPhase(preset.category, snapshot.phase),
       coverSrc: cover.src,
       coverBg: cover.bg,
     })

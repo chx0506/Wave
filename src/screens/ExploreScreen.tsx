@@ -2,7 +2,7 @@ import {
   EXPLORE_ARTICLES,
   EXPLORE_ISLANDS,
   EXPLORE_LOCKED_ARTICLE_IDS,
-  EXPLORE_STARS,
+  EXPLORE_SHELLS,
   type ExploreArticle,
   type ExploreIsland,
   type ExploreObjectKind,
@@ -19,13 +19,13 @@ import {
   dockOf,
   type SailCurve,
 } from '@/data/exploreWorld'
-import { Check, LockSimple, Star, X } from '@phosphor-icons/react'
+import { Check, LockSimple, Seal, X } from '@phosphor-icons/react'
 import { useEffect, useRef, useState, type CSSProperties } from 'react'
 import styles from './ExploreScreen.module.css'
 
 type Boat = { x: number; y: number; angle: number }
 
-const LAND_ZOOM = 1.42
+const LAND_ZOOM = 1.48
 
 /** Shortest-path lerp for degrees, so the bow turns instead of spinning the long way. */
 function lerpAngle(from: number, to: number, t: number) {
@@ -37,7 +37,7 @@ function islandPos(id: ExploreIsland['id']) {
   return ISLAND_WORLD[id]
 }
 
-/** Fit map width to the viewport; pan vertically so the boat stays in view. */
+/** Fit map width to the viewport; when landed, center the island in the free frame. */
 function cameraFor(
   boat: Boat,
   vw: number,
@@ -51,14 +51,18 @@ function cameraFor(
   const scaledW = WORLD_W * scale
 
   const focus = landedId
-    ? { x: ISLAND_WORLD[landedId].x, y: ISLAND_WORLD[landedId].y }
+    ? {
+        x: ISLAND_WORLD[landedId].x,
+        // Bias slightly upward so art (not the dock) sits in the optical center.
+        y: ISLAND_WORLD[landedId].y - 28,
+      }
     : { x: boat.x, y: boat.y }
 
-  const topPad = landedId ? Math.min(88, vh * 0.12) : Math.min(110, vh * 0.16)
+  const topPad = landedId ? Math.min(72, vh * 0.1) : Math.min(110, vh * 0.16)
   /** Reserve room for land bar + floating tab bar when inspecting. */
-  const bottomPad = landedId ? Math.min(178, vh * 0.3) : Math.min(96, vh * 0.14)
+  const bottomPad = landedId ? Math.min(168, vh * 0.28) : Math.min(96, vh * 0.14)
   const focusY = landedId
-    ? topPad + (vh - topPad - bottomPad) * 0.5
+    ? topPad + (vh - topPad - bottomPad) * 0.46
     : Math.min(vh * 0.55, vh / 2 + topPad * 0.28)
   const focusX = vw / 2
 
@@ -95,6 +99,8 @@ export function ExploreScreen() {
   const [activeTrail, setActiveTrail] = useState<{ d: string; length: number; progress: number } | null>(
     null,
   )
+  const [shellInfoOpen, setShellInfoOpen] = useState(false)
+  const shellCount = EXPLORE_SHELLS + completed.length * 2
 
   const applyBoat = (next: Boat) => {
     boatRef.current = next
@@ -278,9 +284,7 @@ export function ExploreScreen() {
             const articles = EXPLORE_ARTICLES.filter((item) => item.islandId === island.id)
             const isLanded = island.id === landedId
             const isHome = island.id === homeId && !sailing
-            const done = articles.filter((item) => completed.includes(item.id)).length
-            const stars = Math.min(island.stars + done, island.starsMax)
-            const displayScale = isLanded ? pos.scale * 1.12 : pos.scale
+            const displayScale = isLanded ? pos.scale * 1.14 : pos.scale
             return (
               <IslandSprite
                 key={island.id}
@@ -294,7 +298,6 @@ export function ExploreScreen() {
                 dimmed={Boolean(landedId) && !isLanded}
                 articles={articles}
                 completed={completed}
-                stars={stars}
                 sailing={sailing}
                 onSelect={() => sailToward(island)}
                 onOpenArticle={(item) => setArticle(item)}
@@ -343,10 +346,15 @@ export function ExploreScreen() {
             {visited.length}/{EXPLORE_ISLANDS.length} 岛
           </em>
         </div>
-        <div className={styles.starChip} aria-label={`探索星星 ${EXPLORE_STARS + completed.length}`}>
-          <Star size={12} weight="fill" />
-          <span>{EXPLORE_STARS + completed.length}</span>
-        </div>
+        <button
+          type="button"
+          className={styles.shellChip}
+          aria-label={`贝壳 ${shellCount}`}
+          onClick={() => setShellInfoOpen(true)}
+        >
+          <Seal size={13} weight="fill" />
+          <span>{shellCount}</span>
+        </button>
       </div>
 
       {landed ? (
@@ -364,6 +372,10 @@ export function ExploreScreen() {
             离开岛屿
           </button>
         </div>
+      ) : null}
+
+      {shellInfoOpen ? (
+        <ShellInfoSheet shells={shellCount} onClose={() => setShellInfoOpen(false)} />
       ) : null}
 
       {article ? (
@@ -428,7 +440,6 @@ function IslandSprite({
   dimmed,
   articles,
   completed,
-  stars,
   sailing,
   onSelect,
   onOpenArticle,
@@ -443,7 +454,6 @@ function IslandSprite({
   dimmed: boolean
   articles: ExploreArticle[]
   completed: string[]
-  stars: number
   sailing: boolean
   onSelect: () => void
   onOpenArticle: (article: ExploreArticle) => void
@@ -488,29 +498,12 @@ function IslandSprite({
             <Check size={10} weight="bold" />
           </span>
         ) : (
-          <span className={styles.starBadge}>
-            <Star size={9} weight="fill" />
+          <span className={styles.shellBadge}>
+            <Seal size={9} weight="fill" />
             {island.stars}
           </span>
         )}
       </button>
-
-      {landed ? (
-        <aside className={styles.islandNote} aria-live="polite">
-          <div className={styles.islandNoteTop}>
-            <strong>{island.title}</strong>
-            <span className={styles.whisperStars}>
-              {Array.from({ length: island.starsMax }, (_, index) => (
-                <Star key={index} size={9} weight={index < stars ? 'fill' : 'regular'} />
-              ))}
-            </span>
-          </div>
-          <p>{island.blurb}</p>
-          <span className={styles.whisperMeta}>
-            拾取物件学习 · {done}/{articles.length}
-          </span>
-        </aside>
-      ) : null}
 
       {landed && !island.locked
         ? articles.map((item, index) => {
@@ -689,6 +682,57 @@ function ArticleSheet({
           ) : (
             '完成阅读，留下探索标记'
           )}
+        </button>
+      </section>
+    </div>
+  )
+}
+
+function ShellInfoSheet({
+  shells,
+  onClose,
+}: {
+  shells: number
+  onClose: () => void
+}) {
+  return (
+    <div className={styles.sheetBackdrop} role="presentation" onClick={onClose}>
+      <section
+        className={styles.sheet}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="shell-title"
+        onClick={(event) => event.stopPropagation()}
+      >
+        <span className={styles.sheetHandle} aria-hidden="true" />
+        <button type="button" className={styles.sheetClose} onClick={onClose} aria-label="关闭">
+          <X size={18} />
+        </button>
+        <p className={styles.sheetKicker}>贝壳积分体系</p>
+        <h2 id="shell-title" className={styles.sheetTitle}>
+          贝壳
+        </h2>
+        <p className={styles.sheetLead}>
+          让每一次照顾自己都留下回响。当前拥有 {shells} 枚贝壳。
+        </p>
+        <div className={styles.articleBody}>
+          <p>
+            <strong>如何获得</strong>
+            <br />
+            每日记录、连续打卡、完成身体小实验、完成正念、探索健康知识，以及充值 VIP。
+          </p>
+          <p>
+            <strong>可以做什么</strong>
+            <br />
+            解锁部分进阶健康内容、静谧海湾主题、Crab 与主页装扮，也可兑换合作女性品牌的小礼品或权益。
+          </p>
+          <p className={styles.articleTakeaway}>
+            贝壳不是机械打卡的分数，而是对自己关注、记录、理解与照顾的回响——时间越久，你的海湾、图鉴、Crab
+            与身体档案会越丰富。
+          </p>
+        </div>
+        <button type="button" className={styles.sheetCta} onClick={onClose}>
+          知道了
         </button>
       </section>
     </div>

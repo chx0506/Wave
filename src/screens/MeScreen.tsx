@@ -7,6 +7,7 @@ import wavesSrc from '@/assets/me/waves-clear.png'
 import { DataImportSheet } from '@/components/me/DataImportSheet'
 import {
   APP_NAME,
+  APP_SEAL,
   PHASE_TIDE_LABEL,
   USER_DISPLAY_NAME,
 } from '@/domain/copy'
@@ -88,7 +89,7 @@ export function MeScreen({ onClose }: { onClose?: () => void }) {
           ) : null}
           <h1 className={styles.brand}>{APP_NAME}</h1>
           <span className={styles.seal} aria-hidden="true">
-            潮记
+            {APP_SEAL}
           </span>
         </div>
         <button type="button" className={styles.iconBtn} aria-label="设置">

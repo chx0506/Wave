@@ -70,11 +70,11 @@
 
 .subtitle {
   margin: 8px 0 0;
-  font-size: 13px;
-  line-height: 1.5;
-  letter-spacing: 0.02em;
+  font-size: 12px;
+  line-height: 1.4;
+  letter-spacing: 0.01em;
   color: var(--ink-soft);
-  max-width: 32ch;
+  white-space: nowrap;
 }
 
 .body {

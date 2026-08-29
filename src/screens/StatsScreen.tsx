@@ -21,6 +21,7 @@ import {
   symptomFrequencyFromLogs,
 } from '@/domain/dailyLog'
 import {
+  APP_SEAL,
   PHASE_TIDE_LABEL,
   PHASE_TODAY_TIP,
   USER_DISPLAY_NAME,
@@ -240,7 +241,7 @@ export function StatsScreen() {
         <div className={styles.brandRow}>
           <h1 className={styles.title}>统计</h1>
           <span className={styles.seal} aria-hidden="true">
-            潮记
+            {APP_SEAL}
           </span>
         </div>
         <p className={styles.subtitle}>
